@@ -45,7 +45,7 @@ $(TEST_OBJECTS): $(OBJ_DIR)/%.o : $(TEST_DIR)/%.cpp
 	$(CXX) $(CXXFLAGS) $(INCS) -c $< -o $@ 
 
 # Main targets 
-all : tools test 
+all : test 
 
 test : $(TESTS)
 
