@@ -44,6 +44,12 @@ TEST_OBJECTS  := $(TEST_SOURCES:$(TEST_DIR)/%.cpp=$(OBJ_DIR)/%.o)
 $(TEST_OBJECTS): $(OBJ_DIR)/%.o : $(TEST_DIR)/%.cpp 
 	$(CXX) $(CXXFLAGS) $(INCS) -c $< -o $@ 
 
+TESTS=test_chip8
+$(TESTS): $(TEST_OBJECTS) $(OBJECTS)
+	$(CXX) $(LDFLAGS) $(OBJECTS) $(OBJ_DIR)/$@.o\
+		-o $(TEST_BIN_DIR)/$@ $(LIBS) $(TEST_LIBS)
+
+
 # Main targets 
 all : test 
 
