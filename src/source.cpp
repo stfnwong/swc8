@@ -159,62 +159,61 @@ SourceInfo::~SourceInfo() {}
  */
 std::string SourceInfo::line_to_string(const LineInfo& l)
 {
-    return "\0";    // TODO: placeholder for linking.
+    std::ostringstream oss;
+
+    oss << "---------------------------------------------------------------------" << std::endl;
+    oss << "Line  Type   Addr  Mnemonic    Opcode  flags   arg1  arg2  " << std::endl;
+    //oss << "Line  Type   Addr  Mnemonic    Opcode  flags   arg1  arg2  arg3  imm  " << std::endl;
+
+    oss << std::left << std::setw(6) << std::setfill(' ') << l.line_num;
+    oss << "[";
+    //if(l.is_imm)
+    //    oss << "i";
+    //else
+    //    oss << ".";
+    oss << ".";
+    if(l.is_label)
+        oss << "l";
+    else
+        oss << ".";
+    if(l.is_directive)
+        oss << "d";
+    else
+        oss << ".";
+    oss << "] ";
+    oss << std::left << "0x" << std::hex << std::setw(4) << std::setfill('0') << l.addr << " ";
+    oss << std::left << std::setw(12) << std::setfill(' ') << l.opcode.mnemonic;
+    oss << "0x" << std::hex << std::setw(4) << std::setfill('0') << l.opcode.opcode << "   ";
+    // Insert flag chars
+    oss << "...";
+    //if(l.flags & LC3_FLAG_P)
+    //    oss << "p";
+    //else
+    //    oss << ".";
+    //if(l.flags & LC3_FLAG_N)
+    //    oss << "n";
+    //else
+    //    oss << ".";
+    //if(l.flags & LC3_FLAG_Z)
+    //    oss << "z";
+    //else
+    //    oss << ".";
+    // Insert args
+    oss << "  ";
+    oss << " $" << std::right << std::hex << std::setw(4) << std::setfill('0') << l.arg1;
+    oss << " $" << std::right << std::hex << std::setw(4) << std::setfill('0') << l.arg2;
+    //oss << " $" << std::right << std::hex << std::setw(4) << std::setfill('0') << l.arg3;
+    //oss << " $" << std::right << std::hex << std::setw(4) << std::setfill('0') << l.imm;
+
+    // (Next line) Text 
+    oss << std::endl;
+    oss << "Label [" << std::left << std::setw(16) << std::setfill(' ') << l.label << "] ";
+    oss << "Symbol[" << std::left << std::setw(16) << std::setfill(' ') << l.symbol << "] ";
+
+    oss << std::endl;
+    
+    return oss.str();
 }
-//std::string SourceInfo::line_to_string(const LineInfo& l)
-//{
-//    std::ostringstream oss;
-//
-//    oss << "---------------------------------------------------------------------" << std::endl;
-//    oss << "Line  Type   Addr  Mnemonic    Opcode  flags   arg1  arg2  arg3  imm  " << std::endl;
-//
-//    oss << std::left << std::setw(6) << std::setfill(' ') << l.line_num;
-//    oss << "[";
-//    if(l.is_imm)
-//        oss << "i";
-//    else
-//        oss << ".";
-//    if(l.is_label)
-//        oss << "l";
-//    else
-//        oss << ".";
-//    if(l.is_directive)
-//        oss << "d";
-//    else
-//        oss << ".";
-//    oss << "] ";
-//    oss << std::left << "0x" << std::hex << std::setw(4) << std::setfill('0') << l.addr << " ";
-//    oss << std::left << std::setw(12) << std::setfill(' ') << l.opcode.mnemonic;
-//    oss << "0x" << std::hex << std::setw(4) << std::setfill('0') << l.opcode.opcode << "   ";
-//    // Insert flag chars
-//    if(l.flags & LC3_FLAG_P)
-//        oss << "p";
-//    else
-//        oss << ".";
-//    if(l.flags & LC3_FLAG_N)
-//        oss << "n";
-//    else
-//        oss << ".";
-//    if(l.flags & LC3_FLAG_Z)
-//        oss << "z";
-//    else
-//        oss << ".";
-//    // Insert args
-//    oss << "  ";
-//    oss << " $" << std::right << std::hex << std::setw(4) << std::setfill('0') << l.arg1;
-//    oss << " $" << std::right << std::hex << std::setw(4) << std::setfill('0') << l.arg2;
-//    oss << " $" << std::right << std::hex << std::setw(4) << std::setfill('0') << l.arg3;
-//    oss << " $" << std::right << std::hex << std::setw(4) << std::setfill('0') << l.imm;
-//
-//    // (Next line) Text 
-//    oss << std::endl;
-//    oss << "Label [" << std::left << std::setw(16) << std::setfill(' ') << l.label << "] ";
-//    oss << "Symbol[" << std::left << std::setw(16) << std::setfill(' ') << l.symbol << "] ";
-//
-//    oss << std::endl;
-//    
-//    return oss.str();
-//}
 
 void SourceInfo::add(const LineInfo& l)
 {

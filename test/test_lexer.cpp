@@ -17,10 +17,10 @@ class TestLexer : public ::testing::Test
 };
 
 
-TEST_F(TestLexer, test_init)
-{
-    Lexer lex;
-}
+///TEST_F(TestLexer, test_init)
+///{
+///    Lexer lex;
+///}
 
 // Generate expected source info for draw.asm
 SourceInfo get_draw_expected_source_info(void)
@@ -36,6 +36,8 @@ SourceInfo get_draw_expected_source_info(void)
     line.opcode.mnemonic = "LD";
     line.arg1            = 0x1;
     line.arg2            = 0x08;
+    info.add(line);
+    // Line 2 
 
     return info;
 }
@@ -52,6 +54,11 @@ TEST_F(TestLexer, test_draw_asm)
     // Get the output and expected source info objects 
     SourceInfo lex_output = lexer.getSourceInfo();
     SourceInfo exp_output = get_draw_expected_source_info();
+
+    // Show the expected output 
+    std::cout << "\t Expected lexer output for source file " << src_filename << std::endl;
+    for(unsigned int idx = 0; idx < exp_output.getNumLines(); ++idx)
+        exp_output.printLine(idx);
 
 }
 
