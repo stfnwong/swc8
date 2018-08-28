@@ -62,6 +62,9 @@ class Lexer
         // parsing 
         void parseToken(void);  // parse a single token
         void parseLine(void);   // parse an entire line
+        void parseOpcode(void);
+        bool checkArg(void);
+        bool checkImm(void);
 
         void resolveLabels(void);
 

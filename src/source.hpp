@@ -45,7 +45,10 @@ typedef struct{
     uint16_t     jmp_addr;
     uint16_t     arg1;
     uint16_t     arg2;
+    uint16_t     ireg;
+    uint16_t     imm;
     bool         is_label;
+    bool         is_imm;
     bool         is_directive;
     bool         error;
 } LineInfo;

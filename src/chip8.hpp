@@ -18,6 +18,8 @@
 // Chip-8 opcodes
 #define C8_JMP      0x1000
 #define C8_CALL     0x2000
+#define C8_SEVxkk   0x3000
+#define C8_SEVxVy   0x5000
 #define C8_LDVxkk   0x6000
 #define C8_ADDVx    0x7000
 #define C8_LDVxVy   0x8000
@@ -31,11 +33,14 @@
 #define C8_SHLVxVy  0x800E
 #define C8_SNEVxVy  0x9000
 #define C8_LDI      0xA000
+#define C8_JP       0xB000
 
 // Chip-8 opcodes (for assembler)
 static Opcode chip8_opcodes[] = {
     {C8_JMP,      "JMP"},
     {C8_CALL,     "CALL"},
+    {C8_SEVxkk,   "SE"},
+    {C8_SEVxVy,   "SE"},
     {C8_LDVxkk,   "LD"},
     {C8_ADDVx,    "ADD"},
     {C8_LDVxVy,   "LD"},
@@ -48,7 +53,8 @@ static Opcode chip8_opcodes[] = {
     {C8_SUBNVxVy, "SUBN"},
     {C8_SHLVxVy,  "SHL"},
     {C8_SNEVxVy,  "SNE"},
-    {C8_LDI,      "LD I"}
+    {C8_LDI,      "LD I"},
+    {C8_JP,       "JP"}
 };
 
 /*
@@ -88,6 +94,7 @@ class Chip8
 
     private:
         uint16_t cur_opcode;
+        uint16_t cur_addr;
 
     public:
         Chip8();
@@ -99,7 +106,6 @@ class Chip8
         std::vector<uint8_t> dumpMem(void) const;
 
 };
-
 
 
 #endif /*__CHIP_8_HPP*/

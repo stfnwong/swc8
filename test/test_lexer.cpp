@@ -60,6 +60,10 @@ TEST_F(TestLexer, test_draw_asm)
     for(unsigned int idx = 0; idx < exp_output.getNumLines(); ++idx)
         exp_output.printLine(idx);
 
+    // Show the actual lexer output 
+    std::cout << "\t Lexer output for file " << src_filename << std::endl;
+    for(unsigned int idx = 0; idx < lex_output.getNumLines(); ++idx)
+        lex_output.printLine(idx);
 }
 
 int main(int argc, char *argv[])

@@ -80,7 +80,10 @@ void initLineInfo(LineInfo& l)
     l.opcode   = {0x0, "INVALID"},
     l.arg1     = 0;
     l.arg2     = 0;
+    l.imm      = 0;
+    l.ireg     = 0;
     l.is_label = false;
+    l.is_imm   = false;
     l.error    = false;
     l.is_directive = false;
 }
@@ -162,16 +165,11 @@ std::string SourceInfo::line_to_string(const LineInfo& l)
     std::ostringstream oss;
 
     oss << "---------------------------------------------------------------------" << std::endl;
-    oss << "Line  Type   Addr  Mnemonic    Opcode  flags   arg1  arg2  " << std::endl;
+    oss << "Line  Type   Addr  Mnemonic    Opcode  flags   arg1  arg2  imm" << std::endl;
     //oss << "Line  Type   Addr  Mnemonic    Opcode  flags   arg1  arg2  arg3  imm  " << std::endl;
 
     oss << std::left << std::setw(6) << std::setfill(' ') << l.line_num;
     oss << "[";
-    //if(l.is_imm)
-    //    oss << "i";
-    //else
-    //    oss << ".";
-    oss << ".";
     if(l.is_label)
         oss << "l";
     else
@@ -180,8 +178,12 @@ std::string SourceInfo::line_to_string(const LineInfo& l)
         oss << "d";
     else
         oss << ".";
+    if(l.is_imm)
+        oss << "i";
+    else
+        oss << ".";
     oss << "] ";
-    oss << std::left << "0x" << std::hex << std::setw(4) << std::setfill('0') << l.addr << " ";
+    oss << std::right << "0x" << std::hex << std::setw(4) << std::setfill('0') << l.addr << " ";
     oss << std::left << std::setw(12) << std::setfill(' ') << l.opcode.mnemonic;
     oss << "0x" << std::hex << std::setw(4) << std::setfill('0') << l.opcode.opcode << "   ";
     // Insert flag chars
@@ -202,6 +204,7 @@ std::string SourceInfo::line_to_string(const LineInfo& l)
     oss << "  ";
     oss << " $" << std::right << std::hex << std::setw(4) << std::setfill('0') << l.arg1;
     oss << " $" << std::right << std::hex << std::setw(4) << std::setfill('0') << l.arg2;
+    oss << " $" << std::right << std::hex << std::setw(4) << std::setfill('0') << l.imm;
     //oss << " $" << std::right << std::hex << std::setw(4) << std::setfill('0') << l.arg3;
     //oss << " $" << std::right << std::hex << std::setw(4) << std::setfill('0') << l.imm;
 
