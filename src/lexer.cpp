@@ -173,6 +173,88 @@ bool Lexer::exhausted(void) const
 }
 
 /*
+ * parseVxVy()
+ * Parse two register arguments 
+ */
+void Lexer::parseVxVy(void)
+{
+    uint16_t arg;
+    std::string argstr;
+
+    // arg1 
+    this->scanToken();
+    if(this->token_buf[0] == 'V' || 
+       this->token_buf[0] == 'v' )
+    {
+        argstr = std::string(this->token_buf);
+        arg = std::stoi(argstr.substr(1, argstr.length()), nullptr, 16);
+        this->line_info.arg1 = arg;
+    }
+    else
+    {
+        this->line_info.error  = true;
+        this->line_info.errstr = "Invalid argument 1 (" + std::string(this->token_buf) + ")";
+        if(this->verbose)
+            std::cout << "[" << __FUNCTION__ << "] " << this->line_info.errstr << std::endl;
+        return;
+    }
+    // arg2 
+    this->scanToken();
+    if(this->token_buf[0] == 'V' || 
+       this->token_buf[0] == 'v' )
+    {
+        argstr = std::string(this->token_buf);
+        arg = std::stoi(argstr.substr(1, argstr.length()), nullptr, 16);
+        this->line_info.arg2 = arg;
+    }
+    else
+    {
+        this->line_info.error  = true;
+        this->line_info.errstr = "Invalid argument 2 (" + std::string(this->token_buf) + ")";
+        if(this->verbose)
+            std::cout << "[" << __FUNCTION__ << "] " << this->line_info.errstr << std::endl;
+        return;
+    }
+}
+
+void Lexer::parseVxkk(void)
+{
+    uint16_t arg;
+    std::string argstr;
+
+    // arg1 
+    this->scanToken();
+    if(this->token_buf[0] == 'V' || 
+       this->token_buf[0] == 'v' )
+    {
+        argstr = std::string(this->token_buf);
+        arg = std::stoi("0x" + argstr.substr(1, argstr.length()), nullptr, 16);
+        this->line_info.arg1 = arg;
+    }
+    else
+    {
+        this->line_info.error  = true;
+        this->line_info.errstr = "Invalid argument 1 (" + std::string(this->token_buf) + ")";
+        if(this->verbose)
+            std::cout << "[" << __FUNCTION__ << "] " << this->line_info.errstr << std::endl;
+        return;
+    }
+    // arg2  (immediate)
+    this->scanToken(); 
+    if(this->token_buf[0] == '$' || 
+       (this->token_buf[0] == '0' && this->token_buf[1] == 'x') || 
+       this->token_buf[0] == 'x')
+    {
+        argstr = std::string(this->token_buf);
+        arg = std::stoi("0x" + argstr.substr(1, argstr.length()), nullptr, 16);
+        this->line_info.arg2 = arg;
+        return;
+    }
+    // Assume label
+    this->line_info.symbol = std::string(this->token_buf);
+}
+
+/*
  * parseToken()
  * Parse a token from the input stream
  */
@@ -359,11 +441,9 @@ void Lexer::parseOpcode(void)
                 this->line_info.is_imm = true;
                 this->line_info.imm    = arg;
             }
+            // Assume this is a symbol and check later 
             else
-            {
-                // Assume this is a symbol and check later 
                 this->line_info.symbol = std::string(this->token_buf);
-            }
 
             break;
 
@@ -397,6 +477,8 @@ void Lexer::parseOpcode(void)
 
             break;
 
+        // TODO : since we don't know what the opcode is until after we parse the args 
+        // we may need to use a new enum for this
         case C8_ADDVxVy: //8ry4
             this->scanToken();
             // First arg must be a register 
@@ -451,6 +533,31 @@ void Lexer::parseOpcode(void)
             this->line_info.symbol = std::string(this->token_buf);
 
             break;
+
+        case C8_DRW:
+            // Get first two tokens
+            this->parseVxVy();
+            if(this->line_info.error)
+                return;
+            // we have one more immediate 
+            this->scanToken();
+            if(this->checkImm())
+            {
+                arg = std::stoi(std::string(this->token_buf));
+                this->line_info.is_imm = true;
+                this->line_info.imm    = arg;
+            }
+            else
+            {
+                this->line_info.error = true;
+                this->line_info.errstr = "Invalid immediate (" + std::string(this->token_buf) + ")";
+                if(this->verbose)
+                    std::cout << "[" << __FUNCTION__ << "] " << this->line_info.errstr << std::endl;
+                return;
+            }
+
+            break;
+
 
 //#define C8_LDVxVy   0x8000
 //#define C8_ORVxVy   0x8001

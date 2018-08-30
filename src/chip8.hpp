@@ -34,12 +34,13 @@
 #define C8_SNEVxVy  0x9000
 #define C8_LDI      0xA000
 #define C8_JP       0xB000
+#define C8_DRW      0xD000
 
 // Chip-8 opcodes (for assembler)
 static Opcode chip8_opcodes[] = {
     {C8_JMP,      "JMP"},
     {C8_CALL,     "CALL"},
-    {C8_SEVxkk,   "SE"},
+    //{C8_SEVxkk,   "SE"},
     {C8_SEVxVy,   "SE"},
     {C8_LDVxkk,   "LD"},
     {C8_ADDVx,    "ADD"},
@@ -54,7 +55,8 @@ static Opcode chip8_opcodes[] = {
     {C8_SHLVxVy,  "SHL"},
     {C8_SNEVxVy,  "SNE"},
     {C8_LDI,      "LD I"},
-    {C8_JP,       "JP"}
+    {C8_JP,       "JP"},
+    {C8_DRW,      "DRW"}
 };
 
 /*
