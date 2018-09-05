@@ -372,7 +372,7 @@ void Lexer::parseOpcode(void)
     switch(op.opcode)
     {
 
-        case C8_SEVxVy:
+        case C8_SE:
             // first arg must be a register number 
             this->scanToken();
             if(!this->checkArg())
@@ -447,7 +447,7 @@ void Lexer::parseOpcode(void)
 
             break;
 
-        case C8_ORVxVy:
+        case C8_OR:
             // first arg is a register 
             this->scanToken();
             if(!this->checkArg())
@@ -479,7 +479,7 @@ void Lexer::parseOpcode(void)
 
         // TODO : since we don't know what the opcode is until after we parse the args 
         // we may need to use a new enum for this
-        case C8_ADDVxVy: //8ry4
+        case C8_ADD: //8ry4
             this->scanToken();
             // First arg must be a register 
             if(!this->checkArg())
@@ -559,16 +559,16 @@ void Lexer::parseOpcode(void)
             break;
 
 
-//#define C8_LDVxVy   0x8000
-//#define C8_ORVxVy   0x8001
-//#define C8_ANDVxVy  0x8002
-//#define C8_XORVxVy  0x8003
-//#define C8_ADDVxVy  0x8004
-//#define C8_SUBVxVy  0x8005
-//#define C8_SHRVxVy  0x8006
-//#define C8_SUBNVxVy 0x8007
-//#define C8_SHLVxVy  0x800E
-//#define C8_SNEVxVy  0x9000
+//#define C8_LD   0x8000
+//#define C8_OR   0x8001
+//#define C8_AND  0x8002
+//#define C8_XOR  0x8003
+//#define C8_ADD  0x8004
+//#define C8_SUB  0x8005
+//#define C8_SHR  0x8006
+//#define C8_SUBN 0x8007
+//#define C8_SHL  0x800E
+//#define C8_SNE  0x9000
 //#define C8_LDI      0xA000
 //#define C8_JP       0xB000
 

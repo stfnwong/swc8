@@ -96,57 +96,57 @@ void Chip8::cycle(void)
             kk = (op & 0x00F0) >> 4;
             this->state.V[vx] += kk;
             break;
-        case C8_LDVxVy:
+        case C8_LD:
             vx = (op & 0x0F00) >> 8;
             vy = (op & 0x00F0) >> 4;
             this->state.V[vx] = this->state.V[vy];
             break;
 
-        case C8_ORVxVy:
+        case C8_OR:
             vx = (op & 0x0F00) >> 8;
             vy = (op & 0x00F0) >> 4;
             this->state.V[vx] = this->state.V[vx] | this->state.V[vy];
             break;
 
-        case C8_ANDVxVy:
+        case C8_AND:
             vx = (op & 0x0F00) >> 8;
             vy = (op & 0x00F0) >> 4;
             this->state.V[vx] = this->state.V[vx] & this->state.V[vy];
             break;
 
-        case C8_XORVxVy:
+        case C8_XOR:
             vx = (op & 0x0F00) >> 8;
             vy = (op & 0x00F0) >> 4;
             this->state.V[vx] = this->state.V[vx] ^ this->state.V[vy];
             break;
 
-        case C8_ADDVxVy:
+        case C8_ADD:
             vx = (op & 0x0F00) >> 8;
             vy = (op & 0x00F0) >> 4;
             this->state.V[vx] = this->state.V[vx] + this->state.V[vy];
             break;
 
-        case C8_SUBVxVy:
+        case C8_SUB:
             vx = (op & 0x0F00) >> 8;
             vy = (op & 0x00F0) >> 4;
             this->state.V[vx] = this->state.V[vx] - this->state.V[vy];
             break;
 
-        case C8_SHRVxVy:
+        case C8_SHR:
             vx = (op & 0x0F00) >> 8;
             vy = (op & 0x00F0) >> 4;
             this->state.VF = (vx & 0x01) ? 0x0001 : 0x000;
             this->state.V[vx] = this->state.V[vx] >> 1;
             break;
 
-        case C8_SHLVxVy:
+        case C8_SHL:
             vx = (op & 0x0F00) >> 8;
             vy = (op & 0x00F0) >> 4;
             this->state.VF = (vx & 0x01) ? 0x0001 : 0x000;
             this->state.V[vx] = this->state.V[vx] << 1;
             break;
 
-        case C8_SNEVxVy:
+        case C8_SNE:
             vx = (op & 0x0F00) >> 8;
             vy = (op & 0x00F0) >> 4;
             if(this->state.V[vx] != this->state.V[vy])

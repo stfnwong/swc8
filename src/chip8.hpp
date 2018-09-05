@@ -19,44 +19,42 @@
 #define C8_JMP      0x1000
 #define C8_CALL     0x2000
 #define C8_SEVxkk   0x3000
-#define C8_SEVxVy   0x5000
+#define C8_SE   0x5000
 #define C8_LDVxkk   0x6000
 #define C8_ADDVx    0x7000
-#define C8_LDVxVy   0x8000
-#define C8_ORVxVy   0x8001
-#define C8_ANDVxVy  0x8002
-#define C8_XORVxVy  0x8003
-#define C8_ADDVxVy  0x8004
-#define C8_SUBVxVy  0x8005
-#define C8_SHRVxVy  0x8006
-#define C8_SUBNVxVy 0x8007
-#define C8_SHLVxVy  0x800E
-#define C8_SNEVxVy  0x9000
+#define C8_LD   0x8000
+#define C8_OR   0x8001
+#define C8_AND  0x8002
+#define C8_XOR  0x8003
+#define C8_ADD  0x8004
+#define C8_SUB  0x8005
+#define C8_SHR  0x8006
+#define C8_SUBN 0x8007
+#define C8_SHL  0x800E
+#define C8_SNE  0x9000
 #define C8_LDI      0xA000
 #define C8_JP       0xB000
 #define C8_DRW      0xD000
 
 // Chip-8 opcodes (for assembler)
 static Opcode chip8_opcodes[] = {
-    {C8_JMP,      "JMP"},
-    {C8_CALL,     "CALL"},
-    //{C8_SEVxkk,   "SE"},
-    {C8_SEVxVy,   "SE"},
-    {C8_LDVxkk,   "LD"},
-    {C8_ADDVx,    "ADD"},
-    {C8_LDVxVy,   "LD"},
-    {C8_ORVxVy,   "OR"},
-    {C8_ANDVxVy,  "AND"},
-    {C8_XORVxVy,  "XOR"},
-    {C8_ADDVxVy,  "ADD"},
-    {C8_SUBVxVy,  "SUB"},
-    {C8_SHRVxVy,  "SHR"},
-    {C8_SUBNVxVy, "SUBN"},
-    {C8_SHLVxVy,  "SHL"},
-    {C8_SNEVxVy,  "SNE"},
-    {C8_LDI,      "LD I"},
-    {C8_JP,       "JP"},
-    {C8_DRW,      "DRW"}
+    {C8_JMP,  "JMP"},
+    {C8_CALL, "CALL"},
+    {C8_SE,   "SE"},
+    {C8_LD,   "LD"},
+    {C8_ADD,  "ADD"},
+    {C8_LD,   "LD"},
+    {C8_OR,   "OR"},
+    {C8_AND,  "AND"},
+    {C8_XOR,  "XOR"},
+    {C8_ADD,  "ADD"},
+    {C8_SUB,  "SUB"},
+    {C8_SHR,  "SHR"},
+    {C8_SUBN, "SUBN"},
+    {C8_SHL,  "SHL"},
+    {C8_SNE,  "SNE"},
+    {C8_JP,   "JP"},
+    {C8_DRW,  "DRW"}
 };
 
 /*
