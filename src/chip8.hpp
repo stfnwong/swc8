@@ -19,7 +19,8 @@
 #define C8_JMP      0x1000
 #define C8_CALL     0x2000
 #define C8_SEVxkk   0x3000
-#define C8_SE   0x5000
+#define C8_SE       0x5000      // 'placeholder' instruction 
+#define C8_SNE      0x4000
 #define C8_LDVxkk   0x6000
 #define C8_ADDVx    0x7000
 #define C8_LD   0x8000
@@ -31,30 +32,45 @@
 #define C8_SHR  0x8006
 #define C8_SUBN 0x8007
 #define C8_SHL  0x800E
-#define C8_SNE  0x9000
+
 #define C8_LDI      0xA000
 #define C8_JP       0xB000
 #define C8_DRW      0xD000
 
+// Skip instructions
+#define C8_SEKK  0x3000
+#define C8_SNEKK 0x4000
+#define C8_SEVX  0x5000
+#define C8_SNEVX 0x9000
+//#define C8_SNE_EQ  0x9000
+
+// Lexer specific opcocdes...?
+
+
 // Chip-8 opcodes (for assembler)
 static Opcode chip8_opcodes[] = {
-    {C8_JMP,  "JMP"},
-    {C8_CALL, "CALL"},
-    {C8_SE,   "SE"},
-    {C8_LD,   "LD"},
-    {C8_ADD,  "ADD"},
-    {C8_LD,   "LD"},
-    {C8_OR,   "OR"},
-    {C8_AND,  "AND"},
-    {C8_XOR,  "XOR"},
-    {C8_ADD,  "ADD"},
-    {C8_SUB,  "SUB"},
-    {C8_SHR,  "SHR"},
-    {C8_SUBN, "SUBN"},
-    {C8_SHL,  "SHL"},
-    {C8_SNE,  "SNE"},
-    {C8_JP,   "JP"},
-    {C8_DRW,  "DRW"}
+    {C8_JMP,   "JMP"},
+    {C8_CALL,  "CALL"},
+    //{C8_SE,   "SE"},
+    {C8_SE,    "SE"},
+    {C8_SNE,   "SNE"},
+    {C8_SEKK,  "SE"},
+    {C8_SEVX,  "SE"},
+    {C8_SNEVX, "SNE"},
+    {C8_SNEKK, "SNE"},
+    {C8_LD,    "LD"},
+    {C8_ADD,   "ADD"},
+    {C8_LD,    "LD"},
+    {C8_OR,    "OR"},
+    {C8_AND,   "AND"},
+    {C8_XOR,   "XOR"},
+    {C8_ADD,   "ADD"},
+    {C8_SUB,   "SUB"},
+    {C8_SHR,   "SHR"},
+    {C8_SUBN,  "SUBN"},
+    {C8_SHL,   "SHL"},
+    {C8_JP,    "JP"},
+    {C8_DRW,   "DRW"}
 };
 
 /*
@@ -80,13 +96,43 @@ class C8Proc
 };
 
 /*
+ * C8Exec
+ * Chip-8 execution context. Allows saving and resuming
+ * of pipeline state.
+ */
+class C8Exec
+{
+    public:
+        uint8_t u;
+        uint8_t p;
+        uint8_t x;
+        uint8_t y;
+        uint8_t kk;
+        uint16_t nnn;
+
+    public:
+        C8Exec();
+        ~C8Exec();
+        C8Exec(const C8Exec& that);
+        std::string toString(void);
+};
+
+/*
  * Chip8
  * Chip-8 object
  */
 class Chip8
 {
     private:
+        // Processor state 
         C8Proc state;
+
+    private:
+        // Execution context
+        C8Exec exec;
+
+    public:
+        // Memory 
         uint8_t* mem;
         uint16_t mem_size;
         void alloc_mem(void);

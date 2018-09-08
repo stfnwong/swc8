@@ -38,6 +38,33 @@ std::string C8Proc::toString(void) const
 }
 
 /*
+ * C8Exec
+ * Chip-8 execution context. Allows saving and resuming
+ * of pipeline state.
+ */
+C8Exec::C8Exec()
+{
+    this->u   = 0;
+    this->p   = 0;
+    this->x   = 0;
+    this->y   = 0;
+    this->kk  = 0;
+    this->nnn = 0;
+}
+
+C8Exec::~C8Exec() {} 
+
+C8Exec::C8Exec(const C8Exec& that)
+{
+    this->u   = that.u;
+    this->p   = that.p;
+    this->x   = that.x;
+    this->y   = that.y;
+    this->kk  = that.kk;
+    this->nnn = that.nnn;
+}
+
+/*
  * Chip8
  * Chip-8 object
  */

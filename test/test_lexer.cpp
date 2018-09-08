@@ -16,12 +16,6 @@ class TestLexer : public ::testing::Test
     virtual void TearDown() {}
 };
 
-
-///TEST_F(TestLexer, test_init)
-///{
-///    Lexer lex;
-///}
-
 // Generate expected source info for draw.asm
 SourceInfo get_draw_expected_source_info(void)
 {

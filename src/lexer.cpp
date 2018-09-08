@@ -24,12 +24,19 @@ Lexer::~Lexer()
 
 //Lexer::Lexer(const Lexer& that) {} 
 
-
+/*
+ * alloc_mem()
+ * Allocate token buffer memory
+ */
 void Lexer::alloc_mem(void)
 {
     this->token_buf = new char[this->token_buf_size];
 }
 
+/*
+ * init_op_table()
+ * Set up the opcode table for the lexer 
+ */
 void Lexer::init_op_table(void)
 {
     for(const Opcode& op : chip8_opcodes)
@@ -101,6 +108,10 @@ bool Lexer::isComment(void) const
     return (this->cur_char == ';');
 }
 
+/*
+ * isMnemonic()
+ * Returns true if the current token is a valid mnemonic
+ */
 bool Lexer::isMnemonic(void)
 {
     if(this->token_buf[0] == '\0')
@@ -348,6 +359,10 @@ bool Lexer::checkImm(void)
     return false;
 }
 
+/* 
+ * parseOpcode()
+ * Parse an opcode
+ */
 void Lexer::parseOpcode(void)
 {
     Opcode op;
@@ -361,9 +376,7 @@ void Lexer::parseOpcode(void)
         this->line_info.error = true;
         this->line_info.errstr = "Invalid opcode " + op.mnemonic;
         if(this->verbose)
-        {
             std::cout << "[" << __FUNCTION__ << "] " << this->line_info.errstr << std::endl;
-        }
         return;
     }
 
@@ -387,8 +400,15 @@ void Lexer::parseOpcode(void)
             arg = std::stoi(argstr.substr(1, argstr.length()), nullptr, 16);
             this->line_info.arg1 = arg;
 
-            // Second arg is also a register number
+            // If the second argument is an immediate, then this is SEVxkk, otherwise its SEVxVy
             this->scanToken();
+            if(this->isNumber())
+            {
+                argstr = std::string(this->token_buf);
+                arg = std::stoi(argstr, nullptr, 16);
+                this->line_info.imm = arg;
+                this->line_info.opcode.opcode = C8_SEKK;
+            }
             if(!this->checkArg())
             {
                 this->line_info.error = true;
@@ -400,6 +420,25 @@ void Lexer::parseOpcode(void)
             argstr = std::string(this->token_buf);
             arg = std::stoi(argstr.substr(1, argstr.length()), nullptr, 16);
             this->line_info.arg2 = arg;
+            this->line_info.opcode.opcode = C8_SEVX;
+
+            break;
+
+        case C8_SNE:
+            this->scanToken();
+            // First arg must be register
+            if(!this->checkArg())
+            {
+                this->line_info.error = true;
+                this->line_info.errstr = "Invalid argument 1 (" + std::string(this->token_buf) + ")";
+                if(this->verbose)
+                    std::cout << "[" << __FUNCTION__ << "] " << this->line_info.errstr << std::endl;
+                return;
+            }
+            argstr = std::string(this->token_buf);
+            arg = std::stoi(argstr.substr(1, argstr.length()), nullptr, 16);
+            this->line_info.arg1 = arg;
+            // If second argument is immediate, we have SNEVxkk, otherwise SNEVx
 
             break;
 
