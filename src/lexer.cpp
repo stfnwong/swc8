@@ -321,25 +321,53 @@ void Lexer::parseToken(void)
 // 3) If not in table, this is a label, move to next token
 // 
 
-//Token Lexer::nextToken(void)
-//{
-//    Token tok;
-//    Opcode op;
-//
-//    this->scanToken();
-//    this->instr_code_table.get(std::string(this->token_buf), op);
-//
-//
-//
-//    // Label should be last..?
-//    if(op.mnemonic == "\0")
-//    {
-//        tok.type = SYM_IDENT;
-//        tok.val  = std::string(this->token_buf);
-//        
-//        return tok;
-//    }
-//}
+void Lexer::nextToken(void)
+{
+    Opcode op;
+    std::string token_str;
+
+    this->scanToken();
+    token_str = std::string(this->token_buf);
+    this->instr_code_table.get(token_str, op);
+
+    // Found an instruction
+    if(op.mnemonic != "\0")
+    {
+        this->cur_token.type = SYM_INSTR;
+        this->cur_token.val  = std::string(this->token_buf);
+        return;
+    }
+
+    // Check if this is a register operand
+    if((token_str[0] == 'V' || token_str[0] == 'v') && 
+            isdigit(std::stoi(token_str.substr(1, 1), nullptr, 16)))
+            //isdigit(std::stoi(std::string(token_str[1], nullptr, 16)))
+    {
+        this->cur_token.type = SYM_REG;
+        this->cur_token.val  = token_str.substr(1, token_str.length());
+        return;
+    }
+
+    // Check if this is an immediate 
+    if((token_str[0] == '0' && token_str[1] == 'x') || token_str[0] == '#')
+    {
+        this->cur_token.type = SYM_LITERAL;
+        this->cur_token.val  = (token_str[0] == '#') ? (token_str.substr(1, token_str.length())) : token_str;
+        return;
+    }
+
+    // Check if the argument is the I register 
+    if(token_str[0] == 'I')
+    {
+        this->cur_token.type = SYM_IREG;
+        this->cur_token.val  = token_str[0];
+        return;
+    }
+
+    // Exhausted all options, must be an identifier
+    this->cur_token.type = SYM_LABEL;
+    this->cur_token.val  = token_str;
+}
 
 
 /*
@@ -347,23 +375,83 @@ void Lexer::parseToken(void)
  */
 void Lexer::parseLine(void)
 {
-    initLineInfo(this->line_info);
+    Opcode op;
 
-    // Get the first token
-    this->parseToken();
-    if(this->line_info.error)
+    initLineInfo(this->line_info);
+    this->nextToken();
+    if(this->cur_token.type == SYM_LABEL)
     {
-        std::cerr << "[" << __FUNCTION__ << "] error parsing line "
-            << std::dec << this->line_info.line_num << " (" 
-            << this->line_info.errstr << ")" << std::endl;
-        goto LINE_END;
+        this->line_info.is_label = true;
+        this->line_info.symbol = cur_token.val;
+        // scan in the next token 
+        this->nextToken();
     }
 
-    // If we have a label, then try to parse the 'actual' token(s)
-    if(this->line_info.is_label)
+    if(this->cur_token.type == SYM_INSTR)
     {
-        this->skipWhitespace();
-        this->parseToken();
+        this->instr_code_table.get(this->cur_token.val, op);
+        switch(op.opcode)
+        {
+            case LEX_ADD:
+                this->nextToken();
+                if(this->cur_token.type == SYM_IREG)
+                {
+                    this->line_info.ireg = true;
+                    this->nextToken();
+                    if(this->cur_token.type != SYM_REG)
+                    {
+                        //error handling
+                    }
+                    this->line_info.arg1 = std::stoi(this->cur_token.val.substr(1,1), nullptr, 16);
+                }
+                else
+                {
+                    if(this->cur_token.type != SYM_REG)
+                    {
+                        this->line_info.error = true;
+                        this->line_info.errstr = "Invalid operand 1 in ADD - must be register";
+                        if(this->verbose)
+                        {
+                            std::cout << "[" << __FUNCTION__ << "] (line" << this->cur_line 
+                                << ") " << this->line_info.errstr << std::endl;
+                        }
+                        goto LINE_END;
+                    }
+                    this->line_info.arg1 = std::stoi(this->cur_token.val.substr(1,1), nullptr, 16);
+                    this->nextToken();
+                    // Could be immediate or register 
+                    if(this->cur_token.type == SYM_REG)
+                        this->line_info.arg2 = std::stoi(this->cur_token.val.substr(1,1), nullptr, 16);
+                    else if(this->cur_token.type == SYM_LITERAL)
+                    {
+                        this->line_info.arg2 = std::stoi(
+                                this->cur_token.val.substr(1, this->cur_token.val.length()), nullptr, 16);
+                    }
+                    else
+                    {
+                        this->line_info.error = true;
+                        this->line_info.errstr = "Invalid operand 2 in ADD";
+                        if(this->verbose)
+                        {
+                            std::cout << "[" << __FUNCTION__ << "] (line " << this->cur_line
+                                << ") " << this->line_info.errstr << std::endl;
+                        }
+                        goto LINE_END;
+                    }
+                }
+                    
+                break;
+
+            default:
+                this->line_info.error = true;
+                this->line_info.errstr = "Unknown opcode " + op.opcode;
+                if(this->verbose)
+                {
+                    std::cout << "[" << __FUNCTION__ << "] (line " << std::dec << 
+                        this->cur_line << ") " << this->line_info.errstr << std::endl;
+                }
+                goto LINE_END;
+        }
     }
 
 LINE_END:
@@ -371,6 +459,34 @@ LINE_END:
     this->line_info.addr     = this->cur_addr;
     this->cur_addr++;
 }
+
+
+//void Lexer::parseLine(void)
+//{
+//    initLineInfo(this->line_info);
+//
+//    // Get the first token
+//    this->parseToken();
+//    if(this->line_info.error)
+//    {
+//        std::cerr << "[" << __FUNCTION__ << "] error parsing line "
+//            << std::dec << this->line_info.line_num << " (" 
+//            << this->line_info.errstr << ")" << std::endl;
+//        goto LINE_END;
+//    }
+//
+//    // If we have a label, then try to parse the 'actual' token(s)
+//    if(this->line_info.is_label)
+//    {
+//        this->skipWhitespace();
+//        this->parseToken();
+//    }
+//
+//LINE_END:
+//    this->line_info.line_num = this->cur_line;
+//    this->line_info.addr     = this->cur_addr;
+//    this->cur_addr++;
+//}
 
 /*
  * checkArg()

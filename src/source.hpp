@@ -11,6 +11,60 @@
 #include <cstdint>
 #include "opcode.hpp"
 
+// ======== TOKEN ======== //
+
+// Token types for lexer 
+typedef enum TokenType{
+    SYM_EOF,
+    SYM_LABEL,
+    SYM_INSTR,
+    SYM_REG,
+    SYM_LITERAL,
+    SYM_IREG
+} TokenType;
+
+// Array for string conversion by index
+const std::vector<std::string> token_type_str = {
+    "EOF",
+    "LABEL",
+    "INSTR",
+    "REG",
+    "LITERAL",
+    "I"
+};
+
+/* 
+ * LexToken
+ * A token emitted by the lexer
+ */
+typedef struct 
+{
+    TokenType type;
+    std::string val;
+} Token;
+
+
+/* 
+ * TokenTable 
+ */
+class TokenTable
+{
+    private: 
+        std::vector<Token> tokens;
+
+    public:
+        TokenTable();
+        ~TokenTable();
+        TokenTable(const TokenTable& that);
+        
+        // Modify table 
+        void add(const Token& t);
+        Token get(const unsigned int idx) const;
+        std::string toString(void);
+};
+
+// ======== SYMBOL ======== //
+
 typedef struct 
 {
     uint16_t    addr;
@@ -45,11 +99,11 @@ typedef struct{
     uint16_t     jmp_addr;
     uint16_t     arg1;
     uint16_t     arg2;
-    uint16_t     ireg;
     uint16_t     imm;
     bool         is_label;
     bool         is_imm;
     bool         is_directive;
+    bool         ireg;
     bool         error;
 } LineInfo;
 

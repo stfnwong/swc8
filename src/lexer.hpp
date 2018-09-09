@@ -12,38 +12,38 @@
 #include <string>
 #include "opcode.hpp"
 #include "source.hpp"
-#include "token.hpp"
 #include "chip8.hpp"   // for opcodes
 
 // Instruction codes - not quite opcodes
 typedef enum instr_code{ 
-    SYS, CLS, RET, JP, CALL, SE, SNE, LD, ADD, OR, AND, XOR, SUB, 
-    SHR, SUBN, SHL, RND, DRW, SKP, SKNP
+    LEX_SYS, LEX_CLS, LEX_RET, LEX_JP, LEX_CALL, LEX_SE, LEX_SNE, 
+    LEX_LD, LEX_ADD, LEX_OR, LEX_AND, LEX_XOR, LEX_SUB, LEX_SHR, 
+    LEX_SUBN, LEX_SHL, LEX_RND, LEX_DRW, LEX_SKP, LEX_SKNP
 } instr_code;
 
 
 // Instruction codes for Lexer 
 const Opcode lex_instr_codes[] = {
-    {SYS,  "SYS"},
-    {CLS,  "CLS"},
-    {RET,  "RET"},
-    {JP,   "JP"},
-    {CALL, "CALL"},
-    {SE,   "SE"},
-    {SNE,  "SNE"},
-    {LD,   "LD"},
-    {ADD,  "ADD"},
-    {OR,   "OR"},
-    {AND,  "AND"},
-    {XOR,  "XOR"},
-    {SUB,  "SUB"},
-    {SHR,  "SHR"},
-    {SUBN, "SUBN"},
-    {SHL,  "SHL"},
-    {RND,  "RND"},
-    {DRW,  "DRW"},
-    {SKP,  "SKP"},
-    {SKNP, "SKNP"},
+    {LEX_SYS,  "SYS"},
+    {LEX_CLS,  "CLS"},
+    {LEX_RET,  "RET"},
+    {LEX_JP,   "JP"},
+    {LEX_CALL, "CALL"},
+    {LEX_SE,   "SE"},
+    {LEX_SNE,  "SNE"},
+    {LEX_LD,   "LD"},
+    {LEX_ADD,  "ADD"},
+    {LEX_OR,   "OR"},
+    {LEX_AND,  "AND"},
+    {LEX_XOR,  "XOR"},
+    {LEX_SUB,  "SUB"},
+    {LEX_SHR,  "SHR"},
+    {LEX_SUBN, "SUBN"},
+    {LEX_SHL,  "SHL"},
+    {LEX_RND,  "RND"},
+    {LEX_DRW,  "DRW"},
+    {LEX_SKP,  "SKP"},
+    {LEX_SKNP, "SKNP"},
 };
 
 
@@ -99,8 +99,10 @@ class Lexer
         bool isComment(void) const;
         bool isMnemonic(void);
 
+    private:
         // new token stuff
-        //Token nextToken(void);
+        Token cur_token;
+        void nextToken(void);
 
     private:
         // parsing 

@@ -9,6 +9,38 @@
 #include <sstream>
 #include "source.hpp"
 
+/* 
+ * TokenTable 
+ */
+TokenTable::TokenTable() {} 
+
+TokenTable::~TokenTable()  {} 
+
+TokenTable::TokenTable(const TokenTable& that)
+{
+    this->tokens.reserve(that.tokens.size());
+    for(unsigned int t = 0; t < that.tokens.size(); ++t)
+        this->tokens[t] = that.tokens[t];
+}
+
+void TokenTable::add(const Token& t)
+{
+    this->tokens.push_back(t);
+}
+
+Token TokenTable::get(const unsigned int idx) const
+{
+    // TODO : bounds check 
+    return this->tokens[idx];
+}
+
+std::string TokenTable::toString(void)
+{
+    std::ostringstream oss;
+
+    return oss.str();
+}
+
 /*
  * SYMBOLTABLE 
  */
@@ -84,6 +116,7 @@ void initLineInfo(LineInfo& l)
     l.ireg     = 0;
     l.is_label = false;
     l.is_imm   = false;
+    l.ireg     = false;
     l.error    = false;
     l.is_directive = false;
 }
@@ -114,6 +147,8 @@ bool compLineInfo(const LineInfo& a, const LineInfo& b)
         return false;
     if(a.is_directive != b.is_directive)
         return false;
+    if(a.ireg != b.ireg)
+        return false;
     if(a.error != b.error)
         return false;
 
@@ -142,9 +177,12 @@ void printLineDiff(const LineInfo& a, const LineInfo& b)
         std::cout << "a.is_label [" << a.is_label << "] != b.is_label [" << b.is_label << "]" << std::endl;
     if(a.is_directive != b.is_directive)
         std::cout << "a.is_directive [" << a.is_directive << "] != b.is_directive [" << b.is_directive << "]" << std::endl;
+    if(a.ireg != b.ireg)
+        std::cout << "a.ireg [" << a.ireg << "] != b.ireg [" << b.ireg << "]" << std::endl;
     if(a.error != b.error)
         std::cout << "a.error [" << a.error << "] != b.error [" << b.error << "]" << std::endl;
 }
+
 /*
  * SOURCEINFO 
  */
