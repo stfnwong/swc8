@@ -106,15 +106,15 @@ class Lexer
 
     private:
         // parsing 
-        void parseToken(void);  // parse a single token
         void parseLine(void);   // parse an entire line
-        void parseOpcode(void);
-        void parseVxVy(void);
-        void parseVxkk(void);
         bool checkArg(void);
         bool checkImm(void);
 
         void resolveLabels(void);
+
+        void parseTwoArg(void);
+        void parseRegImm(void);
+        void parseAddr(void);
 
     public:
         Lexer();
