@@ -14,9 +14,9 @@ TOOL_DIR=tools
 # Tool options
 CXX=g++
 OPT=-O0
-CXXFLAGS=-Wall -g2 -pthread -std=c++14 -D_REENTRANT $(OPT)
+CXXFLAGS=-Wall -g2 -std=c++14 -D_REENTRANT $(OPT)
 TESTFLAGS=-lgtest -lgtest_main
-LDFLAGS =$(shell root-config --ldflags) -pthread
+LDFLAGS =$(shell root-config --ldflags)
 LIBS = 
 TEST_LIBS = -lgtest -lgtest_main
 

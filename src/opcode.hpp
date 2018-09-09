@@ -17,8 +17,11 @@ typedef struct
     std::string mnemonic;
 } Opcode;
 
-void printOpcode(const Opcode& o);
-
+/* 
+ * OpcodeTable 
+ *
+ * Holds a list of Opcode structures.
+ */
 class OpcodeTable
 {
     private:
@@ -34,7 +37,6 @@ class OpcodeTable
         void getIdx(const unsigned int idx, Opcode& o) const;
         void init(void);
 
-        // TODO: create toString() method
         void print(void) const;
 
         // generic getters 

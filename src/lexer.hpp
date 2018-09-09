@@ -4,14 +4,49 @@
  * Stefan Wong 2018
  */
 
-
 #ifndef __LEXER_HPP
 #define __LEXER_HPP
+
+#define C8_DEBUG 1
 
 #include <string>
 #include "opcode.hpp"
 #include "source.hpp"
+#include "token.hpp"
 #include "chip8.hpp"   // for opcodes
+
+// Instruction codes - not quite opcodes
+typedef enum instr_code{ 
+    SYS, CLS, RET, JP, CALL, SE, SNE, LD, ADD, OR, AND, XOR, SUB, 
+    SHR, SUBN, SHL, RND, DRW, SKP, SKNP
+} instr_code;
+
+
+// Instruction codes for Lexer 
+const Opcode lex_instr_codes[] = {
+    {SYS,  "SYS"},
+    {CLS,  "CLS"},
+    {RET,  "RET"},
+    {JP,   "JP"},
+    {CALL, "CALL"},
+    {SE,   "SE"},
+    {SNE,  "SNE"},
+    {LD,   "LD"},
+    {ADD,  "ADD"},
+    {OR,   "OR"},
+    {AND,  "AND"},
+    {XOR,  "XOR"},
+    {SUB,  "SUB"},
+    {SHR,  "SHR"},
+    {SUBN, "SUBN"},
+    {SHL,  "SHL"},
+    {RND,  "RND"},
+    {DRW,  "DRW"},
+    {SKP,  "SKP"},
+    {SKNP, "SKNP"},
+};
+
+
 
 /* 
  * Lexer
@@ -34,8 +69,14 @@ class Lexer
     private:
         // opcodes
         OpcodeTable op_table;
+        OpcodeTable instr_code_table;        // not quite opcodes....
+
         //OpcodeTable pseudo_op_table;
-        void init_op_table(void);
+        void init_op_table(void);       // TODO: may remove ...
+        void init_instr_code_table(void);
+
+    private:
+        // symbol table
 
     private:
         SourceInfo   source_info;
@@ -57,6 +98,9 @@ class Lexer
         bool isSpace(void) const;
         bool isComment(void) const;
         bool isMnemonic(void);
+
+        // new token stuff
+        //Token nextToken(void);
 
     private:
         // parsing 
@@ -82,6 +126,11 @@ class Lexer
         // Verbose mode
         void setVerbose(const bool v);
         bool getVerbose(void) const;
+        
+#if C8_DEBUG > 0
+        // Debug routines 
+
+#endif /*C8_DEBUG*/
 
 };
 

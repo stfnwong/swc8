@@ -15,6 +15,7 @@ Lexer::Lexer()
     this->cur_pos = 0;
     this->alloc_mem();
     this->init_op_table();
+    this->init_instr_code_table();
 }
 
 Lexer::~Lexer()
@@ -47,6 +48,16 @@ void Lexer::init_op_table(void)
             << std::dec << this->op_table.getNumOps() 
             << " opcodes in table" << std::endl;
     }
+}
+
+/*
+ * init_instr_code_table()
+ * Initialize a table of lexer instruction codes
+ */
+void Lexer::init_instr_code_table(void)
+{
+    for(const Opcode& code : lex_instr_codes)
+        this->instr_code_table.add(code);
 }
 
 /* 
@@ -302,6 +313,34 @@ void Lexer::parseToken(void)
             << std::string(this->token_buf) << ">" << std::endl;
     }
 }
+
+// TODO: new structure for parseLine()
+//
+// 1) scanToken
+// 2) check this->instr_code_table
+// 3) If not in table, this is a label, move to next token
+// 
+
+//Token Lexer::nextToken(void)
+//{
+//    Token tok;
+//    Opcode op;
+//
+//    this->scanToken();
+//    this->instr_code_table.get(std::string(this->token_buf), op);
+//
+//
+//
+//    // Label should be last..?
+//    if(op.mnemonic == "\0")
+//    {
+//        tok.type = SYM_IDENT;
+//        tok.val  = std::string(this->token_buf);
+//        
+//        return tok;
+//    }
+//}
+
 
 /*
  * parseLine()
