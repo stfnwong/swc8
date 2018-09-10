@@ -78,6 +78,8 @@ class SymbolTable
     public:
         SymbolTable();
         ~SymbolTable();
+        SymbolTable(const SymbolTable& that);
+
         void         add(const Symbol& s);
         void         update(const unsigned int idx, const Symbol& s);
         Symbol       get(const unsigned int idx) const;
@@ -134,6 +136,7 @@ class SourceInfo
     public:
         SourceInfo();
         ~SourceInfo();
+        SourceInfo(const SourceInfo& that);
         // Add/remove lines
         void         add(const LineInfo& l);
         void         update(const unsigned int idx, const LineInfo& l);

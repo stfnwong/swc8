@@ -550,6 +550,7 @@ void Lexer::lex(void)
         this->parseLine();
         this->source_info.add(this->line_info);
     }
+
 }
 
 /*
@@ -583,6 +584,8 @@ void Lexer::loadFile(const std::string& filename)
 
 SourceInfo Lexer::getSourceInfo(void) const
 {
+    std::cout << "[" << __FUNCTION__ << "] source info has " << std::dec << this->source_info.getNumLines() 
+        << " lines of output" << std::endl;
     return this->source_info;
 }
 

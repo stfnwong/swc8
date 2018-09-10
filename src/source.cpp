@@ -49,6 +49,13 @@ std::string TokenTable::toString(void)
 SymbolTable::SymbolTable() {} 
 SymbolTable::~SymbolTable() {} 
 
+SymbolTable::SymbolTable(const SymbolTable& that)
+{
+    this->syms.reserve(that.syms.size());
+    for(unsigned int s = 0; s < this->syms.size(); ++s)
+        this->syms[s] = that.syms[s];
+}
+
 void SymbolTable::add(const Symbol& s)
 {
     this->syms.push_back(s);
@@ -203,6 +210,14 @@ SourceInfo::SourceInfo()
 }
 
 SourceInfo::~SourceInfo() {} 
+
+SourceInfo::SourceInfo(const SourceInfo& that)
+{
+    this->error = that.error;
+    //this->line_info.reserve(that.line_info.size());
+    for(unsigned int l = 0; l < that.line_info.size(); ++l)
+        this->line_info.push_back(that.line_info[l]);
+}
 
 /* 
  * line_to_string
