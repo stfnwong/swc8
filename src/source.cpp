@@ -38,6 +38,8 @@ std::string TokenTable::toString(void)
 {
     std::ostringstream oss;
 
+    oss << "TODO: no string method at this time" << std::endl;
+
     return oss.str();
 }
 
@@ -110,9 +112,10 @@ void initLineInfo(LineInfo& l)
     l.label    = "\0";
     l.errstr   = "\0";
     l.opcode   = {0x0, "INVALID"},
-    l.arg1     = 0;
-    l.arg2     = 0;
-    l.imm      = 0;
+    l.vx       = 0;
+    l.vy       = 0;
+    l.kk       = 0;
+    l.nnn      = 0;
     l.ireg     = 0;
     l.is_label = false;
     l.is_imm   = false;
@@ -139,9 +142,13 @@ bool compLineInfo(const LineInfo& a, const LineInfo& b)
         return false;
     if(a.addr != b.addr)
         return false;
-    if(a.arg1 != b.arg1)
+    if(a.vx != b.vx)
         return false;
-    if(a.arg2 != b.arg2)
+    if(a.vy != b.vy)
+        return false;
+    if(a.kk != b.kk)
+        return false;
+    if(a.nnn != b.nnn)
         return false;
     if(a.is_label != b.is_label)
         return false;
@@ -169,10 +176,14 @@ void printLineDiff(const LineInfo& a, const LineInfo& b)
         std::cout << "a.line_num [" << a.line_num << "] != b.line_num [" << b.line_num << "]" << std::endl;
     if(a.addr != b.addr)
         std::cout << "a.addr [" << a.addr << "] != b.addr [" << b.addr << "]" << std::endl;
-    if(a.arg1 != b.arg1)
-        std::cout << "a.arg1 [" << a.arg1 << "] != b.arg1 [" << b.arg1 << "]" << std::endl;
-    if(a.arg2 != b.arg2)
-        std::cout << "a.arg2 [" << a.arg2 << "] != b.arg2 [" << b.arg2 << "]" << std::endl;
+    if(a.vx != b.vx)
+        std::cout << "a.arg1 [" << a.vx << "] != b.arg1 [" << b.vx << "]" << std::endl;
+    if(a.vy != b.vy)
+        std::cout << "a.arg2 [" << a.vy << "] != b.arg2 [" << b.vy << "]" << std::endl;
+    if(a.kk != b.kk)
+        std::cout << "a.kk [" << a.kk << "] != b.kk [" << b.kk << "]" << std::endl;
+    if(a.nnn != b.nnn)
+        std::cout << "a.nnn [" << a.nnn << "] != b.nnn [" << b.nnn << "]" << std::endl;
     if(a.is_label != b.is_label)
         std::cout << "a.is_label [" << a.is_label << "] != b.is_label [" << b.is_label << "]" << std::endl;
     if(a.is_directive != b.is_directive)
@@ -203,7 +214,7 @@ std::string SourceInfo::line_to_string(const LineInfo& l)
     std::ostringstream oss;
 
     oss << "---------------------------------------------------------------------" << std::endl;
-    oss << "Line  Type   Addr  Mnemonic    Opcode  flags   arg1  arg2  imm" << std::endl;
+    oss << "Line  Type   Addr  Mnemonic    Opcode  flags  Vx Vy kk   nnn" << std::endl;
     //oss << "Line  Type   Addr  Mnemonic    Opcode  flags   arg1  arg2  arg3  imm  " << std::endl;
 
     oss << std::left << std::setw(6) << std::setfill(' ') << l.line_num;
@@ -226,25 +237,15 @@ std::string SourceInfo::line_to_string(const LineInfo& l)
     oss << "0x" << std::hex << std::setw(4) << std::setfill('0') << l.opcode.opcode << "   ";
     // Insert flag chars
     oss << "...";
-    //if(l.flags & LC3_FLAG_P)
-    //    oss << "p";
-    //else
-    //    oss << ".";
-    //if(l.flags & LC3_FLAG_N)
-    //    oss << "n";
-    //else
-    //    oss << ".";
-    //if(l.flags & LC3_FLAG_Z)
-    //    oss << "z";
-    //else
-    //    oss << ".";
-    // Insert args
+    // Registers
     oss << "  ";
-    oss << " $" << std::right << std::hex << std::setw(4) << std::setfill('0') << l.arg1;
-    oss << " $" << std::right << std::hex << std::setw(4) << std::setfill('0') << l.arg2;
-    oss << " $" << std::right << std::hex << std::setw(4) << std::setfill('0') << l.imm;
-    //oss << " $" << std::right << std::hex << std::setw(4) << std::setfill('0') << l.arg3;
-    //oss << " $" << std::right << std::hex << std::setw(4) << std::setfill('0') << l.imm;
+    if(l.ireg)
+        oss << "  I"; 
+    else
+        oss << " V" << std::right << std::hex << std::setw(1) << l.vx;
+    oss << " V" << std::right << std::hex << std::setw(1) << l.vy;
+    oss << " 0x" << std::right << std::hex << std::setw(2) << std::setfill('0') << l.kk;
+    oss << " 0x" << std::right << std::hex << std::setw(3) << std::setfill('0') << l.nnn;
 
     // (Next line) Text 
     oss << std::endl;

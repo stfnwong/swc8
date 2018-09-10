@@ -28,8 +28,8 @@ SourceInfo get_draw_expected_source_info(void)
     line.addr            = 0x200;
     line.opcode.opcode   = 0x8000;    // LD
     line.opcode.mnemonic = "LD";
-    line.arg1            = 0x1;
-    line.arg2            = 0x08;
+    line.vx              = 0x1;
+    line.vy              = 0x08;
     info.add(line);
     // Line 2 
 
