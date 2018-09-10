@@ -112,10 +112,10 @@ void initLineInfo(LineInfo& l)
     l.label    = "\0";
     l.errstr   = "\0";
     l.opcode   = {0x0, "INVALID"},
+    l.nnn      = 0;
     l.vx       = 0;
     l.vy       = 0;
     l.kk       = 0;
-    l.nnn      = 0;
     l.ireg     = 0;
     l.is_label = false;
     l.is_imm   = false;
@@ -234,7 +234,7 @@ std::string SourceInfo::line_to_string(const LineInfo& l)
     oss << "] ";
     oss << std::right << "0x" << std::hex << std::setw(4) << std::setfill('0') << l.addr << " ";
     oss << std::left << std::setw(12) << std::setfill(' ') << l.opcode.mnemonic;
-    oss << "0x" << std::hex << std::setw(4) << std::setfill('0') << l.opcode.opcode << "   ";
+    oss << "0x" << std::right << std::hex << std::setw(4) << std::setfill('0') << l.opcode.opcode << "   ";
     // Insert flag chars
     oss << "...";
     // Registers

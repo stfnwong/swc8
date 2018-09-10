@@ -18,7 +18,8 @@
 typedef enum instr_code{ 
     LEX_SYS, LEX_CLS, LEX_RET, LEX_JP, LEX_CALL, LEX_SE, LEX_SNE, 
     LEX_LD, LEX_ADD, LEX_OR, LEX_AND, LEX_XOR, LEX_SUB, LEX_SHR, 
-    LEX_SUBN, LEX_SHL, LEX_RND, LEX_DRW, LEX_SKP, LEX_SKNP
+    LEX_SUBN, LEX_SHL, LEX_RND, LEX_DRW, LEX_SKP, LEX_SKNP,
+    LEX_DW, LEX_DB
 } instr_code;
 
 
@@ -44,6 +45,8 @@ const Opcode lex_instr_codes[] = {
     {LEX_DRW,  "DRW"},
     {LEX_SKP,  "SKP"},
     {LEX_SKNP, "SKNP"},
+    {LEX_DW,   "DW"},
+    {LEX_DB,   "DB"}
 };
 
 

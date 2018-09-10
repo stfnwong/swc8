@@ -375,7 +375,7 @@ void Lexer::parseAddr(void)
     if(this->cur_token.type == SYM_LITERAL)
     {
         tok_str = std::string(this->cur_token.val);
-        this->line_info.nnn = std::stoi(tok_str.substr(1, tok_str.length()), nullptr, 16);
+        this->line_info.nnn = std::stoi(this->cur_token.val, nullptr, 16);
         this->line_info.is_imm = true;
     }
     else if(this->cur_token.type == SYM_LABEL)
@@ -431,6 +431,11 @@ void Lexer::parseLine(void)
 
         switch(op.opcode)
         {
+            // No args
+            case LEX_CLS:
+            case LEX_RET:
+                break;
+
             case LEX_JP:
             case LEX_CALL:
                 this->parseAddr();
@@ -447,6 +452,28 @@ void Lexer::parseLine(void)
 
             case LEX_RND:
                 this->parseRegImm();
+                break;
+
+            case LEX_DRW:
+                this->parseTwoArg();
+                // Should also be one more immediate  
+                this->nextToken();
+                if(this->cur_token.type != SYM_LITERAL)
+                {
+                    this->line_info.error = true;
+                    this->line_info.errstr = "DRW argument 3 must be immediate";
+                    if(this->verbose)
+                    {
+                        std::cout << "[" << __FUNCTION__ << "] (line " << this->cur_line
+                            << ") " << this->line_info.errstr << std::endl;
+                    }
+                    break;
+                }
+                this->line_info.kk = std::stoi(this->cur_token.val, nullptr, 16);
+                break;
+
+            case LEX_DW:
+                //this->parseAddr();  
                 break;
 
             default:
@@ -503,7 +530,7 @@ void Lexer::lex(void)
 {
     this->cur_line = 1;
     this->cur_pos = 0;
-    this->cur_addr = 0x150;     // TODO : proper address init..
+    this->cur_addr = 0x200;     // TODO : proper address init..
 
     while(!this->exhausted())
     {

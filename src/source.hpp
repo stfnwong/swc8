@@ -97,10 +97,10 @@ typedef struct{
     unsigned int line_num;
     unsigned int addr;
     uint16_t     jmp_addr;
+    uint16_t     nnn;
     uint16_t     vx;
     uint16_t     vy;
     uint16_t     kk;
-    uint16_t     nnn;
     bool         is_label;
     bool         is_imm;
     bool         is_directive;
