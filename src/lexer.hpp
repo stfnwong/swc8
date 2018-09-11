@@ -84,6 +84,7 @@ class Lexer
     private:
         SourceInfo   source_info;
         LineInfo     line_info;
+        SymbolTable  sym_table;
         unsigned int cur_addr;
 
     private:

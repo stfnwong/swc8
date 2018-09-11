@@ -401,13 +401,21 @@ void Lexer::parseAddr(void)
 void Lexer::parseLine(void)
 {
     Opcode op;
+    Symbol s;
 
     initLineInfo(this->line_info);
     this->nextToken();
     if(this->cur_token.type == SYM_LABEL)
     {
         this->line_info.is_label = true;
-        this->line_info.label = cur_token.val;
+        this->line_info.label = this->cur_token.val;
+        // Add symbol to table, removing any trailing ':' characters 
+        if(this->cur_token.val[this->cur_token.val.length() - 1] == ':')
+            s.label = this->cur_token.val.substr(0, this->cur_token.val.length() -1);
+        else
+            s.label = this->cur_token.val;
+        s.addr  = this->cur_addr;
+        this->sym_table.add(s);
         // scan in the next token 
         this->nextToken();
 
@@ -522,6 +530,52 @@ bool Lexer::checkImm(void)
     return false;
 }
 
+
+/*
+ * resolveLabels()
+ */
+void Lexer::resolveLabels(void)
+{
+    unsigned int idx;
+    uint16_t label_addr;
+    LineInfo line;
+
+    if(this->verbose)
+    {
+        std::cout << this->sym_table.getNumSyms() << " symbols in table" << std::endl;
+        for(unsigned s = 0; s < this->sym_table.getNumSyms(); ++s)
+        {
+            Symbol sym = this->sym_table.get(s);
+            std::cout << "[" << std::hex << std::setw(4) << std::setfill('0') << sym.addr << "] ";
+            std::cout << " " << sym.label << std::endl;
+        }
+    }
+
+
+    for(idx = 0; idx < this->source_info.getNumLines(); ++idx)
+    {
+        line = this->source_info.get(idx);
+        if(line.symbol != "\0")
+        {
+            label_addr = this->sym_table.getAddr(line.symbol);
+            if(label_addr > 0)
+            {
+                if(line.opcode.mnemonic == "JP")
+                    line.nnn = label_addr;
+                else
+                    line.kk = label_addr;
+                this->source_info.update(idx, line);
+                if(this->verbose)
+                {
+                    std::cout << "[" << __FUNCTION__ << "] updated label " 
+                        << line.symbol << " with address " << std::hex 
+                        << line.kk << std::endl;
+                }
+            }
+        }
+    }
+}
+
 /*
  * lex()
  * Lex the source 
@@ -550,7 +604,8 @@ void Lexer::lex(void)
         this->parseLine();
         this->source_info.add(this->line_info);
     }
-
+    // Resolve symbols
+    this->resolveLabels();
 }
 
 /*

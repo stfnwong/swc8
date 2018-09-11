@@ -186,7 +186,6 @@ void Assembler::assemble(void)
                 break;
         }
     }
-
 }
 
 void Assembler::loadSource(const SourceInfo& s)

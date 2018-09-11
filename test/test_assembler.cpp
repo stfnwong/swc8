@@ -23,6 +23,30 @@ class TestAssembler : public ::testing::Test
 //
 //}
 
+Program get_draw_expected_program(void)
+{
+    Program prog;
+    Instr instr;
+
+    // LD V1, 0x08
+    instr.ins = 0x6108;
+    instr.adr = 0x200;
+    prog.add(instr);
+    // LD, V2, 0x00
+    instr.ins = 0x6200;
+    instr.adr = 0x201;
+    prog.add(instr);
+    // LD VA, 0x05
+    instr.ins = 0x6A05;
+    instr.adr = 0x202;
+    // LD VB, 0x01
+    instr.ins = 0x6B01;
+    instr.adr = 0x203;
+    // ADD Vb, 0x01
+
+    return prog;
+}
+
 TEST_F(TestAssembler, test_asm_draw)
 {
     SourceInfo lex_output;
