@@ -39,10 +39,100 @@ Program get_draw_expected_program(void)
     // LD VA, 0x05
     instr.ins = 0x6A05;
     instr.adr = 0x202;
+    prog.add(instr);
     // LD VB, 0x01
     instr.ins = 0x6B01;
     instr.adr = 0x203;
+    prog.add(instr);
     // ADD Vb, 0x01
+    instr.ins = 0x7B01;
+    instr.adr = 0x204;
+    prog.add(instr);
+    // LD I, Line <- (0x218)
+    instr.ins = 0xA218;
+    instr.adr = 0x205;
+    prog.add(instr);
+    // DRW Va, Vb, 0x01
+    instr.ins = 0xDAB1;
+    instr.adr = 0x206;
+    prog.add(instr);
+    // SE Vb, V1,
+    instr.ins = 0x5B10;
+    instr.adr = 0x207;
+    prog.add(instr);
+    // JP Draw_Column_C <- (0x20A)
+    instr.ins = 0x120A;
+    instr.adr = 0x208;
+    prog.add(instr);
+    // JP Draw_H <- (0x21)
+    instr.ins = 0x1210;
+    instr.adr = 0x209;
+    prog.add(instr);
+
+// Draw_Column_C
+    // ADD Bv, 0x01
+    instr.ins = 0x7b01;
+    instr.adr = 0x20A;
+    prog.add(instr);
+    // LD I, Column 
+    instr.ins = 0xA21A;
+    instr.adr = 0x20B;
+    prog.add(instr);
+    // DRW Va. Vb, 0x01
+    instr.ins = 0xDAB1;
+    instr.adr = 0x20C;
+    prog.add(instr);
+    // SE Vb, 0x07
+    instr.ins = 0x3B07;
+    instr.adr = 0x20D;
+    prog.add(instr);
+    // JP Draw_Column_C <- (0x20A)
+    instr.ins = 0x120A;
+    instr.adr = 0x20E;
+    prog.add(instr);
+    // JP Draw_Line_C <- (0x204)
+    instr.ins = 0x1204;
+    instr.adr = 0x20F;
+    prog.add(instr);
+
+
+// Draw_H
+    // ADD Va, 0x05
+    instr.ins = 0x7A05;
+    instr.adr = 0x210;
+    prog.add(instr);
+    // LD Vb, 0x01
+    instr.ins = 0x6B01;
+    instr.adr = 0x211;
+    prog.add(instr);
+
+// Draw_Column_H
+    // ADD, VB, 0x01
+    instr.ins = 0x7B01;
+    instr.adr = 0x212;
+    prog.add(instr);
+    // LD, I, Column <- (0x21A)
+    instr.ins = 0xA21A;
+    instr.adr = 0x213;
+    prog.add(instr);
+    // DRW Va, Vb, 0x1
+    instr.ins = 0xDAB1;
+    instr.adr = 0x214;
+    prog.add(instr);
+    // SE Vb, V1
+    instr.ins = 0x5B10;
+    instr.adr = 0x215;
+    prog.add(instr);
+    // JP Draw_Column_H <- (0x212)
+    instr.ins = 0x1212;
+    instr.adr = 0x216;
+    prog.add(instr);
+    // RET
+    instr.ins = 0x00EE;
+    instr.adr = 0x217;
+    prog.add(instr);
+    // DW 0x7000
+    // DW 0x8000
 
     return prog;
 }
@@ -59,7 +149,18 @@ TEST_F(TestAssembler, test_asm_draw)
     lexer.lex();
     lex_output = lexer.getSourceInfo();
     std::cout << "Lexer produced " << lex_output.getNumLines() << " lines of output" << std::endl;
-    //ASSERT_GT(0, lex_output.getNumLines());
+    // Show the symbol table contents
+    std::cout << "\t Dumping lexer symbol table contents...." << std::endl;
+
+    SymbolTable sym_table = lexer.getSymTable();
+    for(unsigned int s = 0; s < sym_table.getNumSyms(); ++s)
+    {
+        Symbol sym = sym_table.get(s);
+        std::cout << "[" << std::left << std::setw(16) << std::setfill(' ') << sym.label << "]  ";
+        std::cout << "0x" << std::hex << std::setw(4) << std::setfill('0') << sym.addr << std::endl;
+    }
+    std::cout << std::endl;
+
 
     Assembler as;
     as.setVerbose(true);
@@ -73,8 +174,20 @@ TEST_F(TestAssembler, test_asm_draw)
     std::cout << "\t Dumping assembly output...." << std::endl;
     for(unsigned int i = 0; i < as_program.numInstr(); ++i)
     {
-        std::cout << as_program.getStr(i);
+        std::cout << "<" << std::right << std::setw(3) << i << "> " << std::right << as_program.getStr(i);
     }
+
+    Program expected_program = get_draw_expected_program();
+    //for(unsigned int i = 0; i < expected_program.numInstr(); ++i)
+    for(unsigned int i = 0; i < as_program.numInstr(); ++i)
+    {
+        Instr as_instr = as_program.get(i);
+        Instr ex_instr = expected_program.get(i);
+        std::cout << "Checking instruction " << i << "/" << expected_program.numInstr() << "\n";
+        ASSERT_EQ(ex_instr.ins, as_instr.ins);
+        ASSERT_EQ(ex_instr.adr, as_instr.adr);
+    }
+    std::cout << std::endl << "done " << std::endl;
 }
 
 int main(int argc, char *argv[])

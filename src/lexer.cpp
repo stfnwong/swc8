@@ -551,7 +551,6 @@ void Lexer::resolveLabels(void)
         }
     }
 
-
     for(idx = 0; idx < this->source_info.getNumLines(); ++idx)
     {
         line = this->source_info.get(idx);
@@ -560,8 +559,10 @@ void Lexer::resolveLabels(void)
             label_addr = this->sym_table.getAddr(line.symbol);
             if(label_addr > 0)
             {
-                if(line.opcode.mnemonic == "JP")
+                if(line.opcode.mnemonic == "JP" || line.ireg)
                     line.nnn = label_addr;
+                //else if(line.opcode.mnemonic == "LD" && line.ireg)
+                //    line.nnn = label.addr;
                 else
                     line.kk = label_addr;
                 this->source_info.update(idx, line);
@@ -639,9 +640,11 @@ void Lexer::loadFile(const std::string& filename)
 
 SourceInfo Lexer::getSourceInfo(void) const
 {
-    std::cout << "[" << __FUNCTION__ << "] source info has " << std::dec << this->source_info.getNumLines() 
-        << " lines of output" << std::endl;
     return this->source_info;
+}
+SymbolTable Lexer::getSymTable(void) const
+{
+    return this->sym_table;
 }
 
 // Verbose 

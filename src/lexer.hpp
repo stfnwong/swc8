@@ -129,6 +129,7 @@ class Lexer
 
         void loadFile(const std::string& filename);
         SourceInfo getSourceInfo(void) const;
+        SymbolTable getSymTable(void) const;
         // Verbose mode
         void setVerbose(const bool v);
         bool getVerbose(void) const;

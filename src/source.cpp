@@ -52,8 +52,8 @@ SymbolTable::~SymbolTable() {}
 SymbolTable::SymbolTable(const SymbolTable& that)
 {
     this->syms.reserve(that.syms.size());
-    for(unsigned int s = 0; s < this->syms.size(); ++s)
-        this->syms[s] = that.syms[s];
+    for(unsigned int s = 0; s < that.syms.size(); ++s)
+        this->syms.push_back(that.syms[s]);
 }
 
 void SymbolTable::add(const Symbol& s)
