@@ -111,7 +111,13 @@ int main(int argc, char *argv[])
     }
     lexer.lex();
     // Assemble the source
-    assembler.loadSource(lexer.getSourceInfo());
+    SourceInfo lex_source = lexer.getSourceInfo();
+    if(lex_source.hasError())
+    {
+        std::cout << lex_source.dumpErrors();
+        exit(-1);
+    }
+    assembler.loadSource(lex_source);
     assembler.assemble();
     as_prog = assembler.getProgram();
 

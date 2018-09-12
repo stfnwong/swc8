@@ -27,6 +27,7 @@ class Assembler
 
     private:
         inline uint8_t get_reg(const uint16_t r);
+        inline uint16_t insert_vx(const uint16_t vx);
         inline uint16_t insert_vxvy(const uint16_t vx, const uint16_t vy);
         inline uint16_t insert_vxkk(const uint16_t vx, const uint16_t kk);
         inline uint16_t insert_addr(const uint16_t addr);
@@ -41,10 +42,14 @@ class Assembler
         void asm_se(const LineInfo& l);
         void asm_shl(const LineInfo& l);
         void asm_shr(const LineInfo& l);
+        void asm_skp(const LineInfo& l);
+        void asm_sknp(const LineInfo& l);
         void asm_sne(const LineInfo& l);
         void asm_sub(const LineInfo& l);
         void asm_subn(const LineInfo& l);
         void asm_xor(const LineInfo& l);
+        // Insert word
+        void asm_dw(const LineInfo& l);
 
     public:
         Assembler();

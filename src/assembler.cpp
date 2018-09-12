@@ -28,6 +28,10 @@ inline uint8_t Assembler::get_reg(const uint16_t r)
 {
     return (r & 0x000F);
 }
+inline uint16_t Assembler::insert_vx(const uint16_t vx)
+{
+    return 0x0000 | ((vx & 0x000F) << 8);
+}
 inline uint16_t Assembler::insert_vxvy(const uint16_t vx, const uint16_t vy)
 {
     uint16_t ins = 0x0000;
@@ -192,6 +196,30 @@ void Assembler::asm_shr(const LineInfo& l)
 }
 
 /*
+ * asm_skip()
+ */
+void Assembler::asm_skp(const LineInfo& l)
+{
+    Instr instr;
+
+    instr.ins = 0xE09E | this->insert_vx(l.vx);
+    instr.adr = l.addr;
+    this->program.add(instr);
+}
+
+/*
+ * asm_sknp()
+ */
+void Assembler::asm_sknp(const LineInfo& l)
+{
+    Instr instr;
+
+    instr.ins = 0xE0A1 | this->insert_vx(l.vx);
+    instr.adr = l.addr;
+    this->program.add(instr);
+}
+
+/*
  * asm_sne()
  */
 void Assembler::asm_sne(const LineInfo& l)
@@ -242,6 +270,18 @@ void Assembler::asm_xor(const LineInfo& l)
     this->program.add(instr);
 }
 
+/*
+ * asm_dw()
+ */
+void Assembler::asm_dw(const LineInfo& l)
+{
+    Instr instr;
+
+    instr.ins = l.nnn;
+    instr.adr = l.addr;
+    this->program.add(instr);
+}
+
 
 /*
  * assemble()
@@ -283,9 +323,33 @@ void Assembler::assemble(void)
             case LEX_LD:
                 this->asm_ld(cur_line);
                 break;
+                
+            case LEX_OR:
+                this->asm_or(cur_line);
+                break;
+
+            case LEX_RND:
+                this->asm_rnd(cur_line);
+                break;
 
             case LEX_SE:
                 this->asm_se(cur_line);
+                break;
+
+            case LEX_SKP:
+                this->asm_skp(cur_line);
+                break;
+
+            case LEX_SKNP:
+                this->asm_sknp(cur_line);
+                break;
+
+            case LEX_XOR:
+                this->asm_xor(cur_line);
+                break;
+
+            case LEX_DW:
+                this->asm_dw(cur_line);
                 break;
 
             default:

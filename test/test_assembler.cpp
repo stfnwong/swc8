@@ -17,12 +17,6 @@ class TestAssembler : public ::testing::Test
     virtual void TearDown() {}
 };
 
-//TEST_F(TestAssembler, test_init)
-//{
-//    Assembler as;
-//
-//}
-
 Program get_draw_expected_program(void)
 {
     Program prog;
@@ -178,7 +172,6 @@ TEST_F(TestAssembler, test_asm_draw)
     }
 
     Program expected_program = get_draw_expected_program();
-    //for(unsigned int i = 0; i < expected_program.numInstr(); ++i)
     for(unsigned int i = 0; i < as_program.numInstr(); ++i)
     {
         Instr as_instr = as_program.get(i);
@@ -188,6 +181,85 @@ TEST_F(TestAssembler, test_asm_draw)
         ASSERT_EQ(ex_instr.adr, as_instr.adr);
     }
     std::cout << std::endl << "done " << std::endl;
+}
+
+
+Program get_instr_expected_program(void)
+{
+    Program prog;
+    Instr instr;
+
+    // LD, V1, 0x04
+    instr.ins = 0x6104;
+    instr.adr = 0x200;
+    prog.add(instr);
+    // LD VC, 0xAA
+    instr.ins = 0x6CAA;
+    instr.adr = 0x201;
+    prog.add(instr);
+    // SKP VA
+    instr.ins = 0xEA9E;
+    instr.adr = 0x202;
+    prog.add(instr);
+    // SNKP VB
+    instr.ins = 0xEBA1;
+    instr.adr = 0x203;
+    prog.add(instr);
+
+    return prog;
+}
+
+TEST_F(TestAssembler, test_asm_instr)
+{
+    SourceInfo lex_output;
+    std::string filename = "data/instr.asm";
+
+    Lexer lexer;
+    lexer.setVerbose(true);
+    lexer.loadFile(filename);
+    std::cout << "\t Lexing source file " << filename << std::endl;
+    lexer.lex();
+    lex_output = lexer.getSourceInfo();
+    std::cout << "Lexer produced " << lex_output.getNumLines() << " lines of output" << std::endl;
+    // Show the symbol table contents
+    std::cout << "\t Dumping lexer symbol table contents...." << std::endl;
+
+    SymbolTable sym_table = lexer.getSymTable();
+    for(unsigned int s = 0; s < sym_table.getNumSyms(); ++s)
+    {
+        Symbol sym = sym_table.get(s);
+        std::cout << "[" << std::left << std::setw(16) << std::setfill(' ') << sym.label << "]  ";
+        std::cout << "0x" << std::hex << std::setw(4) << std::setfill('0') << sym.addr << std::endl;
+    }
+    std::cout << std::endl;
+
+
+    Assembler as;
+    as.setVerbose(true);
+    std::cout <<"\t Loading lexer output into assembler" << std::endl;
+    as.loadSource(lex_output);
+    std::cout << "\t Assembling file " << filename << std::endl;
+    as.assemble();
+
+    Program as_program = as.getProgram();
+    std::cout << "Assembled " << as_program.numInstr() << " instructions in program " << filename << std::endl;
+    std::cout << "\t Dumping assembly output...." << std::endl;
+    for(unsigned int i = 0; i < as_program.numInstr(); ++i)
+    {
+        std::cout << "<" << std::right << std::setw(3) << i << "> " << std::right << as_program.getStr(i);
+    }
+
+    Program expected_program = get_instr_expected_program();
+    for(unsigned int i = 0; i < as_program.numInstr(); ++i)
+    {
+        Instr as_instr = as_program.get(i);
+        Instr ex_instr = expected_program.get(i);
+        std::cout << "Checking instruction " << i << "/" << expected_program.numInstr() << "\n";
+        ASSERT_EQ(ex_instr.ins, as_instr.ins);
+        ASSERT_EQ(ex_instr.adr, as_instr.adr);
+    }
+    std::cout << std::endl << "done " << std::endl;
+
 }
 
 int main(int argc, char *argv[])

@@ -119,6 +119,8 @@ class Lexer
         void parseTwoArg(void);
         void parseRegImm(void);
         void parseAddr(void);
+        void parseVx(void);
+        void parseWord(void);
 
     public:
         Lexer();

@@ -155,6 +155,7 @@ class SourceInfo
 
         // String / display 
         void         printLine(const unsigned int idx);
+        std::string  dumpErrors(void);
 }; 
 
 #endif /*__SOURCE_HPP*/

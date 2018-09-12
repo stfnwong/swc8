@@ -43,12 +43,6 @@ void Lexer::init_op_table(void)
 {
     for(const Opcode& op : chip8_opcodes)
         this->op_table.add(op);
-    if(this->verbose)
-    {
-        std::cout << "[" << __FUNCTION__ << "] placed " 
-            << std::dec << this->op_table.getNumOps() 
-            << " opcodes in table" << std::endl;
-    }
 }
 
 /*
@@ -59,12 +53,6 @@ void Lexer::init_instr_code_table(void)
 {
     for(const Opcode& code : lex_instr_codes)
         this->instr_code_table.add(code);
-    if(this->verbose)
-    {
-        std::cout << "[" << __FUNCTION__ << "] placed " 
-            << std::dec << this->instr_code_table.getNumOps() 
-            << " instruction codes in table" << std::endl;
-    }
 }
 
 /* 
@@ -147,6 +135,7 @@ bool Lexer::isMnemonic(void)
 void Lexer::scanToken(void)
 {
     unsigned int idx = 0;
+
     this->skipWhitespace();     // eat any leading whitespace 
     this->skipSeperators();     // eat any seperators that might be left
     while(idx < (this->token_buf_size-1))
@@ -188,7 +177,7 @@ void Lexer::advance(void)
     if(this->cur_pos >= this->src.size())
         this->cur_char = '\0';
     if(this->cur_char == '\n')
-        this->cur_line++;
+        this->cur_line = this->cur_line + 1;
 }
 
 /*
@@ -233,7 +222,7 @@ void Lexer::nextToken(void)
         this->cur_token.val  = (token_str[0] == '#') ? (token_str.substr(1, token_str.length())) : token_str;
     }
     // Check if the argument is the I register 
-    else if(token_str[0] == 'I')
+    else if(token_str[0] == 'I' && token_str.size() == 1)
     {
         this->cur_token.type = SYM_IREG;
         this->cur_token.val  = token_str[0];
@@ -397,6 +386,36 @@ void Lexer::parseAddr(void)
 }
 
 /*
+ * parseVx()
+ */
+void Lexer::parseVx(void)
+{
+    this->nextToken();
+    if(this->cur_token.type != SYM_REG)
+    {
+        this->line_info.error = true;
+        this->line_info.errstr = "Invalid operand 1 in " + token_type_str[this->cur_token.type] + " - must be register";
+        return;
+    }
+    this->line_info.vx = std::stoi(this->cur_token.val.substr(1,1), nullptr, 16);
+}
+
+/*
+ * parseWord()
+ */
+void Lexer::parseWord(void)
+{
+    this->nextToken();
+    if(this->cur_token.type != SYM_LITERAL)
+    {
+        this->line_info.error = true;
+        this->line_info.errstr = "Invalid operand 1 in " + token_type_str[this->cur_token.type] + " - must be literal";
+
+    }
+    this->line_info.nnn = std::stoi(this->cur_token.val, nullptr, 16);
+}
+
+/*
  * parseLine()
  */
 void Lexer::parseLine(void)
@@ -409,7 +428,6 @@ void Lexer::parseLine(void)
     if(this->cur_token.type == SYM_LABEL)
     {
         this->line_info.is_label = true;
-        this->line_info.label = this->cur_token.val;
         // Add symbol to table, removing any trailing ':' characters 
         if(this->cur_token.val[this->cur_token.val.length() - 1] == ':')
             s.label = this->cur_token.val.substr(0, this->cur_token.val.length() -1);
@@ -417,13 +435,14 @@ void Lexer::parseLine(void)
             s.label = this->cur_token.val;
         s.addr  = this->cur_addr;
         this->sym_table.add(s);
+        this->line_info.label = s.label;
         // scan in the next token 
         this->nextToken();
 
         if(this->verbose)
         {
             std::cout << "[" << __FUNCTION__ << "] (line " << std::dec << this->cur_line
-                << ") found label " << this->line_info.symbol << std::endl;
+                << ") found label " << s.label << std::endl;
         }
     }
 
@@ -455,12 +474,20 @@ void Lexer::parseLine(void)
             case LEX_ADD:
             case LEX_OR:
             case LEX_XOR:
+            case LEX_SHL:
+            case LEX_SHR:
             case LEX_SUB:
+            case LEX_SUBN:
                 this->parseTwoArg();
                 break;
 
             case LEX_RND:
                 this->parseRegImm();
+                break;
+
+            case LEX_SKP:
+            case LEX_SKNP:
+                this->parseVx();
                 break;
 
             case LEX_DRW:
@@ -482,7 +509,7 @@ void Lexer::parseLine(void)
                 break;
 
             case LEX_DW:
-                //this->parseAddr();  
+                this->parseWord();  
                 break;
 
             default:

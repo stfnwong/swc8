@@ -184,9 +184,9 @@ void printLineDiff(const LineInfo& a, const LineInfo& b)
     if(a.addr != b.addr)
         std::cout << "a.addr [" << a.addr << "] != b.addr [" << b.addr << "]" << std::endl;
     if(a.vx != b.vx)
-        std::cout << "a.arg1 [" << a.vx << "] != b.arg1 [" << b.vx << "]" << std::endl;
+        std::cout << "a.vx [" << a.vx << "] != b.vx [" << b.vx << "]" << std::endl;
     if(a.vy != b.vy)
-        std::cout << "a.arg2 [" << a.vy << "] != b.arg2 [" << b.vy << "]" << std::endl;
+        std::cout << "a.vy [" << a.vy << "] != b.vy [" << b.vy << "]" << std::endl;
     if(a.kk != b.kk)
         std::cout << "a.kk [" << a.kk << "] != b.kk [" << b.kk << "]" << std::endl;
     if(a.nnn != b.nnn)
@@ -362,7 +362,14 @@ unsigned int SourceInfo::numInstance(const std::string& m) const
 
 bool SourceInfo::hasError(void) const
 {
-    return this->error;
+    //return this->error;
+    for(unsigned int idx = 0; idx < this->line_info.size(); ++idx)
+    {
+        if(this->line_info[idx].error)
+            return true;
+    }
+
+    return false;
 }
 
 void SourceInfo::setError(const bool e) 
@@ -396,4 +403,20 @@ void SourceInfo::printLine(const unsigned int idx)
         return;
     std::cout << this->line_to_string(
             this->line_info[idx]);
+}
+
+std::string SourceInfo::dumpErrors(void)
+{
+    std::ostringstream oss;
+
+    for(unsigned int l = 0; l < this->line_info.size(); ++l)
+    {
+        if(this->line_info[l].error)
+        {
+            oss << "(line " << std::dec << this->line_info[l].line_num << ") ";
+            oss << this->line_info[l].errstr << std::endl;
+        }
+    }
+
+    return oss.str();
 }
