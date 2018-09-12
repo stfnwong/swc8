@@ -16,6 +16,7 @@ Lexer::Lexer()
     this->alloc_mem();
     this->init_op_table();
     this->init_instr_code_table();
+    this->verbose = false;
 }
 
 Lexer::~Lexer()
@@ -613,10 +614,11 @@ void Lexer::lex(void)
  * loadFile()
  * Read source from the file given by filename.
  */
-void Lexer::loadFile(const std::string& filename)
+int Lexer::loadFile(const std::string& filename)
 {
     std::ifstream infile(filename);
     std::string line;
+    int status = 0;     // TODO: faliure checks, etc
 
     // save the filename
     this->filename = filename;
@@ -636,6 +638,8 @@ void Lexer::loadFile(const std::string& filename)
     infile.close();
     this->src.push_back('\0');
     this->cur_char = this->src[0];
+
+    return status;
 }
 
 SourceInfo Lexer::getSourceInfo(void) const

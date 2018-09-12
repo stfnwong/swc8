@@ -40,7 +40,17 @@ class Program
         void add(const Instr& i);
         void writeMem(const uint16_t addr, const uint16_t val);
 
+        // Get the number of instructions in this program
         unsigned int numInstr(void) const;
+
+        /*
+         * save()
+         * 
+         * Inputs: std::string filename
+         * Write the program binary to the file given by filename
+         */
+        int save(const std::string& filename);
+        int load(const std::string& filename);
 
         void setVerbose(const bool v);
         bool getVerbose(void) const;

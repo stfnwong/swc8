@@ -44,16 +44,30 @@ TEST_OBJECTS  := $(TEST_SOURCES:$(TEST_DIR)/%.cpp=$(OBJ_DIR)/%.o)
 $(TEST_OBJECTS): $(OBJ_DIR)/%.o : $(TEST_DIR)/%.cpp 
 	$(CXX) $(CXXFLAGS) $(INCS) -c $< -o $@ 
 
-TESTS=test_chip8 test_lexer test_assembler
+TOOL_OBJECTS := $(TOOL_SOURCES:$(TOOL_DIR)/%.cpp=$(OBJ_DIR)/%.o)
+
+$(TOOL_OBJECTS): $(OBJ_DIR)/%.o : $(TOOL_DIR)/%.cpp
+	$(CXX) $(CXXFLAGS) $(INCS) -c $< -o $@
+
+# ==== TEST TARGETS ==== #
+TESTS=test_chip8 test_lexer test_assembler test_program
 $(TESTS): $(TEST_OBJECTS) $(OBJECTS)
 	$(CXX) $(LDFLAGS) $(OBJECTS) $(OBJ_DIR)/$@.o\
 		-o $(TEST_BIN_DIR)/$@ $(LIBS) $(TEST_LIBS)
 
+# ===== TOOL TARGETS ===== # 
+TOOLS = c8asm 
+
+$(TOOLS): $(OBJECTS) $(TOOL_OBJECTS)
+	$(CXX) $(LDFLAGS) $(OBJECTS) $(OBJ_DIR)/$@.o \
+		$(INCS) -o $(BIN_DIR)/$@ $(LIBS)
 
 # Main targets 
-all : test 
+all : test tools
 
 test : $(TESTS)
+
+tools : $(TOOLS)
 
 clean:
 	rm -rfv *.o $(OBJ_DIR)/*.o 

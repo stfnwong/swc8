@@ -113,21 +113,11 @@ void Assembler::asm_ld(const LineInfo& l)
     Instr instr;
 
     if(l.ireg)
-    {
-        std::cout << "nnn = " << std::hex << l.nnn << std::endl;
-        instr.ins = 0xA000;
-        instr.ins = instr.ins | (l.nnn & 0x0FFF);
-    }
+        instr.ins = 0xA000 | (l.nnn & 0x0FFF);
     else if(l.is_imm)
-    {
-        instr.ins = 0x6000;
-        instr.ins = instr.ins | this->insert_vxkk(l.vx, l.kk);
-    }
+        instr.ins = 0x6000 | this->insert_vxkk(l.vx, l.kk);
     else
-    {
-        instr.ins = 0x8000;
-        instr.ins = instr.ins | this->insert_vxvy(l.vx, l.vy);
-    }
+        instr.ins = 0x8000 | this->insert_vxvy(l.vx, l.vy);
     instr.adr = l.addr;
     this->program.add(instr);
 }
@@ -228,11 +218,26 @@ void Assembler::asm_sub(const LineInfo& l)
     this->program.add(instr);
 }
 
+/*
+ * asm_subn()
+ */
 void Assembler::asm_subn(const LineInfo& l)
 {
     Instr instr;
 
     instr.ins = 0x8007 | this->insert_vxvy(l.vx, l.vy);
+    instr.adr = l.addr;
+    this->program.add(instr);
+}
+
+/*
+ * asm_xor()
+ */
+void Assembler::asm_xor(const LineInfo& l)
+{
+    Instr instr; 
+
+    instr.ins = 0x8003 | this->insert_vxvy(l.vx, l.vy);
     instr.adr = l.addr;
     this->program.add(instr);
 }
