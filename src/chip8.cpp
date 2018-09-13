@@ -115,6 +115,9 @@ void Chip8::cycle(void)
     this->cur_opcode = (this->mem[this->state.pc] << 8) |  
                        (this->mem[this->state.pc + 1]);
     op = this->cur_opcode & 0xF00F;
+    vx = this->cur_opcode & 0x0F00;
+    vy = this->cur_opcode & 0x00F0;
+    kk = this->cur_opcode & 0x000F;
     // execute
     switch(op)
     {
