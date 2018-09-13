@@ -28,6 +28,7 @@ class Assembler
     private:
         inline uint8_t get_reg(const uint16_t r);
         inline uint16_t insert_vx(const uint16_t vx);
+        inline uint16_t insert_vy(const uint16_t vy);
         inline uint16_t insert_vxvy(const uint16_t vx, const uint16_t vy);
         inline uint16_t insert_vxkk(const uint16_t vx, const uint16_t kk);
         inline uint16_t insert_addr(const uint16_t addr);

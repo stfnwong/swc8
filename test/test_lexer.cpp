@@ -381,6 +381,7 @@ SourceInfo get_instr_expected_source_info(void)
     line.vy              = 0x5;
     line.label           = "SPECIAL_TOKENS";
     line.is_label        = true;
+    line.is_imm          = true;
     info.add(line);
     // LD F V0
     initLineInfo(line);

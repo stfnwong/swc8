@@ -205,6 +205,22 @@ Program get_instr_expected_program(void)
     instr.ins = 0xEBA1;
     instr.adr = 0x203;
     prog.add(instr);
+    // LD [I], V5
+    instr.ins = 0xF555;
+    instr.adr = 0x204;
+    prog.add(instr);
+    // LD F, VF
+    instr.ins = 0xFF29;
+    instr.adr = 0x205;
+    prog.add(instr);
+    // LD B, B8
+    instr.ins = 0xF833;
+    instr.adr = 0x206;
+    prog.add(instr);
+    // LD VE, [I]
+    instr.ins = 0xFE65;
+    instr.adr = 0x207;
+    prog.add(instr);
 
     return prog;
 }

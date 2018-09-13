@@ -32,6 +32,10 @@ inline uint16_t Assembler::insert_vx(const uint16_t vx)
 {
     return 0x0000 | ((vx & 0x000F) << 8);
 }
+inline uint16_t Assembler::insert_vy(const uint16_t vy)
+{
+    return 0x0000 | (vy & 0x00FF);
+}
 inline uint16_t Assembler::insert_vxvy(const uint16_t vx, const uint16_t vy)
 {
     uint16_t ins = 0x0000;
@@ -59,7 +63,9 @@ void Assembler::asm_add(const LineInfo& l)
 {
     Instr instr;
 
-    if(l.is_imm)
+    if(l.reg_flags == LEX_IREG)
+        instr.ins = 0xF01E | this->insert_vx(l.vy);
+    else if(l.is_imm)
         instr.ins = 0x7000 | this->insert_vxkk(l.vx, l.kk);
     else
         instr.ins = 0x8004 | this->insert_vxvy(l.vx, l.vy);
@@ -116,9 +122,45 @@ void Assembler::asm_ld(const LineInfo& l)
 {
     Instr instr;
 
-    // TODO : handle all the LD permutations
-    if(l.reg_flags & LEX_IREG)
-        instr.ins = 0xA000 | (l.nnn & 0x0FFF);
+    if(l.reg_flags > 0)
+    {
+        switch(l.reg_flags)
+        {
+            case LEX_IREG:
+                instr.ins = 0xA000 | this->insert_addr(l.nnn);
+                break;
+
+            case LEX_BREG:
+                instr.ins = 0xF033 | this->insert_vx(l.vx);
+                break;
+
+            case LEX_FREG:
+                instr.ins = 0xF029 | this->insert_vx(l.vy);
+                break;
+
+            case LEX_KREG:
+                instr.ins = 0xF00A | this->insert_vx(l.vx);
+
+            case LEX_DTREG:
+                if(l.is_imm)
+                    instr.ins = 0xF007 | this->insert_vx(l.vx);
+                else
+                    instr.ins = 0xF015 | this->insert_vx(l.vy);
+                break;
+
+            case LEX_STREG:
+                instr.ins = 0xF018 | this->insert_vx(l.vy);
+                break;
+                
+            case LEX_IST:
+                instr.ins = 0xF055 | this->insert_vx(l.vy);
+                break;
+
+            case LEX_ILD:
+                instr.ins = 0xF065 | this->insert_vx(l.vx);
+                break;
+        }
+    }
     else if(l.is_imm)
         instr.ins = 0x6000 | this->insert_vxkk(l.vx, l.kk);
     else
