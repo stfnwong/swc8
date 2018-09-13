@@ -84,7 +84,7 @@ SourceInfo get_draw_expected_source_info(void)
     line.opcode.opcode   = 0x7;    
     line.opcode.mnemonic = "LD";
     line.nnn             = 0x218;
-    line.ireg            = true;
+    line.reg_flags       = LEX_IREG;
     info.add(line);
     // Line 7 
     initLineInfo(line);
@@ -142,7 +142,7 @@ SourceInfo get_draw_expected_source_info(void)
     line.symbol          = "Column";
     line.opcode.opcode   = 0x7;    
     line.opcode.mnemonic = "LD";
-    line.ireg            = true;
+    line.reg_flags       = LEX_IREG;
     line.nnn             = 0x219;
     info.add(line);
     // Line 13 
@@ -225,7 +225,7 @@ SourceInfo get_draw_expected_source_info(void)
     line.opcode.opcode   = 0x7;
     line.opcode.mnemonic = "LD";
     line.nnn             = 0x219;
-    line.ireg            = true;
+    line.reg_flags       = LEX_IREG;
     info.add(line);
     // Line 21
     initLineInfo(line);
@@ -339,6 +339,7 @@ SourceInfo get_instr_expected_source_info(void)
     line.opcode.mnemonic = "LD";
     line.vx              = 0x1;
     line.kk              = 0x04;
+    line.is_label        = true;
     info.add(line);
     // LD, VC, 0xAA
     initLineInfo(line);
@@ -358,6 +359,7 @@ SourceInfo get_instr_expected_source_info(void)
     line.opcode.opcode   = 0x12;
     line.opcode.mnemonic = "SKP";
     line.vx              = 0xA;
+    line.is_label        = true;
     info.add(line);
     // SKNP VB
     initLineInfo(line);
@@ -366,6 +368,46 @@ SourceInfo get_instr_expected_source_info(void)
     line.opcode.opcode   = 0x13;
     line.opcode.mnemonic = "SKNP";
     line.vx              = 0xB;
+    info.add(line);
+
+    // Special tokens 
+    // LD [I] V5
+    initLineInfo(line);
+    line.line_num        = 18;
+    line.addr            = 0x204;
+    line.opcode.opcode   = 0x7;
+    line.opcode.mnemonic = "LD";
+    line.reg_flags       = LEX_IST;
+    line.vy              = 0x5;
+    line.label           = "SPECIAL_TOKENS";
+    line.is_label        = true;
+    info.add(line);
+    // LD F V0
+    initLineInfo(line);
+    line.line_num        = 19;
+    line.addr            = 0x205;
+    line.opcode.opcode   = 0x7;
+    line.opcode.mnemonic = "LD";
+    line.reg_flags       = LEX_FREG;
+    line.vy              = 0xF;
+    info.add(line);
+    // LD B, V8
+    initLineInfo(line);
+    line.line_num        = 20;
+    line.addr            = 0x206;
+    line.opcode.opcode   = 0x7;
+    line.opcode.mnemonic = "LD";
+    line.reg_flags       = LEX_BREG;
+    line.vy              = 0x8;
+    info.add(line);
+    // LD VE, [I]
+    initLineInfo(line);
+    line.line_num        = 21;
+    line.addr            = 0x207;
+    line.opcode.opcode   = 0x7;
+    line.opcode.mnemonic = "LD";
+    line.reg_flags       = LEX_ILD;
+    line.vx              = 0xE;
     info.add(line);
 
     return info;
@@ -393,6 +435,9 @@ TEST_F(TestLexer, test_instr_asm)
     std::cout << "\t Lexer output for file " << src_filename << std::endl;
     for(unsigned int idx = 0; idx < lex_output.getNumLines(); ++idx)
         lex_output.printLine(idx);
+    
+    std::cout << lex_output.dumpErrors() << std::endl;
+    ASSERT_EQ(0, lex_output.getNumError());
 
     // Automatically compare
     ASSERT_EQ(exp_output.getNumLines(), lex_output.getNumLines());
@@ -400,8 +445,10 @@ TEST_F(TestLexer, test_instr_asm)
     {
         LineInfo lex_line = lex_output.get(idx);
         LineInfo exp_line = exp_output.get(idx);
+        std::cout << "Checking line " << idx << "/" << lex_output.getNumLines() << std::endl;
         bool diff = compLineInfo(exp_line, lex_line);
-        ASSERT_EQ(false, diff);
+        printLineDiff(exp_line, lex_line);
+        ASSERT_EQ(true, diff);
     }
 }
 

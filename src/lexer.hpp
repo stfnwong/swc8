@@ -121,6 +121,7 @@ class Lexer
         void parseAddr(void);
         void parseVx(void);
         void parseWord(void);
+        void parseLD(void);
 
     public:
         Lexer();
@@ -135,6 +136,7 @@ class Lexer
         // Verbose mode
         void setVerbose(const bool v);
         bool getVerbose(void) const;
+        unsigned int getNumErr(void) const;
         
 #if C8_DEBUG > 0
         // Debug routines 

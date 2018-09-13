@@ -20,7 +20,14 @@ typedef enum TokenType{
     SYM_INSTR,
     SYM_REG,
     SYM_LITERAL,
-    SYM_IREG
+    SYM_IREG,
+    SYM_BREG,
+    SYM_FREG,
+    SYM_DREG,
+    SYM_KREG,
+    SYM_DT,
+    SYM_ST,
+    SYM_LOC_I
 } TokenType;
 
 // Array for string conversion by index
@@ -30,7 +37,14 @@ const std::vector<std::string> token_type_str = {
     "INSTR",
     "REG",
     "LITERAL",
-    "I"
+    "I",
+    "B",
+    "F",
+    "D",
+    "K",
+    "DT",
+    "ST",
+    "LOC_I" // [I]
 };
 
 /* 
@@ -90,6 +104,21 @@ class SymbolTable
         void         dump(void);
 };
 
+// Special register flags 
+#define LEX_IREG  0x01
+#define LEX_BREG  0x02
+#define LEX_FREG  0x04
+#define LEX_KREG  0x08
+#define LEX_DTREG 0x10
+#define LEX_STREG 0x20
+#define LEX_IST   0x40  // for LD [I] Vx
+#define LEX_ILD   0x80  // for LD Vx [I]
+
+// Opcode flags 
+#define LEX_OP_IMM   0x01
+#define LEX_OP_LABEL 0x02
+#define LEX_OP_DIR   0x04
+
 // Chip 8 LineInfo structure 
 typedef struct{
     std::string  symbol;
@@ -98,7 +127,8 @@ typedef struct{
     Opcode       opcode;
     unsigned int line_num;
     unsigned int addr;
-    uint16_t     jmp_addr;
+    uint8_t      reg_flags;
+    uint8_t      op_flags;
     uint16_t     nnn;
     uint16_t     vx;
     uint16_t     vy;
@@ -106,7 +136,6 @@ typedef struct{
     bool         is_label;
     bool         is_imm;
     bool         is_directive;
-    bool         ireg;
     bool         error;
 } LineInfo;
 

@@ -116,7 +116,8 @@ void Assembler::asm_ld(const LineInfo& l)
 {
     Instr instr;
 
-    if(l.ireg)
+    // TODO : handle all the LD permutations
+    if(l.reg_flags & LEX_IREG)
         instr.ins = 0xA000 | (l.nnn & 0x0FFF);
     else if(l.is_imm)
         instr.ins = 0x6000 | this->insert_vxkk(l.vx, l.kk);

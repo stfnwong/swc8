@@ -13,3 +13,9 @@ IMMEDIATE_SECTION:
 PARSE_VX_SECTION:
     SKP VA
     SKNP VB
+
+SPECIAL_TOKENS:
+    LD [I], V5
+    LD F, VF
+    LD B, V8
+    LD VE, [I]
