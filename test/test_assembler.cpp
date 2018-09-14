@@ -227,6 +227,35 @@ Program get_instr_expected_program(void)
     instr.ins = 0xFE65;
     instr.adr = 0x207;
     prog.add(instr);
+    // Arithmetic 
+    // LD VA, VB
+    instr.ins = 0x8AB0;
+    instr.adr = 0x208;
+    prog.add(instr);
+    // OR V1, VF
+    instr.ins = 0x81F1;
+    instr.adr = 0x209;
+    prog.add(instr);
+    // AND VC, VD 
+    instr.ins = 0x8CD2;
+    instr.adr = 0x20A;
+    prog.add(instr);
+    // XOR V3, V4
+    instr.ins = 0x8343;
+    instr.adr = 0x20B;
+    prog.add(instr);
+    // ADD V7, V7
+    instr.ins = 0x8774;
+    instr.adr = 0x20C;
+    prog.add(instr);
+    // SUB V3, V9
+    instr.ins = 0x8395;
+    instr.adr = 0x20D;
+    prog.add(instr);
+    // SUBN V5, VA
+    instr.ins = 0x85A7;
+    instr.adr = 0x20E;
+    prog.add(instr);
 
     return prog;
 }

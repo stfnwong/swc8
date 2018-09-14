@@ -610,6 +610,7 @@ void Lexer::parseLine(void)
         s.addr  = this->cur_addr;
         this->sym_table.add(s);
         this->line_info.label = s.label;
+        this->skipComment();
         // scan in the next token 
         this->nextToken();
 
@@ -651,13 +652,14 @@ void Lexer::parseLine(void)
                 this->parseLD();
                 break;
 
-            case LEX_SE:
+            case LEX_AND:
             case LEX_OR:
-            case LEX_XOR:
+            case LEX_SE:
             case LEX_SHL:
             case LEX_SHR:
             case LEX_SUB:
             case LEX_SUBN:
+            case LEX_XOR:
                 this->parseTwoArg();
                 break;
 

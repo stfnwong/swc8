@@ -19,3 +19,12 @@ SPECIAL_TOKENS:
     LD F, VF
     LD B, V8
     LD VE, [I]
+
+ARITHMETIC:     ; 8000 series instructions 
+    LD VA, Vb
+    OR V1, VF
+    AND VC, VD
+    XOR V3, V4
+    ADD V7, V7
+    SUB V3, V9
+    SUBN V5, VA
