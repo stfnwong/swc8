@@ -310,6 +310,11 @@ LineInfo SourceInfo::get(const unsigned int idx) const
     }
 }
 
+std::string SourceInfo::getStr(const unsigned int idx) 
+{
+    return this->line_to_string(this->line_info[idx]);
+}
+
 unsigned int SourceInfo::getLineNum(const unsigned int idx) const
 {
     return this->line_info[idx].line_num;

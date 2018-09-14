@@ -170,6 +170,7 @@ class SourceInfo
         void         add(const LineInfo& l);
         void         update(const unsigned int idx, const LineInfo& l);
         LineInfo     get(const unsigned int idx) const;
+        std::string  getStr(const unsigned int idx);
         unsigned int getLineNum(const unsigned int idx) const;
         unsigned int getNumLines(void) const;
         unsigned int getNumError(void) const;
