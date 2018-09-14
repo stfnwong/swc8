@@ -122,6 +122,72 @@ SourceInfo get_instr_expected_source_info(void)
     line.vx              = 0xE;
     info.add(line);
 
+    // ARITHMETIC SECTION
+    // LD VA, VB
+    initLineInfo(line);
+    line.line_num        = 9;
+    line.addr            = 0x208;
+    line.opcode.opcode   = LEX_LD;
+    line.opcode.mnemonic = "LD";
+    line.vx              = 0xA;
+    line.vy              = 0xB;
+    info.add(line);
+    // OR V1, V2
+    initLineInfo(line);
+    line.line_num        = 10;
+    line.addr            = 0x209;
+    line.opcode.opcode   = LEX_OR;
+    line.opcode.mnemonic = "OR";
+    line.vx              = 0x1;
+    line.vy              = 0xF;
+    info.add(line);
+    // AND VC, VD
+    initLineInfo(line);
+    line.line_num        = 11;
+    line.addr            = 0x20A;
+    line.opcode.opcode   = LEX_AND;
+    line.opcode.mnemonic = "AND";
+    line.vx              = 0xC;
+    line.vy              = 0xD;
+    info.add(line);
+    // XOR V3, V4
+    initLineInfo(line);
+    line.line_num        = 12;
+    line.addr            = 0x20B;
+    line.opcode.opcode   = LEX_XOR;
+    line.opcode.mnemonic = "XOR";
+    line.vx              = 0x3;
+    line.vy              = 0x4;
+    info.add(line);
+    // ADD V7, V7
+    initLineInfo(line);
+    line.line_num        = 13;
+    line.addr            = 0x20C;
+    line.opcode.opcode   = LEX_ADD;
+    line.opcode.mnemonic = "ADD";
+    line.vx              = 0x7;
+    line.vy              = 0x7;
+    info.add(line);
+    // SUB V3, V9
+    initLineInfo(line);
+    line.line_num        = 14;
+    line.addr            = 0x20D;
+    line.opcode.opcode   = LEX_SUB;
+    line.opcode.mnemonic = "SUB";
+    line.vx              = 0x3;
+    line.vy              = 0x9;
+    info.add(line);
+
+    // SUBN V5, VA
+    initLineInfo(line);
+    line.line_num        = 15;
+    line.addr            = 0x20E;
+    line.opcode.opcode   = LEX_SUBN;
+    line.opcode.mnemonic = "SUBN";
+    line.vx              = 0x5;
+    line.vy              = 0xA;
+    info.add(line);
+
     return info;
 }
 

@@ -130,7 +130,7 @@ void Disassembler::dis_arith(void)
 
         case 0x03:
             this->cur_line.opcode.opcode = LEX_XOR;
-            this->cur_line.opcode.mnemonic = "OR";
+            this->cur_line.opcode.mnemonic = "XOR";
             break;
 
         case 0x4:
