@@ -101,8 +101,8 @@ int main(int argc, char *argv[])
     Assembler assembler;
     Program as_prog;
 
-    lexer.setVerbose(opts.verbose);
-    assembler.setVerbose(opts.verbose);
+    //lexer.setVerbose(opts.verbose);
+    //assembler.setVerbose(opts.verbose);
     status = lexer.loadFile(opts.infile);
     if(status < 0)
     {
@@ -126,6 +126,21 @@ int main(int argc, char *argv[])
     {
         std::cerr << "ERROR while writing program to " << opts.outfile << std::endl;
         exit(-1);
+    }
+
+    if(opts.verbose)
+    {
+        std::cout << "\t Dumping assembled output ... " << std::endl;
+        std::cout << "----------------" << std::endl;
+        std::cout << " ADDR    OPCODE " << std::endl;
+        std::cout << "----------------" << std::endl;
+        Instr instr;
+        for(unsigned i = 0; i < as_prog.numInstr(); ++i)
+        {
+            instr = as_prog.get(i); 
+            std::cout << "[" << std::right << std::setw(4) << std::setfill('0') << std::hex << instr.adr << "]   ";
+            std::cout << "$" << std::right << std::setw(4) << std::setfill('0') << std::hex << instr.ins << std::endl;
+        }
     }
 
     return 0;
