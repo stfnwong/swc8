@@ -257,6 +257,16 @@ Program get_instr_expected_program(void)
     instr.adr = 0x20E;
     prog.add(instr);
 
+    // RND and DRAW
+    // RND VE, 0x56
+    instr.ins = 0xCE56;
+    instr.adr = 0x20F;
+    prog.add(instr);
+    // DRW VF, V4. 0x2
+    instr.ins = 0xDF42;
+    instr.adr = 0x210;
+    prog.add(instr);
+
     return prog;
 }
 

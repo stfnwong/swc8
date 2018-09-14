@@ -23,6 +23,7 @@ class Disassembler
         inline uint8_t dis_vx(const uint16_t instr);
         inline uint8_t dis_vy(const uint16_t instr);
         inline uint8_t dis_kk(const uint16_t instr);
+        inline uint8_t dis_n(const uint16_t instr);
         inline uint16_t dis_nnn(const uint16_t instr);
 
         // instruction disassembly
@@ -42,6 +43,9 @@ class Disassembler
         void dis_arith(void);
         void dis_skp(void);
         void dis_ld_special(void);
+
+        void dis_rnd(void);
+        void dis_drw(void);
 
     private:
         Program program;

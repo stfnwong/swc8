@@ -259,13 +259,8 @@ TOKEN_LABEL:
 
 TOKEN_END:
     if(this->verbose)
-        std::cout << "[" << __FUNCTION__ << "] got token of type " << token_type_str[this->cur_token.type] << std::endl;
-    //if(this->verbose)
-    //{
-    //    std::cout << "[" << __FUNCTION__ << "] (line " << std::dec << this->cur_line 
-    //        << ") got " << token_type_str[this->cur_token.type] << " token (" 
-    //        << this->cur_token.val << ")" << std::endl;
-    //}
+        std::cout << "TOKEN END" << std::endl;
+        //std::cout << "[" << __FUNCTION__ << "] got token of type " << token_type_str[this->cur_token.type] << std::endl;
 }
 
 /*
@@ -664,7 +659,8 @@ void Lexer::parseLine(void)
                 break;
 
             case LEX_RND:
-                this->parseRegImm();
+                //this->parseRegImm();
+                this->parseTwoArg();
                 break;
 
             case LEX_SKP:
@@ -673,6 +669,7 @@ void Lexer::parseLine(void)
                 break;
 
             case LEX_DRW:
+                std::cout << "Lexing DRW" << std::endl;
                 this->parseTwoArg();
                 // Should also be one more immediate  
                 this->nextToken();

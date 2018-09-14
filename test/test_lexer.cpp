@@ -479,6 +479,29 @@ SourceInfo get_instr_expected_source_info(void)
     line.vy              = 0xA;
     info.add(line);
 
+    // Draw and random number
+    // RND V3, 0x56
+    initLineInfo(line);
+    line.line_num        = 33;
+    line.addr            = 0x20F;
+    line.label           = "RND_DRAW";
+    line.opcode.opcode   = LEX_RND;
+    line.opcode.mnemonic = "RND";
+    line.vx              = 0xE;
+    line.kk              = 0x56;
+    line.is_label        = true;
+    info.add(line);
+    // DRW VF, V4
+    initLineInfo(line);
+    line.line_num        = 34;
+    line.addr            = 0x210;
+    line.opcode.opcode   = LEX_DRW;
+    line.opcode.mnemonic = "DRW";
+    line.vx              = 0xF;
+    line.vy              = 0x4;
+    line.kk              = 0x2;
+    info.add(line);
+
 
     return info;
 }

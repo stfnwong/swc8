@@ -28,3 +28,7 @@ ARITHMETIC:     ; 8000 series instructions
     ADD V7, V7
     SUB V3, V9
     SUBN V5, VA
+
+RND_DRAW:
+    RND VE, 0x56
+    DRW VF, V4, 0x2

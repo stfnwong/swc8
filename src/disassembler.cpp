@@ -32,6 +32,10 @@ inline uint8_t Disassembler::dis_kk(const uint16_t instr)
 {
     return (instr & 0x00FF);
 }
+inline uint8_t Disassembler::dis_n(const uint16_t instr)
+{
+    return (instr & 0x000F);
+}
 inline uint16_t Disassembler::dis_nnn(const uint16_t instr)
 {
     return (instr & 0x0FFF);
@@ -249,6 +253,23 @@ void Disassembler::dis_ld_special(void)
     }
 }
 
+void Disassembler::dis_rnd(void)
+{
+    this->cur_line.opcode.opcode = LEX_RND;
+    this->cur_line.opcode.mnemonic = "RND";
+    this->cur_line.vx = this->dis_vx(this->cur_instr);
+    this->cur_line.kk = this->dis_kk(this->cur_instr);
+}
+
+void Disassembler::dis_drw(void)
+{
+    this->cur_line.opcode.opcode = LEX_DRW;
+    this->cur_line.opcode.mnemonic = "DRW";
+    this->cur_line.vx = this->dis_vx(this->cur_instr);
+    this->cur_line.vy = this->dis_vy(this->cur_instr);
+    this->cur_line.kk = this->dis_n(this->cur_instr);
+}
+
 /*
  * load()
  */
@@ -311,6 +332,14 @@ void Disassembler::disassemble(void)
 
             case 0xA: // LD I nnn
                 this->dis_ldi();
+                break;
+
+            case 0xC:   // RND Vx, kk
+                this->dis_rnd();
+                break;
+
+            case 0xD:   // DRW Vx. Vy, n
+                this->dis_drw();
                 break;
 
             case 0xE:

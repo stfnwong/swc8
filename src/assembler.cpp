@@ -94,7 +94,7 @@ void Assembler::asm_drw(const LineInfo& l)
     Instr instr;
 
     instr.ins = 0xD000 | this->insert_vxvy(l.vx, l.vy);
-    instr.ins = instr.ins | l.kk;
+    instr.ins = instr.ins | (l.kk & 0x000F);
     instr.adr = l.addr;
     this->program.add(instr);
 }
@@ -401,6 +401,14 @@ void Assembler::assemble(void)
 
             case LEX_SKNP:
                 this->asm_sknp(cur_line);
+                break;
+
+            case LEX_SUB:
+                this->asm_sub(cur_line);
+                break;
+
+            case LEX_SUBN:
+                this->asm_subn(cur_line);
                 break;
 
             case LEX_XOR:
