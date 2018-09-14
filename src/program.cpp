@@ -53,7 +53,7 @@ void Program::initProgram(void)
  */
 Instr Program::get(const unsigned int idx) const
 {
-    if(idx > 0 && idx < this->instructions.size())
+    if(idx >= 0 && idx < this->instructions.size())
         return this->instructions[idx];
 
     Instr i;

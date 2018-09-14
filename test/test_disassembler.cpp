@@ -43,7 +43,7 @@ SourceInfo get_instr_expected_source_info(void)
     // source. Will need a seperate symbol file for that.
     // LD, V1, 0x04
     initLineInfo(line);
-    line.line_num        = 10;
+    line.line_num        = 1;
     line.addr            = 0x200;
     //line.label           = "IMMEDIATE_SECTION";
     line.opcode.opcode   = 0x7;
@@ -54,7 +54,7 @@ SourceInfo get_instr_expected_source_info(void)
     info.add(line);
     // LD, VC, 0xAA
     initLineInfo(line);
-    line.line_num        = 11;
+    line.line_num        = 2;
     line.addr            = 0x201;
     line.opcode.opcode   = 0x7;
     line.opcode.mnemonic = "LD";
@@ -64,7 +64,7 @@ SourceInfo get_instr_expected_source_info(void)
 
     // SKP VA
     initLineInfo(line);
-    line.line_num        = 14;
+    line.line_num        = 3;
     line.addr            = 0x202;
     //line.label           = "PARSE_VX_SECTION";
     line.opcode.opcode   = 0x12;
@@ -74,7 +74,7 @@ SourceInfo get_instr_expected_source_info(void)
     info.add(line);
     // SKNP VB
     initLineInfo(line);
-    line.line_num        = 15;
+    line.line_num        = 4;
     line.addr            = 0x203;
     line.opcode.opcode   = 0x13;
     line.opcode.mnemonic = "SKNP";
@@ -84,7 +84,7 @@ SourceInfo get_instr_expected_source_info(void)
     // Special tokens 
     // LD [I] V5
     initLineInfo(line);
-    line.line_num        = 18;
+    line.line_num        = 5;
     line.addr            = 0x204;
     line.opcode.opcode   = 0x7;
     line.opcode.mnemonic = "LD";
@@ -96,7 +96,7 @@ SourceInfo get_instr_expected_source_info(void)
     info.add(line);
     // LD F V0
     initLineInfo(line);
-    line.line_num        = 19;
+    line.line_num        = 6;
     line.addr            = 0x205;
     line.opcode.opcode   = 0x7;
     line.opcode.mnemonic = "LD";
@@ -105,7 +105,7 @@ SourceInfo get_instr_expected_source_info(void)
     info.add(line);
     // LD B, V8
     initLineInfo(line);
-    line.line_num        = 20;
+    line.line_num        = 7;
     line.addr            = 0x206;
     line.opcode.opcode   = 0x7;
     line.opcode.mnemonic = "LD";
@@ -114,7 +114,7 @@ SourceInfo get_instr_expected_source_info(void)
     info.add(line);
     // LD VE, [I]
     initLineInfo(line);
-    line.line_num        = 21;
+    line.line_num        = 8;
     line.addr            = 0x207;
     line.opcode.opcode   = 0x7;
     line.opcode.mnemonic = "LD";
@@ -139,6 +139,17 @@ TEST_F(TestDisassembler, test_dis_instr)
     std::cout << "\t Loading data from file " << obj_file << std::endl;
     status = dis.load(obj_file);
     ASSERT_EQ(0, status);
+
+    // Dump the object file from disk 
+    std::cout << "\t Dumping contents of file " << obj_file << std::endl;
+    Program obj_prog = dis.getProgram();
+    Instr instr;
+    for(unsigned int idx = 0; idx < obj_prog.numInstr(); ++idx)
+    {
+        instr = obj_prog.get(idx);
+        std::cout << "[" << std::right << std::hex << std::setw(4) << std::setfill('0') << instr.adr << "]  ";
+        std::cout << "$" << std::right << std::hex << std::setw(4) << std::setfill('0') << instr.ins << std::endl;
+    }
 
     dis.disassemble();
     SourceInfo dis_out = dis.getSourceInfo();
