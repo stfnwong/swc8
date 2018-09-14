@@ -131,7 +131,7 @@ void Assembler::asm_ld(const LineInfo& l)
                 break;
 
             case LEX_BREG:
-                instr.ins = 0xF033 | this->insert_vx(l.vx);
+                instr.ins = 0xF033 | this->insert_vx(l.vy);
                 break;
 
             case LEX_FREG:
@@ -177,6 +177,18 @@ void Assembler::asm_or(const LineInfo& l)
     Instr instr;
 
     instr.ins = 0x8001 | this->insert_vxvy(l.vx, l.vy);
+    instr.adr = l.addr;
+    this->program.add(instr);
+}
+
+/*
+ * asm_ret()
+ */
+void Assembler::asm_ret(const LineInfo& l)
+{
+    Instr instr;
+
+    instr.ins = 0x00EE;
     instr.adr = l.addr;
     this->program.add(instr);
 }
@@ -369,6 +381,10 @@ void Assembler::assemble(void)
                 
             case LEX_OR:
                 this->asm_or(cur_line);
+                break;
+
+            case LEX_RET:
+                this->asm_ret(cur_line);
                 break;
 
             case LEX_RND:

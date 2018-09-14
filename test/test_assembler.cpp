@@ -69,7 +69,7 @@ Program get_draw_expected_program(void)
     instr.adr = 0x20A;
     prog.add(instr);
     // LD I, Column 
-    instr.ins = 0xA21A;
+    instr.ins = 0xA219;
     instr.adr = 0x20B;
     prog.add(instr);
     // DRW Va. Vb, 0x01
@@ -105,8 +105,8 @@ Program get_draw_expected_program(void)
     instr.ins = 0x7B01;
     instr.adr = 0x212;
     prog.add(instr);
-    // LD, I, Column <- (0x21A)
-    instr.ins = 0xA21A;
+    // LD, I, Column <- (0x219)
+    instr.ins = 0xA219;
     instr.adr = 0x213;
     prog.add(instr);
     // DRW Va, Vb, 0x1
@@ -126,7 +126,13 @@ Program get_draw_expected_program(void)
     instr.adr = 0x217;
     prog.add(instr);
     // DW 0x7000
+    instr.ins = 0x7000;
+    instr.adr = 0x218;
+    prog.add(instr);
     // DW 0x8000
+    instr.ins = 0x8000;
+    instr.adr = 0x219;
+    prog.add(instr);
 
     return prog;
 }

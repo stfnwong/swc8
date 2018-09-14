@@ -39,6 +39,7 @@ class Assembler
         void asm_jp(const LineInfo& l);
         void asm_ld(const LineInfo& l);
         void asm_or(const LineInfo& l);
+        void asm_ret(const LineInfo& l);
         void asm_rnd(const LineInfo& l);
         void asm_se(const LineInfo& l);
         void asm_shl(const LineInfo& l);
