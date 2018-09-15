@@ -17,12 +17,6 @@ class TestAssembler : public ::testing::Test
     virtual void TearDown() {}
 };
 
-//TEST_F(TestAssembler, test_init)
-//{
-//    Assembler as;
-//
-//}
-
 Program get_draw_expected_program(void)
 {
     Program prog;
@@ -75,7 +69,7 @@ Program get_draw_expected_program(void)
     instr.adr = 0x20A;
     prog.add(instr);
     // LD I, Column 
-    instr.ins = 0xA21A;
+    instr.ins = 0xA219;
     instr.adr = 0x20B;
     prog.add(instr);
     // DRW Va. Vb, 0x01
@@ -111,8 +105,8 @@ Program get_draw_expected_program(void)
     instr.ins = 0x7B01;
     instr.adr = 0x212;
     prog.add(instr);
-    // LD, I, Column <- (0x21A)
-    instr.ins = 0xA21A;
+    // LD, I, Column <- (0x219)
+    instr.ins = 0xA219;
     instr.adr = 0x213;
     prog.add(instr);
     // DRW Va, Vb, 0x1
@@ -132,7 +126,13 @@ Program get_draw_expected_program(void)
     instr.adr = 0x217;
     prog.add(instr);
     // DW 0x7000
+    instr.ins = 0x7000;
+    instr.adr = 0x218;
+    prog.add(instr);
     // DW 0x8000
+    instr.ins = 0x8000;
+    instr.adr = 0x219;
+    prog.add(instr);
 
     return prog;
 }
@@ -178,7 +178,6 @@ TEST_F(TestAssembler, test_asm_draw)
     }
 
     Program expected_program = get_draw_expected_program();
-    //for(unsigned int i = 0; i < expected_program.numInstr(); ++i)
     for(unsigned int i = 0; i < as_program.numInstr(); ++i)
     {
         Instr as_instr = as_program.get(i);
@@ -188,6 +187,162 @@ TEST_F(TestAssembler, test_asm_draw)
         ASSERT_EQ(ex_instr.adr, as_instr.adr);
     }
     std::cout << std::endl << "done " << std::endl;
+}
+
+
+Program get_instr_expected_program(void)
+{
+    Program prog;
+    Instr instr;
+
+    // LD, V1, 0x04
+    instr.ins = 0x6104;
+    instr.adr = 0x200;
+    prog.add(instr);
+    // LD VC, 0xAA
+    instr.ins = 0x6CAA;
+    instr.adr = 0x201;
+    prog.add(instr);
+    // SKP VA
+    instr.ins = 0xEA9E;
+    instr.adr = 0x202;
+    prog.add(instr);
+    // SNKP VB
+    instr.ins = 0xEBA1;
+    instr.adr = 0x203;
+    prog.add(instr);
+    // LD [I], V5
+    instr.ins = 0xF555;
+    instr.adr = 0x204;
+    prog.add(instr);
+    // LD F, VF
+    instr.ins = 0xFF29;
+    instr.adr = 0x205;
+    prog.add(instr);
+    // LD B, B8
+    instr.ins = 0xF833;
+    instr.adr = 0x206;
+    prog.add(instr);
+    // LD VE, [I]
+    instr.ins = 0xFE65;
+    instr.adr = 0x207;
+    prog.add(instr);
+    // Arithmetic 
+    // LD VA, VB
+    instr.ins = 0x8AB0;
+    instr.adr = 0x208;
+    prog.add(instr);
+    // OR V1, VF
+    instr.ins = 0x81F1;
+    instr.adr = 0x209;
+    prog.add(instr);
+    // AND VC, VD 
+    instr.ins = 0x8CD2;
+    instr.adr = 0x20A;
+    prog.add(instr);
+    // XOR V3, V4
+    instr.ins = 0x8343;
+    instr.adr = 0x20B;
+    prog.add(instr);
+    // ADD V7, V7
+    instr.ins = 0x8774;
+    instr.adr = 0x20C;
+    prog.add(instr);
+    // SUB V3, V9
+    instr.ins = 0x8395;
+    instr.adr = 0x20D;
+    prog.add(instr);
+    // SUBN V5, VA
+    instr.ins = 0x85A7;
+    instr.adr = 0x20E;
+    prog.add(instr);
+
+    // RND and DRAW
+    // RND VE, 0x56
+    instr.ins = 0xCE56;
+    instr.adr = 0x20F;
+    prog.add(instr);
+    // DRW VF, V4. 0x2
+    instr.ins = 0xDF42;
+    instr.adr = 0x210;
+    prog.add(instr);
+
+    //JMP_AND_CALL
+    //CLS
+    instr.ins = 0x00E0;
+    instr.adr = 0x211;
+    prog.add(instr);
+    // RET 
+    instr.ins = 0x00EE;
+    instr.adr = 0x212;
+    prog.add(instr);
+    // SYS 0x040
+    instr.ins = 0x0040;
+    instr.adr = 0x213;
+    prog.add(instr);
+    // SYS 0xA1A
+    instr.ins = 0x0A1A;
+    instr.adr = 0x214;
+    prog.add(instr);
+    // CALL 0x443
+    instr.ins = 0x2443;
+    instr.adr = 0x215;
+    prog.add(instr);
+
+    return prog;
+}
+
+TEST_F(TestAssembler, test_asm_instr)
+{
+    SourceInfo lex_output;
+    std::string filename = "data/instr.asm";
+
+    Lexer lexer;
+    lexer.setVerbose(true);
+    lexer.loadFile(filename);
+    std::cout << "\t Lexing source file " << filename << std::endl;
+    lexer.lex();
+    lex_output = lexer.getSourceInfo();
+    std::cout << "Lexer produced " << lex_output.getNumLines() << " lines of output" << std::endl;
+    // Show the symbol table contents
+    std::cout << "\t Dumping lexer symbol table contents...." << std::endl;
+
+    SymbolTable sym_table = lexer.getSymTable();
+    for(unsigned int s = 0; s < sym_table.getNumSyms(); ++s)
+    {
+        Symbol sym = sym_table.get(s);
+        std::cout << "[" << std::left << std::setw(16) << std::setfill(' ') << sym.label << "]  ";
+        std::cout << "0x" << std::hex << std::setw(4) << std::setfill('0') << sym.addr << std::endl;
+    }
+    std::cout << std::endl;
+
+
+    Assembler as;
+    as.setVerbose(true);
+    std::cout <<"\t Loading lexer output into assembler" << std::endl;
+    as.loadSource(lex_output);
+    std::cout << "\t Assembling file " << filename << std::endl;
+    as.assemble();
+
+    Program as_program = as.getProgram();
+    std::cout << "Assembled " << as_program.numInstr() << " instructions in program " << filename << std::endl;
+    std::cout << "\t Dumping assembly output...." << std::endl;
+    for(unsigned int i = 0; i < as_program.numInstr(); ++i)
+    {
+        std::cout << "<" << std::right << std::setw(3) << i << "> " << std::right << as_program.getStr(i);
+    }
+
+    Program expected_program = get_instr_expected_program();
+    for(unsigned int i = 0; i < as_program.numInstr(); ++i)
+    {
+        Instr as_instr = as_program.get(i);
+        Instr ex_instr = expected_program.get(i);
+        std::cout << "Checking instruction " << i << "/" << expected_program.numInstr() << "\n";
+        ASSERT_EQ(ex_instr.ins, as_instr.ins);
+        ASSERT_EQ(ex_instr.adr, as_instr.adr);
+    }
+    std::cout << std::endl << "done " << std::endl;
+
 }
 
 int main(int argc, char *argv[])

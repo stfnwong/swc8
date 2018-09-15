@@ -1,6 +1,6 @@
 /* 
- * C8ASM
- * Chip-8 assembler.
+ * C8DIS
+ * Chip-8 disassembler.
  *
  * Stefan Wong 2018
  */
@@ -11,28 +11,26 @@
 #include <string>
 #include <getopt.h>
 // Modules
-#include "lexer.hpp"
-#include "assembler.hpp"
+#include "disassembler.hpp"
+#include "source.hpp"
 
 typedef struct 
 {
     std::string infile;
     std::string outfile;
     bool verbose;
-} AsmOpts;
+}  DisOpts;
 
-void init_opts(AsmOpts& opts)
+void init_opts( DisOpts& opts)
 {
     opts.infile  = "\0";
     opts.outfile = "\0";
-    //opts.asm_file = "\0";
-    //opts.dump_asm = false;
     opts.verbose = false;
 }
 
 int main(int argc, char *argv[])
 {
-    AsmOpts opts;
+     DisOpts opts;
     //const char* const short_opts = "vhi:o:sS:";
     const char* const short_opts = "vhi:o:";
     const option long_opts[] = {};
@@ -89,58 +87,46 @@ int main(int argc, char *argv[])
         std::cerr << "Use -i <filename> to specify" << std::endl;
         exit(-1);
     }
-    if(opts.outfile == "\0")
-    {
-        std::cerr << "Invalid output filename" << std::endl;
-        std::cerr << "Use -o <filename> to specify" << std::endl;
-        exit(-1);
-    }
+
 
     // Get a lexer object 
-    Lexer lexer;
-    Assembler assembler;
+    Disassembler dis;
     Program as_prog;
 
-    //lexer.setVerbose(opts.verbose);
-    //assembler.setVerbose(opts.verbose);
-    status = lexer.loadFile(opts.infile);
+    dis.setVerbose(opts.verbose);
+    status = dis.load(opts.infile);
     if(status < 0)
     {
         std::cerr << "ERROR unable to load file " << opts.infile << std::endl;
         exit(-1);
     }
-    lexer.lex();
+    dis.disassemble();
     // Assemble the source
-    SourceInfo lex_source = lexer.getSourceInfo();
-    if(lex_source.hasError())
-    {
-        std::cout << lex_source.dumpErrors();
-        exit(-1);
-    }
-    assembler.loadSource(lex_source);
-    assembler.assemble();
-    as_prog = assembler.getProgram();
+    SourceInfo dis_source = dis.getSourceInfo();
+    //if(dis_source.hasError())
+    //{
+    //    std::cout << lex_source.dumpErrors();
+    //    exit(-1);
+    //}
 
-    status = as_prog.save(opts.outfile);
-    if(status < 0)
-    {
-        std::cerr << "ERROR while writing program to " << opts.outfile << std::endl;
-        exit(-1);
-    }
+    for(unsigned line = 0; line < dis_source.getNumLines(); ++line)
+        std::cout << dis_source.getStr(line);
 
-    if(opts.verbose)
+    if(opts.outfile != "\0")
     {
-        std::cout << "\t Dumping assembled output ... " << std::endl;
-        std::cout << "----------------" << std::endl;
-        std::cout << " ADDR    OPCODE " << std::endl;
-        std::cout << "----------------" << std::endl;
-        Instr instr;
-        for(unsigned i = 0; i < as_prog.numInstr(); ++i)
-        {
-            instr = as_prog.get(i); 
-            std::cout << "[" << std::right << std::setw(4) << std::setfill('0') << std::hex << instr.adr << "]   ";
-            std::cout << "$" << std::right << std::setw(4) << std::setfill('0') << std::hex << instr.ins << std::endl;
+        std::ofstream ofile;
+        try{
+            ofile.open(opts.outfile);
         }
+        catch(std::ios_base::failure& e) {
+            std::cerr << e.what() << std::endl;
+            exit(-1);
+        }
+
+        for(unsigned int line = 0; line < dis_source.getNumLines(); ++line)
+            ofile << dis_source.getStr(line) << std::endl;
+
+        ofile.close();
     }
 
     return 0;

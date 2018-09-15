@@ -50,13 +50,13 @@ $(TOOL_OBJECTS): $(OBJ_DIR)/%.o : $(TOOL_DIR)/%.cpp
 	$(CXX) $(CXXFLAGS) $(INCS) -c $< -o $@
 
 # ==== TEST TARGETS ==== #
-TESTS=test_chip8 test_lexer test_assembler test_program
+TESTS=test_chip8 test_lexer test_assembler test_disassembler test_program 
 $(TESTS): $(TEST_OBJECTS) $(OBJECTS)
 	$(CXX) $(LDFLAGS) $(OBJECTS) $(OBJ_DIR)/$@.o\
 		-o $(TEST_BIN_DIR)/$@ $(LIBS) $(TEST_LIBS)
 
 # ===== TOOL TARGETS ===== # 
-TOOLS = c8asm 
+TOOLS = c8asm c8dis
 
 $(TOOLS): $(OBJECTS) $(TOOL_OBJECTS)
 	$(CXX) $(LDFLAGS) $(OBJECTS) $(OBJ_DIR)/$@.o \

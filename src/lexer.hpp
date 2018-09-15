@@ -94,14 +94,9 @@ class Lexer
         void skipWhitespace(void);
         void skipComment(void);
         void skipSeperators(void);
-
         void scanToken(void);
-        bool isSymbol(void) const;
-        bool isNumber(void) const;
-        bool isDirective(void) const;
         bool isSpace(void) const;
         bool isComment(void) const;
-        bool isMnemonic(void);
 
     private:
         // new token stuff
@@ -113,12 +108,14 @@ class Lexer
         void parseLine(void);   // parse an entire line
         bool checkArg(void);
         bool checkImm(void);
-
         void resolveLabels(void);
-
         void parseTwoArg(void);
         void parseRegImm(void);
         void parseAddr(void);
+        void parseVx(void);
+        void parseWord(void);
+        void parseAdd(void);
+        void parseLD(void);
 
     public:
         Lexer();
@@ -133,6 +130,7 @@ class Lexer
         // Verbose mode
         void setVerbose(const bool v);
         bool getVerbose(void) const;
+        unsigned int getNumErr(void) const;
         
 #if C8_DEBUG > 0
         // Debug routines 

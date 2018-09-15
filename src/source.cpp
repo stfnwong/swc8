@@ -113,21 +113,21 @@ void SymbolTable::dump(void)
 // LineInfo
 void initLineInfo(LineInfo& l)
 {
-    l.line_num = 0;
-    l.addr     = 0;
-    l.symbol   = "\0";
-    l.label    = "\0";
-    l.errstr   = "\0";
-    l.opcode   = {0x0, "INVALID"},
-    l.nnn      = 0;
-    l.vx       = 0;
-    l.vy       = 0;
-    l.kk       = 0;
-    l.ireg     = 0;
-    l.is_label = false;
-    l.is_imm   = false;
-    l.ireg     = false;
-    l.error    = false;
+    l.symbol    = "\0";
+    l.label     = "\0";
+    l.errstr    = "\0";
+    l.opcode    = {0x0, "INVALID"};
+    l.line_num  = 0;
+    l.addr      = 0;
+    l.reg_flags = 0;
+    l.op_flags  = 0;
+    l.nnn       = 0;
+    l.vx        = 0;
+    l.vy        = 0;
+    l.kk        = 0;
+    l.is_label  = false;
+    l.is_imm    = false;
+    l.error     = false;
     l.is_directive = false;
 }
 
@@ -161,8 +161,6 @@ bool compLineInfo(const LineInfo& a, const LineInfo& b)
         return false;
     if(a.is_directive != b.is_directive)
         return false;
-    if(a.ireg != b.ireg)
-        return false;
     if(a.error != b.error)
         return false;
 
@@ -183,10 +181,12 @@ void printLineDiff(const LineInfo& a, const LineInfo& b)
         std::cout << "a.line_num [" << a.line_num << "] != b.line_num [" << b.line_num << "]" << std::endl;
     if(a.addr != b.addr)
         std::cout << "a.addr [" << a.addr << "] != b.addr [" << b.addr << "]" << std::endl;
+    if(a.reg_flags != b.reg_flags)
+        std::cout << "a.reg_flags [" << a.reg_flags << "] != b.reg_flags [" << b.reg_flags << "]" << std::endl;
     if(a.vx != b.vx)
-        std::cout << "a.arg1 [" << a.vx << "] != b.arg1 [" << b.vx << "]" << std::endl;
+        std::cout << "a.vx [" << a.vx << "] != b.vx [" << b.vx << "]" << std::endl;
     if(a.vy != b.vy)
-        std::cout << "a.arg2 [" << a.vy << "] != b.arg2 [" << b.vy << "]" << std::endl;
+        std::cout << "a.vy [" << a.vy << "] != b.vy [" << b.vy << "]" << std::endl;
     if(a.kk != b.kk)
         std::cout << "a.kk [" << a.kk << "] != b.kk [" << b.kk << "]" << std::endl;
     if(a.nnn != b.nnn)
@@ -195,8 +195,6 @@ void printLineDiff(const LineInfo& a, const LineInfo& b)
         std::cout << "a.is_label [" << a.is_label << "] != b.is_label [" << b.is_label << "]" << std::endl;
     if(a.is_directive != b.is_directive)
         std::cout << "a.is_directive [" << a.is_directive << "] != b.is_directive [" << b.is_directive << "]" << std::endl;
-    if(a.ireg != b.ireg)
-        std::cout << "a.ireg [" << a.ireg << "] != b.ireg [" << b.ireg << "]" << std::endl;
     if(a.error != b.error)
         std::cout << "a.error [" << a.error << "] != b.error [" << b.error << "]" << std::endl;
 }
@@ -229,7 +227,7 @@ std::string SourceInfo::line_to_string(const LineInfo& l)
     std::ostringstream oss;
 
     oss << "---------------------------------------------------------------------" << std::endl;
-    oss << "Line  Type   Addr  Mnemonic    Opcode  flags  Vx Vy kk   nnn" << std::endl;
+    oss << "Line  Type   Addr  Mnemonic    Opcode  flags  Vx  Vy kk   nnn" << std::endl;
     //oss << "Line  Type   Addr  Mnemonic    Opcode  flags   arg1  arg2  arg3  imm  " << std::endl;
 
     oss << std::left << std::setw(6) << std::setfill(' ') << l.line_num;
@@ -254,11 +252,26 @@ std::string SourceInfo::line_to_string(const LineInfo& l)
     oss << "...";
     // Registers
     oss << "  ";
-    if(l.ireg)
+    if(l.reg_flags & LEX_IREG)
         oss << "  I"; 
+    else if(l.reg_flags & LEX_BREG)
+        oss << "  B";
+    else if(l.reg_flags & LEX_FREG)
+        oss << "  F";
+    else if(l.reg_flags & LEX_KREG)
+        oss << "  K";
+    else if(l.reg_flags & LEX_DTREG)
+        oss << " DT";
+    else if(l.reg_flags & LEX_STREG)
+        oss << " ST";
+    else if(l.reg_flags & LEX_IST)
+        oss << " [I]";
     else
         oss << " V" << std::right << std::hex << std::setw(1) << l.vx;
-    oss << " V" << std::right << std::hex << std::setw(1) << l.vy;
+    if(l.reg_flags & LEX_ILD)
+        oss << " [I]";
+    else
+        oss << "  V" << std::right << std::hex << std::setw(1) << l.vy;
     oss << " 0x" << std::right << std::hex << std::setw(2) << std::setfill('0') << l.kk;
     oss << " 0x" << std::right << std::hex << std::setw(3) << std::setfill('0') << l.nnn;
 
@@ -295,6 +308,11 @@ LineInfo SourceInfo::get(const unsigned int idx) const
         
         return l;
     }
+}
+
+std::string SourceInfo::getStr(const unsigned int idx) 
+{
+    return this->line_to_string(this->line_info[idx]);
 }
 
 unsigned int SourceInfo::getLineNum(const unsigned int idx) const
@@ -362,7 +380,14 @@ unsigned int SourceInfo::numInstance(const std::string& m) const
 
 bool SourceInfo::hasError(void) const
 {
-    return this->error;
+    //return this->error;
+    for(unsigned int idx = 0; idx < this->line_info.size(); ++idx)
+    {
+        if(this->line_info[idx].error)
+            return true;
+    }
+
+    return false;
 }
 
 void SourceInfo::setError(const bool e) 
@@ -396,4 +421,20 @@ void SourceInfo::printLine(const unsigned int idx)
         return;
     std::cout << this->line_to_string(
             this->line_info[idx]);
+}
+
+std::string SourceInfo::dumpErrors(void)
+{
+    std::ostringstream oss;
+
+    for(unsigned int l = 0; l < this->line_info.size(); ++l)
+    {
+        if(this->line_info[l].error)
+        {
+            oss << "(line " << std::dec << this->line_info[l].line_num << ") ";
+            oss << this->line_info[l].errstr << std::endl;
+        }
+    }
+
+    return oss.str();
 }
