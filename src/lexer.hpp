@@ -70,8 +70,7 @@ class Lexer
         void alloc_mem(void);
 
     private:
-        // opcodes
-        OpcodeTable op_table;
+        // instruction codes (internal to lexer)
         OpcodeTable instr_code_table;        // not quite opcodes....
 
         //OpcodeTable pseudo_op_table;

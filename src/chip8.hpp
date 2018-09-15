@@ -10,68 +10,41 @@
 #include <vector>
 #include <string>
 #include <cstdint>
+#include <random>
 #include "opcode.hpp"
 
 #define CHIP8_START_ADR 0x200
 // TODO: fontset
 
-// Chip-8 opcodes
-#define C8_JMP      0x1000
-#define C8_CALL     0x2000
-#define C8_SEVxkk   0x3000
-#define C8_SE       0x5000      // 'placeholder' instruction 
-#define C8_SNE      0x4000
-#define C8_LDVxkk   0x6000
-#define C8_ADDVx    0x7000
-#define C8_LD   0x8000
-#define C8_OR   0x8001
-#define C8_AND  0x8002
-#define C8_XOR  0x8003
-#define C8_ADD  0x8004
-#define C8_SUB  0x8005
-#define C8_SHR  0x8006
-#define C8_SUBN 0x8007
-#define C8_SHL  0x800E
+// Chip8 instruction codes 
+// effectively a kind of opcode mask 
+#define C8_JP    0x1000
+#define C8_CALL  0x2000
+#define C8_SEI   0x3000
+#define C8_SNEI  0x4000
+#define C8_SE    0x5000
+#define C8_LDI   0x6000
+#define C8_ADDI  0x7000
+#define C8_LD    0x8000
+#define C8_OR    0x8001
+#define C8_AND   0x8002
+#define C8_XOR   0x8003
+#define C8_ADD   0x8004
+#define C8_SUB   0x8005
+#define C8_SHR   0x8006
+#define C8_SUBN  0x8007
+#define C8_SHL   0x800E
+#define C8_SNE   0x9000
+#define C8_LDII  0xA000
+#define C8_JPV   0xB000
+#define C8_RND   0xC000
+#define C8_DRW   0xD000
+#define C8_SKP   0xE09E
+#define C8_SKNP  0xE0A1
+#define C8_LDDT  0xF007
+#define C8_LDK   0xF00A
 
-#define C8_LDI      0xA000
-#define C8_JP       0xB000
-#define C8_DRW      0xD000
-
-// Skip instructions
-#define C8_SEKK  0x3000
-#define C8_SNEKK 0x4000
-#define C8_SEVX  0x5000
-#define C8_SNEVX 0x9000
-//#define C8_SNE_EQ  0x9000
-
-// Lexer specific opcocdes...?
-
-
-// Chip-8 opcodes (for assembler)
-static Opcode chip8_opcodes[] = {
-    {C8_JMP,   "JMP"},
-    {C8_CALL,  "CALL"},
-    //{C8_SE,   "SE"},
-    {C8_SE,    "SE"},
-    {C8_SNE,   "SNE"},
-    {C8_SEKK,  "SE"},
-    {C8_SEVX,  "SE"},
-    {C8_SNEVX, "SNE"},
-    {C8_SNEKK, "SNE"},
-    {C8_LD,    "LD"},
-    {C8_ADD,   "ADD"},
-    {C8_LD,    "LD"},
-    {C8_OR,    "OR"},
-    {C8_AND,   "AND"},
-    {C8_XOR,   "XOR"},
-    {C8_ADD,   "ADD"},
-    {C8_SUB,   "SUB"},
-    {C8_SHR,   "SHR"},
-    {C8_SUBN,  "SUBN"},
-    {C8_SHL,   "SHL"},
-    {C8_JP,    "JP"},
-    {C8_DRW,   "DRW"}
-};
+// TODO : handle zero codes seperately
 
 /*
  * C8Proc
@@ -82,10 +55,18 @@ class C8Proc
     public:
         // Internals
         uint8_t  V[16];
+        uint16_t pc;            // program counter
+        uint16_t sp;            // stack pointer 
+        // special registers 
         uint16_t VF;
         uint16_t I;
-        uint16_t pc;
-        uint16_t sp;
+        // Timers 
+        uint8_t dt;             // Delay timer
+        uint8_t st;             // Sound timer
+        // Stack 
+        uint16_t stack[12];     // stack memory
+        // keys 
+        uint8_t  keys[16];      // key input
 
     public:
         C8Proc();
@@ -105,8 +86,8 @@ class C8Exec
     public:
         uint8_t u;
         uint8_t p;
-        uint8_t x;
-        uint8_t y;
+        uint8_t vx;
+        uint8_t vy;
         uint8_t kk;
         uint16_t nnn;
 
@@ -121,6 +102,9 @@ class C8Exec
  * Chip8
  * Chip-8 object
  */
+static constexpr const unsigned int W = 64;
+static constexpr const unsigned int H = 64;
+
 class Chip8
 {
     private:
@@ -131,11 +115,15 @@ class Chip8
         // Execution context
         C8Exec exec;
 
+    private:
+        // Display memory 
+        uint8_t disp_mem[W * H / 8];
+        uint8_t fontmem[16 * 5];
+
     public:
         // Memory 
-        uint8_t* mem;
+        uint8_t mem[0x1000];
         uint16_t mem_size;
-        void alloc_mem(void);
         void init_mem(void);
 
     private:
@@ -149,8 +137,11 @@ class Chip8
 
         void cycle(void);
         int loadMem(const std::string& filename, int offset);
+        /* 
+         * dumpMem()
+         * Dump the memory contents into a vector. 
+         */
         std::vector<uint8_t> dumpMem(void) const;
-
 };
 
 

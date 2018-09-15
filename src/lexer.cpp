@@ -14,7 +14,6 @@ Lexer::Lexer()
     this->token_buf_size = 256;
     this->cur_pos = 0;
     this->alloc_mem();
-    this->init_op_table();
     this->init_instr_code_table();
     this->verbose = false;
 }
@@ -33,16 +32,6 @@ Lexer::~Lexer()
 void Lexer::alloc_mem(void)
 {
     this->token_buf = new char[this->token_buf_size];
-}
-
-/*
- * init_op_table()
- * Set up the opcode table for the lexer 
- */
-void Lexer::init_op_table(void)
-{
-    for(const Opcode& op : chip8_opcodes)
-        this->op_table.add(op);
 }
 
 /*
@@ -180,7 +169,6 @@ void Lexer::nextToken(void)
     // Check for special tokens 
     if(token_str.length() == 1)
     { 
-        std::cout << "[" << __FUNCTION__ << "] checking for special token (" << token_str << ")" << std::endl;
         if(token_str == "I" || token_str == "i")
         {
             this->cur_token.type = SYM_IREG;

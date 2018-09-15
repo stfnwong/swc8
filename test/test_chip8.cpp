@@ -7,6 +7,11 @@
 #include <vector>
 #include <gtest/gtest.h>
 #include "chip8.hpp"
+// May need to assemble the program first, so bring in assembly tools 
+#include "lexer.hpp"
+#include "assembler.hpp"
+#include "source.hpp"
+#include "program.hpp"
 
 class TestChip8 : public ::testing::Test
 {
@@ -18,8 +23,30 @@ TEST_F(TestChip8, test_init)
 {
     Chip8 c8;
     std::vector<uint8_t> mem_dump = c8.dumpMem();
-    for(unsigned int m = 0; m < mem_dump.size(); m++)
+    ASSERT_EQ(0x12, mem_dump[0]);
+    ASSERT_EQ(0x00, mem_dump[1]);
+    for(unsigned int m = 2; m < mem_dump.size(); m++)
         ASSERT_EQ(0, mem_dump[m]);
+}
+
+TEST_F(TestChip8, test_instr_asm)
+{
+    int status;
+    std::string prog_filename = "data/instr.asm";
+    Chip8 c8;
+
+    // Ensure the program is assembled, etc before execution 
+    Lexer lexer;
+    Assembler assembler;
+
+    // Assemble the source into a program
+    status = lexer.loadFile(prog_filename);
+    ASSERT_EQ(0, status);
+    std::cout << "\t Assembing file " << prog_filename << std::endl;
+    lexer.lex();
+    assembler.loadSource(lexer.getSourceInfo());
+    assembler.assemble();
+
 }
 
 int main(int argc, char *argv[])
