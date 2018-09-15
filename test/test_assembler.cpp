@@ -267,6 +267,28 @@ Program get_instr_expected_program(void)
     instr.adr = 0x210;
     prog.add(instr);
 
+    //JMP_AND_CALL
+    //CLS
+    instr.ins = 0x00E0;
+    instr.adr = 0x211;
+    prog.add(instr);
+    // RET 
+    instr.ins = 0x00EE;
+    instr.adr = 0x212;
+    prog.add(instr);
+    // SYS 0x040
+    instr.ins = 0x0040;
+    instr.adr = 0x213;
+    prog.add(instr);
+    // SYS 0xA1A
+    instr.ins = 0x0A1A;
+    instr.adr = 0x214;
+    prog.add(instr);
+    // CALL 0x443
+    instr.ins = 0x2443;
+    instr.adr = 0x215;
+    prog.add(instr);
+
     return prog;
 }
 

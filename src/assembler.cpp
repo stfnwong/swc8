@@ -392,6 +392,7 @@ void Assembler::assemble(void)
                 break;
 
             case LEX_CLS:
+                this->asm_cls(cur_line);
                 break;
 
             case LEX_DRW:
