@@ -77,6 +77,67 @@ TEST_F(TestProgram, test_load_program)
     }
 }
 
+TEST_F(TestProgram, test_read_write_object)
+{
+    int status;
+    Lexer lexer;
+    Assembler assembler;
+    Program program;
+    std::string src_filename = "data/instr.asm";
+    std::string obj_filename = "data/instr.obj";
+
+    lexer.setVerbose(false);
+    lexer.loadFile(src_filename);
+    
+    std::cout << "\t Lexing file " << src_filename << std::endl;
+    lexer.lex();
+    assembler.setVerbose(false);
+    assembler.loadSource(lexer.getSourceInfo());
+    std::cout << "\t Assembling file " << src_filename << std::endl;
+    assembler.assemble();
+
+    program = assembler.getProgram();    
+    program.setVerbose(true);
+    std::cout << "\t Dumping program output for file " << src_filename << std::endl;
+    for(unsigned int idx = 0; idx < program.numInstr(); ++idx)
+    {
+        Instr instr = program.get(idx);
+        std::cout << "<" << std::right << std::hex << std::setw(4) << std::setfill('0') << idx << "> ";
+        std::cout << "[0x" << std::right << std::hex << std::setw(4) << instr.adr << "]   ";
+        std::cout << std::right << std::hex << std::setw(4) << std::setfill('0') << instr.ins << std::endl;
+    }
+
+    // Write the program object file to disk 
+    std::cout << "\t Writing program object to file " << obj_filename << std::endl;
+    status = program.writeObj(obj_filename);
+    ASSERT_EQ(0, status);
+    // Now read into a new program
+    std::cout << "\t Reading object file (" << obj_filename << ") into new Program" << std::endl;
+    Program obj_prog;
+    obj_prog.setVerbose(true);
+    status = obj_prog.readObj(obj_filename);
+    ASSERT_EQ(0, status);
+
+    std::cout << "\t Dumping object file output from file " << obj_filename << std::endl;
+    for(unsigned int idx = 0; idx < obj_prog.numInstr(); ++idx)
+    {
+        Instr instr = obj_prog.get(idx);
+        std::cout << "<" << std::right << std::hex << std::setw(4) << std::setfill('0') << idx << "> ";
+        std::cout << "[0x" << std::right << std::hex << std::setw(4) << instr.adr << "]   ";
+        std::cout << std::right << std::hex << std::setw(4) << std::setfill('0') << instr.ins << std::endl;
+    }
+
+    std::cout << "Checking program outputs..." << std::endl;
+    for(unsigned int idx = 0; idx < program.numInstr(); ++idx)
+    {
+        std::cout << "Checking instruction " << idx << "/" << program.numInstr() << std::endl;
+        Instr prog_instr = program.get(idx);
+        Instr obj_instr  = obj_prog.get(idx);
+        ASSERT_EQ(prog_instr.adr, obj_instr.adr);
+        ASSERT_EQ(prog_instr.ins, obj_instr.ins);
+    }
+}
+
 int main(int argc, char *argv[])
 {
     ::testing::InitGoogleTest(&argc, argv);
