@@ -270,6 +270,31 @@ void Disassembler::dis_drw(void)
     this->cur_line.kk = this->dis_n(this->cur_instr);
 }
 
+void Disassembler::dis_zero(void)
+{
+    uint16_t instr_mask;
+
+    instr_mask = (this->cur_instr & 0x0FFF);
+    switch(instr_mask)
+    {
+        case 0x0E0:     // CLS
+            this->cur_line.opcode.opcode = LEX_CLS;
+            this->cur_line.opcode.mnemonic = "CLS";
+            break;
+
+        case 0x0EE:     // RET
+            this->cur_line.opcode.opcode = LEX_RET;
+            this->cur_line.opcode.mnemonic = "RET";
+            break;
+
+        default:        // SYS nnn
+            this->cur_line.opcode.opcode = LEX_SYS;
+            this->cur_line.opcode.mnemonic = "SYS";
+            this->cur_line.nnn = this->dis_nnn(this->cur_instr);
+            break;
+    }
+}
+
 /*
  * load()
  */
@@ -293,21 +318,17 @@ void Disassembler::disassemble(void)
         return;
     }
 
-    // Disassemble each line in turn
     for(i = 0; i < this->program.numInstr(); ++i)
     {
         instr = this->program.get(i);
         instr_mask = (instr.ins & 0xF000) >> 12;
         this->cur_instr = instr.ins;
         initLineInfo(this->cur_line);
-        if(this->verbose)
-        {
-            std::cout << "[" << __FUNCTION__ << "] testing intr_mask " 
-                << std::hex << std::setw(2) << instr_mask << std::endl;
-        }
+
         switch(instr_mask)
         {
             case 0x0:       // TODO : named constants 
+                this->dis_zero();
                 break;
 
             case 0x3:

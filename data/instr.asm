@@ -32,3 +32,10 @@ ARITHMETIC:     ; 8000 series instructions
 RND_DRAW:
     RND VE, 0x56
     DRW VF, V4, 0x2
+
+JMP_AND_CALL:
+    CLS 
+    RET
+    SYS 0x040
+    SYS 0xA1A
+    CALL 0x443

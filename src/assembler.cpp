@@ -87,6 +87,18 @@ void Assembler::asm_and(const LineInfo& l)
 }
 
 /*
+ * asm_cls()
+ */
+void Assembler::asm_cls(const LineInfo& l)
+{
+    Instr instr;
+
+    instr.ins = 0x00E0;
+    instr.adr = l.addr;
+    this->program.add(instr);
+}
+
+/*
  * asm_drw()
  */
 void Assembler::asm_drw(const LineInfo& l)
@@ -314,6 +326,18 @@ void Assembler::asm_subn(const LineInfo& l)
 }
 
 /*
+ * asm_sys()
+ */
+void Assembler::asm_sys(const LineInfo& l)
+{
+    Instr instr;
+
+    instr.ins = 0x0000 | this->insert_addr(l.nnn);
+    instr.adr = l.addr;
+    this->program.add(instr);
+}
+
+/*
  * asm_xor()
  */
 void Assembler::asm_xor(const LineInfo& l)
@@ -367,6 +391,9 @@ void Assembler::assemble(void)
                 this->asm_and(cur_line);
                 break;
 
+            case LEX_CLS:
+                break;
+
             case LEX_DRW:
                 this->asm_drw(cur_line);
                 break;
@@ -409,6 +436,10 @@ void Assembler::assemble(void)
 
             case LEX_SUBN:
                 this->asm_subn(cur_line);
+                break;
+
+            case LEX_SYS:
+                this->asm_sys(cur_line);
                 break;
 
             case LEX_XOR:

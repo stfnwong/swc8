@@ -47,6 +47,8 @@ class Disassembler
         void dis_rnd(void);
         void dis_drw(void);
 
+        void dis_zero(void);
+
     private:
         Program program;
         SourceInfo source;

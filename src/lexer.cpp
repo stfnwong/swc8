@@ -259,8 +259,7 @@ TOKEN_LABEL:
 
 TOKEN_END:
     if(this->verbose)
-        std::cout << "TOKEN END" << std::endl;
-        //std::cout << "[" << __FUNCTION__ << "] got token of type " << token_type_str[this->cur_token.type] << std::endl;
+        std::cout << "[" << __FUNCTION__ << "] got token of type " << token_type_str[this->cur_token.type] << std::endl;
 }
 
 /*
@@ -593,6 +592,7 @@ void Lexer::parseLine(void)
     unsigned int line_num = 0;
 
     initLineInfo(this->line_info);
+    line_num = this->cur_line;
     this->nextToken();
     if(this->cur_token.type == SYM_LABEL)
     {
@@ -614,9 +614,9 @@ void Lexer::parseLine(void)
             std::cout << "[" << __FUNCTION__ << "] (line " << std::dec << this->cur_line
                 << ") found label " << s.label << std::endl;
         }
+        // update line number if this was a label
+        line_num = this->cur_line;
     }
-
-    line_num = this->cur_line;
 
     if(this->cur_token.type == SYM_INSTR)
     {
@@ -640,6 +640,7 @@ void Lexer::parseLine(void)
 
             case LEX_JP:
             case LEX_CALL:
+            case LEX_SYS:
                 this->parseAddr();
                 break;
 
@@ -659,7 +660,6 @@ void Lexer::parseLine(void)
                 break;
 
             case LEX_RND:
-                //this->parseRegImm();
                 this->parseTwoArg();
                 break;
 
@@ -669,7 +669,6 @@ void Lexer::parseLine(void)
                 break;
 
             case LEX_DRW:
-                std::cout << "Lexing DRW" << std::endl;
                 this->parseTwoArg();
                 // Should also be one more immediate  
                 this->nextToken();
@@ -692,6 +691,8 @@ void Lexer::parseLine(void)
                 this->parseWord();  
                 break;
 
+                //TODO : DB psuedo-op?
+
             default:
                 this->line_info.error = true;
                 this->line_info.errstr = "Invalid instruction " + this->cur_token.val;
@@ -703,6 +704,11 @@ void Lexer::parseLine(void)
                 goto LINE_END;
         }
         this->line_info.opcode = op;
+    }
+    else
+    {
+        std::cout << "[" << __FUNCTION__ << "] invalid instruction on line " << this->line_info.line_num << std::endl;
+        this->line_info.error = true;
     }
 
 LINE_END:

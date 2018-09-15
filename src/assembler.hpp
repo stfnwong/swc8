@@ -35,6 +35,7 @@ class Assembler
         // Assembly routines
         void asm_add(const LineInfo& l); 
         void asm_and(const LineInfo& l); 
+        void asm_cls(const LineInfo& l);
         void asm_drw(const LineInfo& l);
         void asm_jp(const LineInfo& l);
         void asm_ld(const LineInfo& l);
@@ -49,6 +50,7 @@ class Assembler
         void asm_sne(const LineInfo& l);
         void asm_sub(const LineInfo& l);
         void asm_subn(const LineInfo& l);
+        void asm_sys(const LineInfo& l);
         void asm_xor(const LineInfo& l);
         // Insert word
         void asm_dw(const LineInfo& l);

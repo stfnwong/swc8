@@ -208,6 +208,47 @@ SourceInfo get_instr_expected_source_info(void)
     line.kk              = 0x2;
     info.add(line);
 
+    // JMP_AND_CALL
+    // CLS 
+    initLineInfo(line);
+    line.line_num        = 18;
+    line.addr            = 0x211;
+    line.opcode.opcode   = LEX_CLS;
+    line.opcode.mnemonic = "CLS";
+    info.add(line);
+    // RET 
+    initLineInfo(line);
+    line.line_num        = 19;
+    line.addr            = 0x212;
+    line.opcode.opcode   = LEX_RET;
+    line.opcode.mnemonic = "RET";
+    info.add(line);
+    // SYS 0x040
+    initLineInfo(line);
+    line.line_num        = 20;
+    line.addr            = 0x213;
+    line.opcode.opcode   = LEX_SYS;
+    line.opcode.mnemonic = "SYS";
+    line.nnn             = 0x040;
+    info.add(line);
+    // SYS 0xA1A
+    initLineInfo(line);
+    line.line_num        = 21;
+    line.addr            = 0x214;
+    line.opcode.opcode   = LEX_SYS;
+    line.opcode.mnemonic = "SYS";
+    line.nnn             = 0xA1A;
+    info.add(line);
+    // CALL 0x443
+    initLineInfo(line);
+    line.line_num        = 22;
+    line.addr            = 0x215;
+    line.opcode.opcode   = LEX_CALL;
+    line.opcode.mnemonic = "CALL";
+    line.nnn             = 0x443;
+    info.add(line);
+
+
     return info;
 }
 
