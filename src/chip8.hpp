@@ -142,6 +142,11 @@ class Chip8
          * Dump the memory contents into a vector. 
          */
         std::vector<uint8_t> dumpMem(void) const;
+        /*
+         * readMem()
+         * Read a single byte from memory
+         */
+        uint8_t readMem(const unsigned int addr) const;
 };
 
 

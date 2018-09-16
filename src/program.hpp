@@ -91,7 +91,13 @@ class Program
          */
         int load(const std::string& filename);
 
+        /*
+         * writeObj()
+         */
         int writeObj(const std::string& filename);
+        /*
+         * readObj()
+         */
         int readObj(const std::string& filename);
 
         void setVerbose(const bool v);

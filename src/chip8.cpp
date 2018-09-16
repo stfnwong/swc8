@@ -185,9 +185,15 @@ int Chip8::loadMem(const std::string& filename, int offset)
 
 std::vector<uint8_t> Chip8::dumpMem(void) const
 {
-    std::vector<uint8_t>dump(this->mem_size);
+    std::vector<uint8_t> mem_out(this->mem_size);
     for(unsigned int m = 0; m < this->mem_size; ++m)
-        dump[m] = this->mem[m];
+        mem_out[m] = this->mem[m];
+        //mem_out.push_back(this->mem[m]);
 
-    return dump;
+    return mem_out;
+}
+
+uint8_t Chip8::readMem(const unsigned int addr) const
+{
+    return this->mem[addr];
 }

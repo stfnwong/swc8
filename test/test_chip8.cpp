@@ -49,6 +49,37 @@ TEST_F(TestChip8, test_instr_asm)
 
 }
 
+TEST_F(TestChip8, test_load_obj)
+{
+    int status;
+    std::string asm_filename = "data/instr.asm";
+    std::string obj_filename = "data/instr.obj";
+    Lexer lexer;
+    Assembler assembler;
+    Program prog;
+    Chip8 c8;
+
+    std::cout << "Assembling file " << asm_filename << std::endl;
+    lexer.loadFile(asm_filename);
+    lexer.lex();
+    assembler.loadSource(lexer.getSourceInfo());
+    assembler.assemble();
+    prog = assembler.getProgram();
+    status = prog.writeObj(obj_filename);
+    ASSERT_EQ(0, status);
+    std::cout << "Wrote object output to " << obj_filename << std::endl;
+
+    status = c8.loadMem(obj_filename, 0x200);
+    ASSERT_EQ(0, status);
+
+    std::vector<uint8_t> mem_contents = c8.dumpMem();
+    //for(unsigned int idx = 0; idx < mem_contents.size(); ++idx)
+    //    std::cout << std::hex << std::setw(2) << std::setfill('0') << mem_contents[idx] << " ";
+    for(unsigned int idx = 0x200; idx < 0x230; ++idx)
+        std::cout << std::hex << std::setw(2) << std::setfill('0') << std::to_string(c8.readMem(idx)) << " ";
+    std::cout << std::endl;
+}
+
 int main(int argc, char *argv[])
 {
     ::testing::InitGoogleTest(&argc, argv);
