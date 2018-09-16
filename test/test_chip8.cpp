@@ -78,6 +78,77 @@ TEST_F(TestChip8, test_load_obj)
     for(unsigned int idx = 0x200; idx < 0x230; ++idx)
         std::cout << std::hex << std::setw(2) << std::setfill('0') << std::to_string(c8.readMem(idx)) << " ";
     std::cout << std::endl;
+
+    // Check that memory contents do match at the program entry point
+    std::cout << "Checking memory contents against program assembly..." << std::endl;
+    Instr instr = prog.get(0);
+    unsigned int start_adr = instr.adr;
+    unsigned int mem_val; 
+    for(unsigned int idx = start_adr; idx < prog.numInstr(); ++idx)
+    {
+        instr = prog.get(idx - start_adr);
+        mem_val = c8.readMem(idx);
+        ASSERT_EQ(instr.ins, mem_val);
+    }
+}
+
+// Try to run the draw program (no display)
+TEST_F(TestChip8, test_run_draw)
+{
+    int status;
+    std::string asm_filename = "data/draw.asm";
+    std::string obj_filename = "data/draw.obj";
+    Lexer lexer;
+    Assembler assembler;
+    Program prog;
+    Chip8 c8;
+
+    std::cout << "Assembling file " << asm_filename << std::endl;
+    lexer.loadFile(asm_filename);
+    lexer.lex();
+    assembler.loadSource(lexer.getSourceInfo());
+    assembler.assemble();
+    prog = assembler.getProgram();
+    status = prog.writeObj(obj_filename);
+    ASSERT_EQ(0, status);
+    std::cout << "Wrote object output to " << obj_filename << std::endl;
+
+    status = c8.loadMem(obj_filename, 0x200);
+    ASSERT_EQ(0, status);
+
+    // Now that the program binary is in memory, start 
+    // invoking the cycle function and stepping through the 
+    // instructions
+    c8.setTrace(true);
+    c8.cycle();         // jump to start address
+    for(unsigned int i = 0; i < prog.numInstr(); ++i)
+        c8.cycle();
+
+    std::vector<C8Proc> state_trace = c8.getTrace();
+    for(unsigned int i = 0; i < prog.numInstr(); ++i)
+        std::cout << state_trace[i].toString() << std::endl;
+
+}
+
+// ===== INSTRUCTION UNIT TESTS ===== //
+TEST_F(TestChip8, test_and_vxvy)
+{
+    Chip8 c8;
+    C8Proc proc;
+
+    // LD VF, 0x05
+    // LD VA, 0x05
+    // ADD VF, Va
+    std::vector<uint8_t> test_data = {0x6F, 0x05, 0x6A, 0x05, 0x8F, 0xA2}; // ADD Vf, Va
+    std::vector<C8Proc> expected_state;
+
+    proc.pc = 0x200;
+    proc.sp = 0;
+
+    // Execute instruction
+    c8.loadMem(test_data, 0x200);
+    for(unsigned int i = 0; i < 2; ++i)
+        c8.cycle();
 }
 
 int main(int argc, char *argv[])

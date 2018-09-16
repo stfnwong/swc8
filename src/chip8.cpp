@@ -59,6 +59,49 @@ std::string C8Proc::toString(void) const
 }
 
 /*
+ * C8StateLog()
+ */
+C8StateLog::C8StateLog() 
+{
+    this->max_log = 256;
+    this->log_ptr = 0;
+    this->log = std::vector<C8Proc>(this->max_log);
+}
+C8StateLog::~C8StateLog() {} 
+
+C8StateLog::C8StateLog(const C8StateLog& that)
+{
+    this->max_log = that.max_log;
+    this->log_ptr = 0;
+    this->log = std::vector<C8Proc>(this->max_log);
+    for(unsigned int l = 0; l < this->max_log; ++l)
+        this->log[l] = that.log[l];
+}
+
+void C8StateLog::add(const C8Proc& state)
+{
+    if(this->log_ptr >= this->max_log-1)
+        this->log_ptr = 0;
+    this->log[this->log_ptr] = state;
+    this->log_ptr++;
+}
+
+C8Proc C8StateLog::get(const unsigned int idx) const
+{
+    if(idx >= 0 && idx < this->max_log)
+        return this->log[idx];
+    
+    C8Proc p;
+    return p;
+}
+
+std::vector<C8Proc> C8StateLog::getLog(void) const
+{
+    return this->log;
+}
+
+
+/*
  * C8Exec
  * Chip-8 execution context. Allows saving and resuming
  * of pipeline state.
@@ -85,6 +128,22 @@ C8Exec::C8Exec(const C8Exec& that)
     this->nnn = that.nnn;
 }
 
+std::string C8Exec::toString(void)
+{
+    std::ostringstream oss;
+
+    // Top line 
+    oss << " u  p  Vx  Vy kk  nnn " << std::endl;
+    oss << " " << std::hex << std::setw(2) << std::setfill('0') << this->u;
+    oss << " " << std::hex << std::setw(2) << std::setfill('0') << this->p;
+    oss << " " << std::hex << std::setw(2) << std::setfill('0') << this->vx;
+    oss << " " << std::hex << std::setw(2) << std::setfill('0') << this->vy;
+    oss << " " << std::hex << std::setw(2) << std::setfill('0') << this->kk;
+    oss << " " << std::hex << std::setw(2) << std::setfill('0') << this->nnn;
+
+    return oss.str();
+}
+
 /*
  * Chip8
  * Chip-8 object
@@ -93,6 +152,8 @@ Chip8::Chip8()
 {
     this->mem_size = 0x1000;
     this->init_mem();
+    this->log_exec = false;
+    this->log_state = false;
 }
 
 Chip8::~Chip8() {} 
@@ -122,6 +183,7 @@ void Chip8::init_mem(void)
 void Chip8::cycle(void)
 {
     uint16_t instr_code;
+    uint8_t  r;              // result
     // decode 
     this->cur_opcode = (this->mem[this->state.pc] << 8) |  
                        (this->mem[this->state.pc + 1]);
@@ -147,20 +209,145 @@ void Chip8::cycle(void)
             this->state.pc = this->exec.nnn;
             break;
 
-        case C8_SEI:    // LD Vx, kk
+        case C8_SEI:    // SE Vx, kk
+            if(this->state.V[this->exec.vx] == this->exec.kk)
+                this->state.pc += 2;
+            break;
+
+        case C8_SNEI:   // SNE Vx, kk
+            if(this->state.V[this->exec.vx] != this->exec.kk)
+                this->state.pc += 2;
+            break;
+
+        case C8_SE:     // SE Vx Vy
+            if(this->state.V[this->exec.vx] == this->state.V[this->exec.vy])
+                this->state.pc += 2;
+            break;
+
+        case C8_LDI:    // LD Vx, kk
             this->state.V[this->exec.vx] = this->exec.kk;
+            break;
+
+        case C8_ADDI:   // ADD Vx, kk
+            this->state.V[this->exec.vx] += this->exec.kk;
+            break;
+
+        case C8_LD:     // LD Vx, Vy
+            this->state.V[this->exec.vx] = this->state.V[this->exec.vy];
+            break;
+
+            // Arithmetic section
+        case C8_OR:     // OR Vx, Vy
+            this->state.V[this->exec.vx] |= this->state.V[this->exec.vy];
+            break;
+
+        case C8_AND:    // AND Vx, Vy
+            this->state.V[this->exec.vx] &= this->state.V[this->exec.vy];
+            break;
+
+        case C8_XOR:    // XOR Vx, Vy
+            this->state.V[this->exec.vx] ^= this->state.V[this->exec.vy];
+            break;
+
+        case C8_ADD:    // ADD Vx, Vy
+            r = this->state.V[this->exec.vx] + this->state.V[this->exec.vy];
+            this->state.V[0xf] = (r >> 8);
+            this->state.V[this->exec.vx] = r;
+            break;
+
+        case C8_SUB:    // SUB Vx, Vy
+            r = this->state.V[this->exec.vx] - this->state.V[this->exec.vy];
+            this->state.V[0xf] = !(r >> 8);
+            this->state.V[this->exec.vx] = r;
+            break;
+
+        case C8_SHR:    // SHR Vx
+            this->state.V[0xF] = this->state.V[this->exec.vy] & 0x1;
+            this->state.V[this->exec.vx] = this->state.V[this->exec.vy] >> 1;
+            break;
+
+        case C8_SUBN:    // SUBN Vx, Vy
+            r = this->state.V[this->exec.vy] - this->state.V[this->exec.vx];
+            this->state.V[0xf] = !(r >> 8);
+            this->state.V[this->exec.vx] = r;
+            break;
+
+        case C8_SHL:    // SHL, Vx
+            this->state.V[0xF] = this->state.V[this->exec.vy] >> 7;
+            this->state.V[this->exec.vx] = this->state.V[this->exec.vy] << 1;
+            break;
+
+        case C8_SNE:    // SNE Vx, Vy
+            if(this->state.V[this->exec.vx] != this->state.V[this->exec.vy])
+                this->state.pc += 2;
+            break;
+
+        case C8_LDII:   // LD I, nnn
+            this->state.I = this->exec.nnn;
+            break;
+
+        case C8_JPV:    // JP V0, nnn
+            this->state.pc = this->state.V[0x0] + this->exec.nnn;
+            break;
+
+        case C8_RND:
+            std::cout << "TODO: RND" << std::endl;
+            break;
+
+        case C8_DRW:
+            std::cout << "TODO: DRW" << std::endl;
+            break;
+
+        case C8_SKP:    // SKP Vx
+            if(this->state.keys[this->state.V[this->exec.vx] & 0xF])
+               this->state.pc += 2; 
+            break;
+
+        case C8_SKNP:   // SNKP Vx
+            if(!this->state.keys[this->state.V[this->exec.vx] & 0xF])
+               this->state.pc += 2; 
+            break;
+
+        case C8_LDB:    // LD B, Vx
+            this->mem[this->state.I & 0xFFF] = (this->state.V[this->exec.vx] / 100) % 10;
+            this->mem[this->state.I & 0xFFF] = (this->state.V[this->exec.vx] / 100) % 10;
+            this->mem[this->state.I & 0xFFF] = (this->state.V[this->exec.vx] / 100) % 10;
+            break;
+
+        case C8_LDIVX:  // LD [I], Vx
+            for(r = 0; r < this->exec.vx; ++r)
+            {
+                this->mem[this->state.I & 0xFFF] = this->state.V[r];
+                this->state.I++;
+            }
+            break;
+
+        case C8_LDVXI:  // LD Vx, [I]
+            for(r = 0; r < this->exec.vx; ++r)
+            {
+                this->state.V[r] = this->mem[this->state.I & 0xFFF];
+                this->state.I++;
+            }
             break;
 
         default:
             std::cout << "[" << __FUNCTION__ << "] invalid op <0x" 
                 << std::hex << std::setw(4) << std::setfill('0') 
-                << this->cur_opcode << std::endl;
+                << this->cur_opcode << ">" << "instr code <" 
+                << instr_code << ">" << std::endl;
             break;
     }
 
-    this->state.pc += 2;
+    // TODO : update loggging 
+    if(this->log_state)
+    {
+        this->state_log.add(this->state);
+    }
 }
 
+/*
+ * loadMem()
+ */
 int Chip8::loadMem(const std::string& filename, int offset)
 {
     int status = 0;
@@ -183,6 +370,22 @@ int Chip8::loadMem(const std::string& filename, int offset)
     return status;
 }
 
+/*
+ * loadMem()
+ */
+void Chip8::loadMem(const std::vector<uint8_t>& data, int offset)
+{
+    unsigned int addr = offset;
+    for(unsigned int i = 0; i < data.size(); ++i)
+    {
+        this->mem[addr] = data[i];
+        addr++;
+    }
+}
+
+/*
+ * dumpMem()
+ */
 std::vector<uint8_t> Chip8::dumpMem(void) const
 {
     std::vector<uint8_t> mem_out(this->mem_size);
@@ -193,7 +396,20 @@ std::vector<uint8_t> Chip8::dumpMem(void) const
     return mem_out;
 }
 
+/* 
+ * readMem()
+ */
 uint8_t Chip8::readMem(const unsigned int addr) const
 {
     return this->mem[addr];
+}
+
+void Chip8::setTrace(const bool v)
+{
+    this->log_state = v;
+}
+
+std::vector<C8Proc> Chip8::getTrace(void)
+{
+    return this->state_log.getLog();
 }
