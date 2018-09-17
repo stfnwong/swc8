@@ -131,24 +131,367 @@ TEST_F(TestChip8, test_run_draw)
 }
 
 // ===== INSTRUCTION UNIT TESTS ===== //
+// Arithmetic instructions 
+
+// ADD 
+TEST_F(TestChip8, test_add_vxvy)
+{
+    Chip8 c8;
+    C8Proc proc;
+
+    // LD V3, 0x05
+    // LD VA, 0x05
+    // ADD V3, Va
+    std::vector<uint8_t> test_data = {0x63, 0x05, 0x6A, 0x05, 0x83, 0xA4}; 
+    std::vector<C8Proc> expected_state;
+
+    // Create the expected state sequence
+    proc.init();
+    proc.pc     = 0x200;
+    expected_state.push_back(proc);
+    proc.init();
+    proc.pc     = 0x202;
+    proc.V[0x3] = 0x05;
+    expected_state.push_back(proc);
+    proc.init();
+    proc.pc     = 0x204;
+    proc.V[0x3] = 0x05;
+    proc.V[0xA] = 0x05;
+    expected_state.push_back(proc);
+    proc.init();
+    proc.pc     = 0x206;
+    proc.V[0x3] = 0x05 + 0x5;
+    proc.V[0xA] = 0x05;
+    expected_state.push_back(proc);
+
+    // Execute instruction
+    c8.setTrace(true);
+    c8.loadMem(test_data, 0x200);
+    for(unsigned int i = 0; i < expected_state.size()+1; ++i)
+        c8.cycle();
+    std::vector<C8Proc> trace_out = c8.getTrace();
+
+    bool eq;
+    for(unsigned int i = 0; i < expected_state.size(); ++i)
+    {
+        C8Proc exp_proc = expected_state[i];
+        C8Proc out_proc = trace_out[i];
+        eq = exp_proc == out_proc;
+        ASSERT_EQ(true, eq);
+    }
+}
+
+// ADDI
+TEST_F(TestChip8, test_add_vxkk)
+{
+    Chip8 c8;
+    C8Proc proc;
+
+    // LD V3, 0xFF
+    // ADD V3, 0xFF
+    std::vector<uint8_t> test_data = {0x63, 0xFF, 0x73, 0xFF};
+    std::vector<C8Proc> expected_state;
+
+    // Create the expected state sequence
+    proc.init();
+    proc.pc     = 0x200;
+    expected_state.push_back(proc);
+    proc.init();
+    proc.pc     = 0x202;
+    proc.V[0x3] = 0xFF;
+    expected_state.push_back(proc);
+    proc.init();
+    proc.pc     = 0x204;
+    proc.V[0x3] = 0xFE;     // no overflow flag for ADDI
+    expected_state.push_back(proc);
+
+    // Execute instruction
+    c8.setTrace(true);
+    c8.loadMem(test_data, 0x200);
+    for(unsigned int i = 0; i < expected_state.size()+1; ++i)
+        c8.cycle();
+    std::vector<C8Proc> trace_out = c8.getTrace();
+
+    bool eq;
+    for(unsigned int i = 0; i < expected_state.size(); ++i)
+    {
+        C8Proc exp_proc = expected_state[i];
+        C8Proc out_proc = trace_out[i];
+        eq = exp_proc == out_proc;
+        if(!eq)
+            std::cout << trace_out[i].toString();
+        ASSERT_EQ(true, eq);
+    }
+}
+
+// AND 
 TEST_F(TestChip8, test_and_vxvy)
 {
     Chip8 c8;
     C8Proc proc;
 
-    // LD VF, 0x05
-    // LD VA, 0x05
-    // ADD VF, Va
-    std::vector<uint8_t> test_data = {0x6F, 0x05, 0x6A, 0x05, 0x8F, 0xA2}; // ADD Vf, Va
+    // LD V2, 0x0A
+    // LD V3, 0xE4
+    // AND V3, V2
+    std::vector<uint8_t> test_data = {0x62, 0x0A, 0x63, 0xE4, 0x83, 0x22}; // AND V3, V2
     std::vector<C8Proc> expected_state;
 
-    proc.pc = 0x200;
-    proc.sp = 0;
+    // Create the expected state sequence
+    proc.init();
+    proc.pc     = 0x200;
+    expected_state.push_back(proc);
+    proc.init();
+    proc.pc     = 0x202;
+    proc.V[0x2] = 0x0A;
+    expected_state.push_back(proc);
+    proc.init();
+    proc.pc     = 0x204;
+    proc.V[0x2] = 0x0A;
+    proc.V[0x3] = 0xE4;
+    expected_state.push_back(proc);
+    proc.init();
+    proc.pc     = 0x206;
+    proc.V[0x2] = 0x0A;
+    proc.V[0x3] = 0x0A & 0xE4;
+    expected_state.push_back(proc);
 
     // Execute instruction
+    c8.setTrace(true);
     c8.loadMem(test_data, 0x200);
-    for(unsigned int i = 0; i < 2; ++i)
+    for(unsigned int i = 0; i < expected_state.size()+1; ++i)
         c8.cycle();
+    std::vector<C8Proc> trace_out = c8.getTrace();
+
+    //std::cout << "Dumping first " << expected_state.size() << " elements of trace..." << std::endl << std::endl;
+    //for(unsigned int i = 0; i < expected_state.size(); ++i)
+    //    std::cout << trace_out[i].toString();
+
+    bool eq;
+    for(unsigned int i = 0; i < expected_state.size(); ++i)
+    {
+        C8Proc exp_proc = expected_state[i];
+        C8Proc out_proc = trace_out[i];
+        eq = exp_proc == out_proc;
+        ASSERT_EQ(true, eq);
+    }
+}
+
+// OR 
+TEST_F(TestChip8, test_or_vxvy)
+{
+    Chip8 c8;
+    C8Proc proc;
+
+    // LD V3, 0xBA
+    // LD V4, 0xEF
+    // OR V3, V4
+    std::vector<uint8_t> test_data = {0x63, 0xBA, 0x64, 0xEF, 0x83, 0x41};
+    std::vector<C8Proc> expected_state;
+
+    // Create the expected state sequence
+    proc.init();
+    proc.pc     = 0x200;
+    expected_state.push_back(proc);
+    proc.init();
+    proc.pc     = 0x202;
+    proc.V[0x3] = 0xBA;
+    expected_state.push_back(proc);
+    proc.init();
+    proc.pc     = 0x204;
+    proc.V[0x3] = 0xBA;
+    proc.V[0x4] = 0xEF;
+    expected_state.push_back(proc);
+    proc.init();
+    proc.pc     = 0x206;
+    proc.V[0x3] = 0xBA | 0xEF;
+    proc.V[0x4] = 0xEF;
+    expected_state.push_back(proc);
+
+    // Execute instruction
+    c8.setTrace(true);
+    c8.loadMem(test_data, 0x200);
+    for(unsigned int i = 0; i < expected_state.size()+1; ++i)
+        c8.cycle();
+    std::vector<C8Proc> trace_out = c8.getTrace();
+
+    //std::cout << "Dumping first " << expected_state.size() << " elements of trace..." << std::endl << std::endl;
+    //for(unsigned int i = 0; i < expected_state.size(); ++i)
+    //    std::cout << trace_out[i].toString();
+
+    bool eq;
+    for(unsigned int i = 0; i < expected_state.size(); ++i)
+    {
+        C8Proc exp_proc = expected_state[i];
+        C8Proc out_proc = trace_out[i];
+        eq = exp_proc == out_proc;
+        if(!eq)
+        {
+            std::cout << "State " << i << ":" << std::endl << trace_out[i].toString();
+            std::cout << trace_out[i].diffStr(expected_state[i]);
+        }
+        ASSERT_EQ(true, eq);
+    }
+}
+
+// XOR
+TEST_F(TestChip8, test_xor_vxvy)
+{
+    Chip8 c8;
+    C8Proc proc;
+
+    // LD V1, 0xAA
+    // LD V6, 0xBB
+    // XOR V1, V6
+    std::vector<uint8_t> test_data = {0x61, 0xAA, 0x66, 0xBB, 0x81, 0x63}; 
+    std::vector<C8Proc> expected_state;
+
+    // Create the expected state sequence
+    proc.init();
+    proc.pc     = 0x200;
+    expected_state.push_back(proc);
+    proc.init();
+    proc.pc     = 0x202;
+    proc.V[0x1] = 0xAA;
+    expected_state.push_back(proc);
+    proc.init();
+    proc.pc     = 0x204;
+    proc.V[0x1] = 0xAA;
+    proc.V[0x6] = 0xBB;
+    expected_state.push_back(proc);
+    proc.init();
+    proc.pc     = 0x206;
+    proc.V[0x1] = 0xAA ^ 0xBB;
+    proc.V[0x6] = 0xBB;
+    expected_state.push_back(proc);
+
+    // Execute instruction
+    c8.setTrace(true);
+    c8.loadMem(test_data, 0x200);
+    for(unsigned int i = 0; i < expected_state.size()+1; ++i)
+        c8.cycle();
+    std::vector<C8Proc> trace_out = c8.getTrace();
+
+    bool eq;
+    for(unsigned int i = 0; i < expected_state.size(); ++i)
+    {
+        C8Proc exp_proc = expected_state[i];
+        C8Proc out_proc = trace_out[i];
+        eq = exp_proc == out_proc;
+        if(!eq)
+        {
+            std::cout << "State " << i << ":" << std::endl << trace_out[i].toString();
+            std::cout << trace_out[i].diffStr(expected_state[i]);
+        }
+        ASSERT_EQ(true, eq);
+    }
+}
+
+// SUB
+TEST_F(TestChip8, test_sub_vxvy)
+{
+    Chip8 c8;
+    C8Proc proc;
+
+    // LD V3, 0xFF
+    // LD VE, 0xEF
+    // SUB V3, VE
+    std::vector<uint8_t> test_data = {0x63, 0xFF, 0x6E, 0xEF, 0x83, 0xE5};
+    std::vector<C8Proc> expected_state;
+
+    // Create the expected state sequence
+    proc.init();
+    proc.pc     = 0x200;
+    expected_state.push_back(proc);
+    proc.init();
+    proc.pc     = 0x202;
+    proc.V[0x3] = 0xFF;
+    expected_state.push_back(proc);
+    proc.init();
+    proc.pc     = 0x204;
+    proc.V[0x3] = 0xFF;     
+    proc.V[0xE] = 0xEF;
+    expected_state.push_back(proc);
+    proc.init();
+    proc.pc     = 0x206;
+    proc.V[0x3] = 0xFF - 0xEF;
+    proc.V[0xE] = 0xEF;
+    proc.V[0xF] = 0x1;
+    expected_state.push_back(proc);
+
+    // Execute instruction
+    c8.setTrace(true);
+    c8.loadMem(test_data, 0x200);
+    for(unsigned int i = 0; i < expected_state.size()+1; ++i)
+        c8.cycle();
+    std::vector<C8Proc> trace_out = c8.getTrace();
+
+    bool eq;
+    for(unsigned int i = 0; i < expected_state.size(); ++i)
+    {
+        C8Proc exp_proc = expected_state[i];
+        C8Proc out_proc = trace_out[i];
+        eq = exp_proc == out_proc;
+        if(!eq)
+        {
+            std::cout << "State " << i << ":" << std::endl << trace_out[i].toString();
+            std::cout << trace_out[i].diffStr(expected_state[i]);
+        }
+        ASSERT_EQ(true, eq);
+    }
+}
+
+// SUBN
+TEST_F(TestChip8, test_subn_vxvy)
+{
+    Chip8 c8;
+    C8Proc proc;
+
+    // LD V3, 0x08
+    // LD VE, 0x04
+    // SUBN V3, VE
+    std::vector<uint8_t> test_data = {0x63, 0x08, 0x6E, 0x04, 0x83, 0xE7};
+    std::vector<C8Proc> expected_state;
+
+    // Create the expected state sequence
+    proc.init();
+    proc.pc     = 0x200;
+    expected_state.push_back(proc);
+    proc.init();
+    proc.pc     = 0x202;
+    proc.V[0x3] = 0x08;
+    expected_state.push_back(proc);
+    proc.init();
+    proc.pc     = 0x204;
+    proc.V[0x3] = 0x08;
+    proc.V[0xE] = 0x04;
+    expected_state.push_back(proc);
+    proc.init();
+    proc.pc     = 0x206;
+    proc.V[0x3] = 0x4 - 0x8;
+    proc.V[0xE] = 0x04;
+    proc.V[0xF] = 0x1;      // not sure about this carry flag....
+    expected_state.push_back(proc);
+
+    // Execute instruction
+    c8.setTrace(true);
+    c8.loadMem(test_data, 0x200);
+    for(unsigned int i = 0; i < expected_state.size()+1; ++i)
+        c8.cycle();
+    std::vector<C8Proc> trace_out = c8.getTrace();
+
+    bool eq;
+    for(unsigned int i = 0; i < expected_state.size(); ++i)
+    {
+        C8Proc exp_proc = expected_state[i];
+        C8Proc out_proc = trace_out[i];
+        eq = exp_proc == out_proc;
+        if(!eq)
+        {
+            std::cout << "State " << i << ":" << std::endl << trace_out[i].toString();
+            std::cout << trace_out[i].diffStr(expected_state[i]);
+        }
+        ASSERT_EQ(true, eq);
+    }
 }
 
 int main(int argc, char *argv[])

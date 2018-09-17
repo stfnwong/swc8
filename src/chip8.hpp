@@ -18,6 +18,8 @@
 
 // Chip8 instruction codes 
 // effectively a kind of opcode mask 
+#define C8_ZERO   0x0000 // special case here for zeros
+
 #define C8_JP     0x1000
 #define C8_CALL   0x2000
 #define C8_SEI    0x3000
@@ -62,7 +64,6 @@ class C8Proc
         uint16_t pc;            // program counter
         uint16_t sp;            // stack pointer 
         // special registers 
-        uint16_t VF;            // TODO: not required 
         uint16_t I;
         // Timers 
         uint8_t dt;             // Delay timer
@@ -76,9 +77,10 @@ class C8Proc
         C8Proc();
         ~C8Proc();
         C8Proc(const C8Proc& that);
+        void init(void);
         // Print format
         std::string toString(void) const;
-
+        std::string diffStr(const C8Proc& that);
         bool operator==(const C8Proc& that)
         {
             for(int r = 0; r < 16; ++r)
@@ -182,6 +184,10 @@ class Chip8
     private:
         uint16_t cur_opcode;
         uint16_t cur_addr;
+
+    private:
+        // internal execution
+        void exec_zero_op(void);
 
     public:
         Chip8();

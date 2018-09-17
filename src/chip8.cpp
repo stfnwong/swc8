@@ -16,16 +16,7 @@
  */
 C8Proc::C8Proc()
 {
-    for(int r = 0; r < 16; r++)
-        this->V[r] = 0;
-    this->pc = 0;
-    this->sp = 0;
-    // special registers 
-    this->VF = 0;
-    this->I  = 0;
-    // timers 
-    this->dt = 0;
-    this->st = 0;
+    this->init();
 }
 
 
@@ -36,6 +27,7 @@ C8Proc::C8Proc(const C8Proc& that)
     for(int r = 0; r < 16; r++)
         this->V[r] = that.V[r];
     this->pc = that.pc;
+    this->sp = that.sp;
     this->I  = that.I;
     this->dt = that.dt;
     this->st = that.st;
@@ -45,15 +37,134 @@ C8Proc::C8Proc(const C8Proc& that)
         this->keys[k] = that.keys[k];
 }
 
+void C8Proc::init(void)
+{
+    for(int r = 0; r < 16; r++)
+        this->V[r] = 0;
+    for(int s = 0; s < 12; ++s)
+        this->stack[s] = 0;
+    for(int k = 0; k < 16; ++k)
+        this->keys[k] = 0;
+    this->pc = 0;
+    this->sp = 0;
+    // special registers 
+    this->I  = 0;
+    // timers 
+    this->dt = 0;
+    this->st = 0;
+}
+
 std::string C8Proc::toString(void) const
 {
     std::ostringstream oss;
 
     // Top line 
-    oss << "pc   I     flags    " << std::endl;
+    oss << "pc     sp     I      " << std::endl;
     oss << "0x" << std::hex << std::setw(4) << std::setfill('0') << this->pc << " ";
+    oss << "0x" << std::hex << std::setw(2) << std::setfill('0') << this->sp << "   ";
     oss << "0x" << std::hex << std::setw(4) << std::setfill('0') << this->I << " ";
-    // TODO : how to print stack?
+    // Make a little 'stack diagram that goes next to a 'register' 
+    // diagram and print that line by line 
+    oss << std::endl;
+    oss << " Stack           Registers " << std::endl;
+    //for(int line = 0; line < 12; ++line)
+    //{
+    //    oss << " " << std::dec << std::setw(2) << line+1;
+    //    oss << " [ 0x" << std::hex << std::setw(4) << std::setfill('0') 
+    //        << this->stack[line] << " ] " << std::endl;
+    //}
+    //
+    for(int r = 0; r < 16; ++r)
+    {
+        // stack
+        if(r < 12)
+        {
+            oss << " " << std::dec << std::setw(2) << r;
+            oss << " [ 0x" << std::hex << std::setw(4) << std::setfill('0') 
+                << this->stack[r] << " ] ";
+        }
+        else if(r == 13)
+        {
+            oss << " ST: [ 0x" << std::hex << std::setw(2) 
+                << std::setfill('0') << this->st << " ]"; 
+            oss << "   ";
+        }
+        else if(r == 14)
+        {
+            oss << " DT: [ 0x" << std::hex << std::setw(2)
+                << std::setfill('0') << this->dt << " ]"; 
+            oss << "   ";
+        }
+        else 
+            oss << std::setw(15) << std::setfill(' ') << " ";
+
+        // registers 
+        oss << " V" << std::hex << std::setw(1) << std::setfill(' ') 
+            << std::uppercase << r;
+        oss << " [ 0x" << std::hex << std::setw(2) << std::setfill('0') 
+                << std::to_string(this->V[r]) << " ] ";
+        oss << std::endl;
+    }
+
+    return oss.str();
+}
+
+std::string C8Proc::diffStr(const C8Proc& that)
+{
+    std::ostringstream oss;
+
+    oss << "\0";
+    // check registers 
+    for(int r = 0; r < 16; ++r)
+    {
+        if(this->V[r] != that.V[r])
+            oss << "this->V" << std::hex << std::uppercase << r 
+                << " (" << std::hex << std::setw(2) << std::setfill('0')
+                << this->V[r] << ") != that.V" << std::hex << r
+                << " (" << std::hex << std::setw(2) << std::setfill('0')
+                << that.V[r] << ")" << std::endl;
+    }
+    // check stack
+    for(int s = 0; s < 12; ++s)
+    {
+        if(this->stack[s] != that.stack[s])
+        {
+            oss << "this->stack[" << std::hex << std::uppercase << s 
+                << "] (" << std::hex << std::setw(2) << std::setfill('0')
+                << this->stack[s] << ") != that.stack[" << std::hex << s
+                << "] (" << std::hex << std::setw(2) << std::setfill('0')
+                << that.stack[s] << ")" << std::endl;
+        }
+    }
+    // rest of state 
+    if(this->pc != that.pc)
+    {
+        oss << "this->pc (" << std::hex << std::setw(4) 
+            << std::setfill('0') << this->pc << ") != that.pc ("
+            << std::setw(4) << std::setfill('0') << that.pc 
+            << ")" << std::endl;
+    }
+    if(this->sp != that.sp)
+    {
+        oss << "this->sp (" << std::hex << std::setw(4) 
+            << std::setfill('0') << this->sp << ") != that.sp ("
+            << std::setw(4) << std::setfill('0') << that.sp 
+            << ")" << std::endl;
+    }
+    if(this->I != that.I)
+    {
+        oss << "this->I (" << std::hex << std::setw(4) 
+            << std::setfill('0') << this->I << ") != that.I ("
+            << std::setw(4) << std::setfill('0') << that.I 
+            << ")" << std::endl;
+    }
+    //if(this->dt != that.dt)
+    //{
+    //    oss << "this->dt (" << std::hex << std::setw(4) 
+    //        << std::setfill('0') << this->dt << ") != that.dt ("
+    //        << std::setw(4) << std::setfill('0') << that.dt 
+    //        << ")" << std::endl;
+    //}
 
     return oss.str();
 }
@@ -63,7 +174,7 @@ std::string C8Proc::toString(void) const
  */
 C8StateLog::C8StateLog() 
 {
-    this->max_log = 256;
+    this->max_log = 32;
     this->log_ptr = 0;
     this->log = std::vector<C8Proc>(this->max_log);
 }
@@ -154,6 +265,7 @@ Chip8::Chip8()
     this->init_mem();
     this->log_exec = false;
     this->log_state = false;
+    this->state.init();
 }
 
 Chip8::~Chip8() {} 
@@ -177,6 +289,28 @@ void Chip8::init_mem(void)
 }
 
 /*
+ * exec_zero_op()
+ */
+void Chip8::exec_zero_op(void)
+{
+    uint16_t zero_code = this->cur_opcode & 0x0FFF;
+    switch(zero_code)
+    {
+        case 0x00E0:        // CLS 
+            std::cout << "[" << __FUNCTION__ << "] got CLS" << std::endl;
+            break;
+
+        case 0x00EE:        // RET 
+            std::cout << "[" << __FUNCTION__ << "] got RET" << std::endl;
+            break;
+
+        default:            // SYS 
+            std::cout << "[" << __FUNCTION__ << "] got SYS" << std::endl;
+            break;
+    }
+}
+
+/*
  * cycle()
  * Run through the instruction cycle 
  */
@@ -197,9 +331,43 @@ void Chip8::cycle(void)
     this->exec.nnn = (this->cur_opcode      ) & 0x0FFF;
 
     instr_code = 0x0000 | (this->exec.u << 12) | (this->exec.p);
+    // Modify the code here for the jump tbale 
+    switch(this->exec.u)
+    {
+        case 0x0:
+            instr_code = 0x0000;
+            break;
+
+        case 0x1:
+        case 0x2:
+        case 0x3:
+        case 0x4:
+        case 0x5:
+        case 0x6:
+        case 0x7:
+        case 0xA:
+        case 0xB:
+        case 0xC:
+        case 0xD:
+            instr_code &= 0xFFF0;
+            break;
+
+        default:
+            break;
+    }
+
+    std::cout << "[" << __FUNCTION__ << "] instr_code " 
+        << std::hex << std::setw(4) << std::setfill('0')
+        << instr_code << std::endl;
+
     switch(instr_code)
     {
+        case C8_ZERO:
+            this->exec_zero_op();
+            break;
+
         case C8_JP:
+            std::cout << "JP" << std::endl;
             this->state.pc = this->exec.nnn;
             break;
 
@@ -334,6 +502,7 @@ void Chip8::cycle(void)
             std::cout << "[" << __FUNCTION__ << "] invalid op <0x" 
                 << std::hex << std::setw(4) << std::setfill('0') 
                 << this->cur_opcode << ">" << "instr code <" 
+                << std::hex << std::setw(4) << std::setfill('0') 
                 << instr_code << ">" << std::endl;
             break;
     }
