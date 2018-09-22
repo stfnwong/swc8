@@ -159,6 +159,10 @@ static constexpr const unsigned int H = 64;
 class Chip8
 {
     private:
+        bool verbose;
+        std::mt19937 rnd{};
+
+    private:
         // Processor state 
         bool log_state;
         C8StateLog state_log;
@@ -228,6 +232,14 @@ class Chip8
          * Return the state trace as a vector 
          */
         std::vector<C8Proc> getTrace(void);
+        /* 
+         * getState()
+         * Get a copy of the state object 
+         */
+        C8Proc getState(void) const;
+
+        void setVerbose(const bool v);
+        bool getVerbose(void) const;
 };
 
 

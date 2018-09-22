@@ -17,8 +17,38 @@ class TestChip8 : public ::testing::Test
 {
     virtual void SetUp() {}
     virtual void TearDown() {}
+
+    // State vector compare 
+    public:
+        void compare_state_vector(
+                const std::vector<C8Proc>& exp_vector,
+                const std::vector<C8Proc>& out_vector);
 };
 
+void TestChip8::compare_state_vector(
+        const std::vector<C8Proc>& exp_vector,
+        const std::vector<C8Proc>& out_vector)
+{
+    //ASSERT_EQ(exp_vector.size(), out_vector.size());
+    bool eq;
+    for(unsigned int i = 0; i < exp_vector.size(); ++i)
+    {
+        C8Proc exp_proc = exp_vector[i];
+        C8Proc out_proc = out_vector[i];
+        eq = (exp_proc == out_proc);
+        if(!eq)
+        {
+            std::cout << "Error in State " << i << ":" << std::endl;
+            std::cout << out_proc.toString();
+            std::cout << "State " << i << " diff:" << std::endl;
+            std::cout << out_proc.diffStr(exp_proc) << std::endl;
+            //std::cout << out_vector[i].diffStr(exp_proc[i]) << std::endl;
+        }
+        ASSERT_EQ(true, eq);
+    }
+}
+
+// Test initialization
 TEST_F(TestChip8, test_init)
 {
     Chip8 c8;
@@ -27,27 +57,38 @@ TEST_F(TestChip8, test_init)
     ASSERT_EQ(0x00, mem_dump[1]);
     for(unsigned int m = 2; m < mem_dump.size(); m++)
         ASSERT_EQ(0, mem_dump[m]);
+
+    // Check that the state is initialized correctly 
+    C8Proc state = c8.getState(); 
+
+    // registers, stack
+    for(int r = 0; r < 16; ++r)
+        ASSERT_EQ(0, state.V[r]);
+
+    for(int s = 0; s < 12; ++s)
+        ASSERT_EQ(0, state.stack[s]);
+    // rest of state 
 }
 
-TEST_F(TestChip8, test_instr_asm)
-{
-    int status;
-    std::string prog_filename = "data/instr.asm";
-    Chip8 c8;
-
-    // Ensure the program is assembled, etc before execution 
-    Lexer lexer;
-    Assembler assembler;
-
-    // Assemble the source into a program
-    status = lexer.loadFile(prog_filename);
-    ASSERT_EQ(0, status);
-    std::cout << "\t Assembing file " << prog_filename << std::endl;
-    lexer.lex();
-    assembler.loadSource(lexer.getSourceInfo());
-    assembler.assemble();
-
-}
+//TEST_F(TestChip8, test_instr_asm)
+//{
+//    int status;
+//    std::string prog_filename = "data/instr.asm";
+//    Chip8 c8;
+//
+//    // Ensure the program is assembled, etc before execution 
+//    Lexer lexer;
+//    Assembler assembler;
+//
+//    // Assemble the source into a program
+//    status = lexer.loadFile(prog_filename);
+//    ASSERT_EQ(0, status);
+//    std::cout << "\t Assembing file " << prog_filename << std::endl;
+//    lexer.lex();
+//    assembler.loadSource(lexer.getSourceInfo());
+//    assembler.assemble();
+//
+//}
 
 TEST_F(TestChip8, test_load_obj)
 {
@@ -73,8 +114,6 @@ TEST_F(TestChip8, test_load_obj)
     ASSERT_EQ(0, status);
 
     std::vector<uint8_t> mem_contents = c8.dumpMem();
-    //for(unsigned int idx = 0; idx < mem_contents.size(); ++idx)
-    //    std::cout << std::hex << std::setw(2) << std::setfill('0') << mem_contents[idx] << " ";
     for(unsigned int idx = 0x200; idx < 0x230; ++idx)
         std::cout << std::hex << std::setw(2) << std::setfill('0') << std::to_string(c8.readMem(idx)) << " ";
     std::cout << std::endl;
@@ -212,16 +251,18 @@ TEST_F(TestChip8, test_add_vxkk)
         c8.cycle();
     std::vector<C8Proc> trace_out = c8.getTrace();
 
-    bool eq;
-    for(unsigned int i = 0; i < expected_state.size(); ++i)
-    {
-        C8Proc exp_proc = expected_state[i];
-        C8Proc out_proc = trace_out[i];
-        eq = exp_proc == out_proc;
-        if(!eq)
-            std::cout << trace_out[i].toString();
-        ASSERT_EQ(true, eq);
-    }
+    this->compare_state_vector(expected_state, trace_out);
+
+    //bool eq;
+    //for(unsigned int i = 0; i < expected_state.size(); ++i)
+    //{
+    //    C8Proc exp_proc = expected_state[i];
+    //    C8Proc out_proc = trace_out[i];
+    //    eq = exp_proc == out_proc;
+    //    if(!eq)
+    //        std::cout << trace_out[i].toString();
+    //    ASSERT_EQ(true, eq);
+    //}
 }
 
 // AND 
@@ -261,10 +302,6 @@ TEST_F(TestChip8, test_and_vxvy)
     for(unsigned int i = 0; i < expected_state.size()+1; ++i)
         c8.cycle();
     std::vector<C8Proc> trace_out = c8.getTrace();
-
-    //std::cout << "Dumping first " << expected_state.size() << " elements of trace..." << std::endl << std::endl;
-    //for(unsigned int i = 0; i < expected_state.size(); ++i)
-    //    std::cout << trace_out[i].toString();
 
     bool eq;
     for(unsigned int i = 0; i < expected_state.size(); ++i)
@@ -313,10 +350,6 @@ TEST_F(TestChip8, test_or_vxvy)
     for(unsigned int i = 0; i < expected_state.size()+1; ++i)
         c8.cycle();
     std::vector<C8Proc> trace_out = c8.getTrace();
-
-    //std::cout << "Dumping first " << expected_state.size() << " elements of trace..." << std::endl << std::endl;
-    //for(unsigned int i = 0; i < expected_state.size(); ++i)
-    //    std::cout << trace_out[i].toString();
 
     bool eq;
     for(unsigned int i = 0; i < expected_state.size(); ++i)
@@ -492,6 +525,158 @@ TEST_F(TestChip8, test_subn_vxvy)
         }
         ASSERT_EQ(true, eq);
     }
+}
+
+
+// PROGRAM CONTROL
+//TEST_F(TestChip8, test_jp)
+//{
+//    Chip8 c8;
+//    C8Proc proc;
+//
+//    // LD VE, 0x1
+//    // LD V2, VE
+//    // ADD VE, 0x1
+//    // LD V3, VE
+//    // ADD VE, 0x1
+//    // ... and so on through 
+//    // SUBN V3, VE
+//    std::vector<uint8_t> test_data = {0x63, 0x08, 0x6E, 0x04, 0x83, 0xE7};
+//    std::vector<C8Proc> expected_state;
+//
+//    // Create the expected state sequence
+//    proc.init();
+//    proc.pc     = 0x200;
+//    expected_state.push_back(proc);
+//    proc.init();
+//    proc.pc     = 0x202;
+//    proc.V[0x3] = 0x08;
+//    expected_state.push_back(proc);
+//    proc.init();
+//    proc.pc     = 0x204;
+//    proc.V[0x3] = 0x08;
+//    proc.V[0xE] = 0x04;
+//    expected_state.push_back(proc);
+//    proc.init();
+//    proc.pc     = 0x206;
+//    proc.V[0x3] = 0x4 - 0x8;
+//    proc.V[0xE] = 0x04;
+//    proc.V[0xF] = 0x1;      // not sure about this carry flag....
+//    expected_state.push_back(proc);
+//
+//    // Execute instruction
+//    c8.setTrace(true);
+//    c8.loadMem(test_data, 0x200);
+//    for(unsigned int i = 0; i < expected_state.size()+1; ++i)
+//        c8.cycle();
+//    std::vector<C8Proc> trace_out = c8.getTrace();
+//
+//    bool eq;
+//    for(unsigned int i = 0; i < expected_state.size(); ++i)
+//    {
+//        C8Proc exp_proc = expected_state[i];
+//        C8Proc out_proc = trace_out[i];
+//        eq = exp_proc == out_proc;
+//        if(!eq)
+//        {
+//            std::cout << "State " << i << ":" << std::endl << trace_out[i].toString();
+//            std::cout << trace_out[i].diffStr(expected_state[i]);
+//        }
+//        ASSERT_EQ(true, eq);
+//    }
+//}
+
+TEST_F(TestChip8, test_call_ret)
+{
+    Chip8 c8;
+    C8Proc proc;
+    std::vector<C8Proc> trace_out;
+
+    // LD V3, 0x08
+    // LD V4, 0x04
+    // ADD V3, V4
+    // CALL 0x20A
+    // LD V5 0x01
+    // ADD V3, V5
+    // RET
+    // LD V6, 0xFF
+    std::vector<uint8_t> test_data = {
+        0x63, 0x08, 0x64, 0x04, 0x83, 0x44, 0x22, 0x0A,
+        0x65, 0x01, 0x83, 0x54, 0x00, 0xEE, 0x66, 0xFF};
+    std::vector<C8Proc> expected_state;
+
+    // Create the expected state sequence
+    proc.init();
+    proc.pc     = 0x200;
+    expected_state.push_back(proc);
+    proc.init();
+    proc.pc     = 0x202;
+    proc.V[0x3] = 0x08;
+    expected_state.push_back(proc);
+    proc.init();
+    proc.pc     = 0x204;
+    proc.V[0x3] = 0x08;
+    proc.V[0x4] = 0x04;
+    expected_state.push_back(proc);
+    proc.init();
+    proc.pc     = 0x206;
+    proc.V[0x3] = 0x8 + 0x4;
+    proc.V[0x4] = 0x04;
+    expected_state.push_back(proc);
+    // Call 
+    proc.init();
+    proc.pc     = 0x208;
+    proc.V[0x3] = 0xB;
+    proc.V[0x4] = 0x04;
+    proc.stack[0] = 0x208;
+    proc.sp = 1;
+    expected_state.push_back(proc);
+    // "subroutine"
+    proc.init();
+    proc.pc     = 0x20A;
+    proc.V[0x3] = 0xB;
+    proc.V[0x4] = 0x04;
+    proc.V[0x5] = 0x01;
+    proc.stack[0] = 0x208;
+    proc.sp = 1;
+    expected_state.push_back(proc);
+    proc.init();
+    proc.pc     = 0x20C;
+    proc.V[0x3] = 0xC;
+    proc.V[0x4] = 0x04;
+    proc.V[0x5] = 0x01;
+    proc.stack[0] = 0x208;
+    proc.sp = 1;
+    expected_state.push_back(proc);
+    // RET
+    proc.init();
+    proc.pc     = 0x20E;
+    proc.V[0x3] = 0xC;
+    proc.V[0x4] = 0x04;
+    proc.V[0x5] = 0x01;
+    proc.sp = 0;
+    expected_state.push_back(proc);
+    // Move to previous stack pointer 
+    // positon
+    proc.init();
+    proc.pc     = 0x208;
+    proc.V[0x3] = 0xC;
+    proc.V[0x4] = 0x04;
+    proc.V[0x5] = 0x01;
+    expected_state.push_back(proc);
+
+    // Execute instruction
+    c8.setTrace(true);
+    c8.loadMem(test_data, 0x200);
+    for(unsigned int i = 0; i < expected_state.size()+1; ++i)
+        c8.cycle();
+    trace_out = c8.getTrace();
+
+    // TODO : (debug) dump the whple trace here 
+    for(unsigned int t = 0; t < 8; ++t)
+        std::cout << trace_out[t].toString();
+
+    this->compare_state_vector(expected_state, trace_out);
 }
 
 int main(int argc, char *argv[])

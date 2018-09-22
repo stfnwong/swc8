@@ -19,7 +19,6 @@ C8Proc::C8Proc()
     this->init();
 }
 
-
 C8Proc::~C8Proc() {}
 
 C8Proc::C8Proc(const C8Proc& that)
@@ -57,23 +56,19 @@ void C8Proc::init(void)
 std::string C8Proc::toString(void) const
 {
     std::ostringstream oss;
+    // TODO : make non-zero values some color (eg: red) for easy 
+    // recognition
 
     // Top line 
     oss << "pc     sp     I      " << std::endl;
     oss << "0x" << std::hex << std::setw(4) << std::setfill('0') << this->pc << " ";
     oss << "0x" << std::hex << std::setw(2) << std::setfill('0') << this->sp << "   ";
     oss << "0x" << std::hex << std::setw(4) << std::setfill('0') << this->I << " ";
+
     // Make a little 'stack diagram that goes next to a 'register' 
     // diagram and print that line by line 
     oss << std::endl;
     oss << " Stack           Registers " << std::endl;
-    //for(int line = 0; line < 12; ++line)
-    //{
-    //    oss << " " << std::dec << std::setw(2) << line+1;
-    //    oss << " [ 0x" << std::hex << std::setw(4) << std::setfill('0') 
-    //        << this->stack[line] << " ] " << std::endl;
-    //}
-    //
     for(int r = 0; r < 16; ++r)
     {
         // stack
@@ -301,11 +296,13 @@ void Chip8::exec_zero_op(void)
             break;
 
         case 0x00EE:        // RET 
-            std::cout << "[" << __FUNCTION__ << "] got RET" << std::endl;
+            this->state.sp--;
+            this->state.pc = this->state.stack[this->state.sp % 12];
             break;
 
-        default:            // SYS 
-            std::cout << "[" << __FUNCTION__ << "] got SYS" << std::endl;
+        default:            // SYS  (nop in this interpreter)
+            if(this->verbose)
+                std::cout << "[" << __FUNCTION__ << "] got SYS" << std::endl;
             break;
     }
 }
@@ -331,7 +328,7 @@ void Chip8::cycle(void)
     this->exec.nnn = (this->cur_opcode      ) & 0x0FFF;
 
     instr_code = 0x0000 | (this->exec.u << 12) | (this->exec.p);
-    // Modify the code here for the jump tbale 
+    // Modify the code here for the jump table 
     switch(this->exec.u)
     {
         case 0x0:
@@ -356,9 +353,9 @@ void Chip8::cycle(void)
             break;
     }
 
-    std::cout << "[" << __FUNCTION__ << "] instr_code " 
-        << std::hex << std::setw(4) << std::setfill('0')
-        << instr_code << std::endl;
+    //std::cout << "[" << __FUNCTION__ << "] instr_code " 
+    //    << std::hex << std::setw(4) << std::setfill('0')
+    //    << instr_code << std::endl;
 
     switch(instr_code)
     {
@@ -366,14 +363,13 @@ void Chip8::cycle(void)
             this->exec_zero_op();
             break;
 
-        case C8_JP:
-            std::cout << "JP" << std::endl;
+        case C8_JP:     // JP nnn
             this->state.pc = this->exec.nnn;
             break;
 
-        case C8_CALL:
-            this->state.sp++;
+        case C8_CALL:   // CALL nnn
             this->state.stack[this->state.sp % 12] = this->state.pc;
+            this->state.sp++;
             this->state.pc = this->exec.nnn;
             break;
 
@@ -459,7 +455,7 @@ void Chip8::cycle(void)
             break;
 
         case C8_RND:
-            std::cout << "TODO: RND" << std::endl;
+            this->state.V[this->exec.vx] = std::uniform_int_distribution<>(0,255)(rnd) & this->exec.kk;
             break;
 
         case C8_DRW:
@@ -507,11 +503,8 @@ void Chip8::cycle(void)
             break;
     }
 
-    // TODO : update loggging 
     if(this->log_state)
-    {
         this->state_log.add(this->state);
-    }
 }
 
 /*
@@ -532,7 +525,7 @@ int Chip8::loadMem(const std::string& filename, int offset)
     }
     catch(std::ios_base::failure& e) {
         std::cerr << "[" << __FUNCTION__ << "] caught execption [%s]" << 
-            e.what() << std::endl;
+            e.what() << " while reading file " << filename << std::endl;
         status = -1;
     }
 
@@ -581,4 +574,18 @@ void Chip8::setTrace(const bool v)
 std::vector<C8Proc> Chip8::getTrace(void)
 {
     return this->state_log.getLog();
+}
+
+C8Proc Chip8::getState(void) const
+{
+    return this->state;
+}
+
+void Chip8::setVerbose(const bool v)
+{
+    this->verbose = v;
+}
+bool Chip8::getVerbose(void) const
+{
+    return this->verbose;
 }
