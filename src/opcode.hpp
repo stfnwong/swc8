@@ -11,11 +11,22 @@
 #include <vector>
 #include <cstdint>
 
-typedef struct 
+
+/*
+ * Opcode object
+ */
+struct Opcode
 {
     uint16_t    opcode;
     std::string mnemonic;
-} Opcode;
+
+    public:
+        Opcode();
+        Opcode(const uint16_t code, const std::string& m);
+
+        bool operator==(const Opcode& that) const;
+        bool operator!=(const Opcode& that) const;
+};
 
 /* 
  * OpcodeTable 
@@ -28,8 +39,8 @@ class OpcodeTable
         std::vector<Opcode> op_list;
         
     public:
-        OpcodeTable();
-        ~OpcodeTable();
+        OpcodeTable() {} 
+
         void add(const Opcode& o);
         void get(const std::string& mnemonic, Opcode& o) const;
         void get(const uint16_t opcode, Opcode& o) const;

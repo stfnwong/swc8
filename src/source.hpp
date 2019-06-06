@@ -15,6 +15,7 @@
 
 // Token types for lexer 
 typedef enum TokenType{
+    SYM_NULL,
     SYM_EOF,
     SYM_LABEL,
     SYM_INSTR,
@@ -51,11 +52,17 @@ const std::vector<std::string> token_type_str = {
  * LexToken
  * A token emitted by the lexer
  */
-typedef struct 
+struct  Token
 {
     TokenType type;
     std::string val;
-} Token;
+
+    public:
+        Token();
+        Token(const TokenType& t, const std::string& v);
+        bool operator==(const Token& that) const;
+        bool operator!=(const Token& that) const;
+};
 
 
 /* 
@@ -64,12 +71,11 @@ typedef struct
 class TokenTable
 {
     private: 
+        Token null_token;
         std::vector<Token> tokens;
 
     public:
         TokenTable();
-        ~TokenTable();
-        TokenTable(const TokenTable& that);
         
         // Modify table 
         void add(const Token& t);
@@ -79,20 +85,28 @@ class TokenTable
 
 // ======== SYMBOL ======== //
 
-typedef struct 
+struct Symbol
 {
     uint16_t    addr;
     std::string label;
-}Symbol;
+
+    public:
+        Symbol();
+        Symbol(const uint16_t a, const std::string& l);
+        bool operator==(const Symbol& that) const;
+        bool operator!=(const Symbol& that) const;
+        //std::string toString(void) const;
+};
+
 
 class SymbolTable
 {
     private:
+        Symbol null_sym;
         std::vector<Symbol> syms;
+
     public:
         SymbolTable();
-        ~SymbolTable();
-        SymbolTable(const SymbolTable& that);
 
         void         add(const Symbol& s);
         void         update(const unsigned int idx, const Symbol& s);
@@ -120,7 +134,8 @@ class SymbolTable
 #define LEX_OP_DIR   0x04
 
 // Chip 8 LineInfo structure 
-typedef struct{
+struct LineInfo
+{
     std::string  symbol;
     std::string  label;
     std::string  errstr;
@@ -137,18 +152,17 @@ typedef struct{
     bool         is_imm;
     bool         is_directive;
     bool         error;
-} LineInfo;
 
-/*
- * initLineInfo()
- * Reset a lineinfo struct
- */
-void initLineInfo(LineInfo& l);
-/*
- * compLineInfo()
- * Compare two LineInfo structs
- */
-bool compLineInfo(const LineInfo& a, const LineInfo& b);
+
+    public:
+        LineInfo();
+
+        void init(void);
+        bool operator==(const LineInfo& that) const;
+        bool operator!=(const LineInfo& that) const;
+        std::string toString(void) const;
+};
+
 void printLineDiff(const LineInfo& a, const LineInfo& b);
 
 /* 
@@ -164,8 +178,7 @@ class SourceInfo
         
     public:
         SourceInfo();
-        ~SourceInfo();
-        SourceInfo(const SourceInfo& that);
+
         // Add/remove lines
         void         add(const LineInfo& l);
         void         update(const unsigned int idx, const LineInfo& l);
@@ -183,8 +196,6 @@ class SourceInfo
         int          write(const std::string& filename);
         int          read(const std::string& filename);
 
-        // String / display 
-        void         printLine(const unsigned int idx);
         std::string  dumpErrors(void);
 }; 
 

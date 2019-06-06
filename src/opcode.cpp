@@ -9,9 +9,41 @@
 #include <iomanip>
 #include "opcode.hpp"
 
-OpcodeTable::OpcodeTable() {} 
 
-OpcodeTable::~OpcodeTable() {} 
+/*
+ * OPCODE
+ */
+Opcode::Opcode()
+{
+    this->opcode   = 0;
+    this->mnemonic = "\0";
+}
+
+Opcode::Opcode(const uint16_t code, const std::string& m)
+{
+    this->opcode = code;
+    this->mnemonic = m;
+}
+
+bool Opcode::operator==(const Opcode& that) const
+{
+    if(this->opcode != that.opcode)
+        return false;
+    if(this->menmonic != that.menmonic)
+        return false;
+    return true;
+}
+
+bool Opcode::operator!=(const Opcode& that) const
+{
+    if(this->opcode == that.opcode)
+        return false;
+    if(this->menmonic == that.menmonic)
+        return false;
+    return true;
+}
+
+
 
 void OpcodeTable::add(const Opcode& o)
 {

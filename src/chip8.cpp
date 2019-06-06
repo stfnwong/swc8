@@ -53,6 +53,7 @@ void C8Proc::init(void)
     this->st = 0;
 }
 
+// TODO : make this more horizontal, up to 80 chars
 std::string C8Proc::toString(void) const
 {
     std::ostringstream oss;
