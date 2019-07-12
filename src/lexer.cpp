@@ -247,7 +247,10 @@ TOKEN_LABEL:
 
 TOKEN_END:
     if(this->verbose)
-        std::cout << "[" << __FUNCTION__ << "] got token of type " << token_type_str[this->cur_token.type] << std::endl;
+    {
+        std::cout << "[" << __FUNCTION__ << "] got token " <<
+            this->cur_token.toString() << std::endl;
+    }
 }
 
 /*
@@ -260,6 +263,7 @@ void Lexer::parseTwoArg(void)
     {
         this->line_info.reg_flags = LEX_IREG;
         this->nextToken();
+
         if(this->cur_token.type == SYM_REG)
         {
             this->line_info.vy = std::stoi(this->cur_token.val.substr(1,1), nullptr, 16);
@@ -579,7 +583,7 @@ void Lexer::parseLine(void)
     Symbol s;
     unsigned int line_num = 0;
 
-    initLineInfo(this->line_info);
+    this->line_info.init();
     line_num = this->cur_line;
     this->nextToken();
     if(this->cur_token.type == SYM_LABEL)

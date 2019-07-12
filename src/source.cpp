@@ -42,6 +42,16 @@ bool Token::operator!=(const Token& that) const
     return true;
 }
 
+std::string Token::toString(void) const
+{
+    std::ostringstream oss;
+
+    oss << "[" << token_type_str[this->type] << "] ";
+    oss << " " << this->val;
+
+    return oss.str();
+}
+
 
 /* 
  * TokenTable 
@@ -360,7 +370,7 @@ LineInfo SourceInfo::get(const unsigned int idx) const
 
 std::string SourceInfo::getStr(const unsigned int idx) 
 {
-    return this->line_to_string(this->line_info[idx]);
+    return this->line_info[idx].toString();
 }
 
 unsigned int SourceInfo::getLineNum(const unsigned int idx) const
@@ -461,14 +471,6 @@ int SourceInfo::read(const std::string& filename)
     int status = 0;
 
     return status;
-}
-
-void SourceInfo::printLine(const unsigned int idx)
-{
-    if(idx > this->line_info.size())
-        return;
-    std::cout << this->line_to_string(
-            this->line_info[idx]);
 }
 
 std::string SourceInfo::dumpErrors(void)

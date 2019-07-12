@@ -296,8 +296,9 @@ TEST_F(TestDisassembler, test_dis_instr)
         LineInfo exp_line = exp_out.get(idx);
         LineInfo dis_line = dis_out.get(idx);
         printLineDiff(exp_line, dis_line);
-        std::cout << "Checking line " << std::dec << idx << "/" << dis_out.getNumLines() << std::endl;
+        std::cout << "Checking line " << std::dec << idx << "/" << dis_out.getNumLines();
         ASSERT_EQ(exp_line, dis_line);
+        std::cout << " <OK>" << std::endl;
     }
 }
 

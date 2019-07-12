@@ -29,7 +29,7 @@ bool Opcode::operator==(const Opcode& that) const
 {
     if(this->opcode != that.opcode)
         return false;
-    if(this->menmonic != that.menmonic)
+    if(this->mnemonic != that.mnemonic)
         return false;
     return true;
 }
@@ -38,7 +38,7 @@ bool Opcode::operator!=(const Opcode& that) const
 {
     if(this->opcode == that.opcode)
         return false;
-    if(this->menmonic == that.menmonic)
+    if(this->mnemonic == that.mnemonic)
         return false;
     return true;
 }

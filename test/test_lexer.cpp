@@ -308,7 +308,6 @@ TEST_F(TestLexer, test_draw_asm)
         exp_line = exp_output.get(idx);
         std::cout << exp_line.toString() << std::endl;
     }
-
     std::cout << std::endl;
     // Show the actual lexer output 
     std::cout << "\t Lexer output for file " << src_filename << std::endl;

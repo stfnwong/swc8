@@ -18,7 +18,7 @@ Draw_Line_C:
 Draw_Column_C:
 
     ADD Vb, 0x01    ; Add position to Y
-    LD I, Columm   ; Load column sprite
+    LD I, Column   ; Load column sprite
     DRW Va, Vb, 0x1
     SE Vb, 0x07       ; Skip repeate
     JP Draw_Column_C  ; Repeate Draw_Column
@@ -30,7 +30,7 @@ Draw_H:
 
 Draw_Column_H:
     ADD Vb, 0x01    ; Add position to Y
-    LD I, Columm   ; Load column sprite
+    LD I, Column   ; Load column sprite
     DRW Va, Vb, 0x1
     SE Vb, V1       ; Skip repeate
     JP Draw_Column_H  ; Repeate Draw_Column
@@ -41,9 +41,5 @@ RET
 Line:
     DW 0x7000
 
-Columm:
+Column:
     DW 0x8000
-
-
-
-

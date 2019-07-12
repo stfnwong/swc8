@@ -32,7 +32,8 @@ typedef enum TokenType{
 } TokenType;
 
 // Array for string conversion by index
-const std::vector<std::string> token_type_str = {
+static const std::vector<std::string> token_type_str = {
+    "NULL",
     "EOF",
     "LABEL",
     "INSTR",
@@ -62,6 +63,7 @@ struct  Token
         Token(const TokenType& t, const std::string& v);
         bool operator==(const Token& that) const;
         bool operator!=(const Token& that) const;
+        std::string toString(void) const;
 };
 
 
@@ -153,7 +155,6 @@ struct LineInfo
     bool         is_directive;
     bool         error;
 
-
     public:
         LineInfo();
 
@@ -173,7 +174,6 @@ class SourceInfo
 {
     private:
         std::vector <LineInfo> line_info;
-        std::string line_to_string(const LineInfo& l);
         bool error;
         
     public:
