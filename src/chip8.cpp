@@ -59,9 +59,55 @@ std::string C8Proc::toString(void) const
     std::ostringstream oss;
     // TODO : make non-zero values some color (eg: red) for easy 
     // recognition
+    
+    // register section
+    oss << "---------------------------------------------------------------------" << std::endl;
+    oss << "Registers :" << std::endl;
+    oss << "V0   V1   V2   V3   V4   V5   V6   V7   " << std::endl;
+    for(int r = 0; r < 8; ++r)
+    {
+        oss << "0x" << std::hex << std::setfill('0') << 
+            std::setw(2) << unsigned(this->V[r]) << " ";
+    }
+    oss << std::endl;
+    oss << "V8   V9   VA   VB   VC   VD   VE   VF" << std::endl;
+    for(int r = 8; r < 16; ++r)
+    {
+        oss << "0x" << std::hex << std::setfill('0') << 
+            std::setw(2) << unsigned(this->V[r]) << " ";
+    }
+    oss << std::endl;
 
-    // Top line 
-    oss << "pc     sp     I      " << std::endl;
+    // stack section
+    oss << "---------------------------------------------------------------------" << std::endl;
+    oss << "Stack :" << std::endl;
+    oss << "  ";
+    for(int s = 0; s < 6; ++s)
+        oss << "S" << std::dec << std::setw(2) << s << "  ";
+
+    oss << std::endl;
+    //oss << "S0   S1   S2   S3   S4   S5   S6   S7   S8   S9   SA   SB " << std::endl;
+    oss << "  ";
+    for(int s = 0; s < 6; ++s)
+    {
+        oss << "0x" << std::hex << std::setfill('0') << 
+            std::setw(4) << unsigned(this->stack[s]) << " ";
+    }
+    oss << std::endl;
+    oss << "  ";
+    for(int s = 6; s < 12; ++s)
+        oss << "S" << std::dec << std::setw(2) << s << "  ";
+
+    oss << std::endl;
+    for(int s = 6; s < 12; ++s)
+    {
+        oss << "0x" << std::hex << std::setfill('0') << 
+            std::setw(4) << unsigned(this->stack[s]) << " ";
+    }
+    oss << std::endl;
+
+    // Othew registers
+    oss << "[PC]   [SP]   [I]     " << std::endl;
     oss << "0x" << std::hex << std::setw(4) << std::setfill('0') << this->pc << " ";
     oss << "0x" << std::hex << std::setw(2) << std::setfill('0') << this->sp << "   ";
     oss << "0x" << std::hex << std::setw(4) << std::setfill('0') << this->I << " ";
