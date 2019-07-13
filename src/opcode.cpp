@@ -64,7 +64,6 @@ void OpcodeTable::get(const std::string& mnemonic, Opcode& o) const
             o.opcode   = this->op_list[idx].opcode;
             o.mnemonic = this->op_list[idx].mnemonic;
             return;
-            //o = this->op_list[idx];
         }
     }
     o.opcode = 0;
@@ -80,7 +79,6 @@ void OpcodeTable::get(const uint16_t opcode, Opcode& o) const
     {
         if(opcode == this->op_list[idx].opcode)
         {
-            //o = this->op_list[idx];
             o.opcode   = this->op_list[idx].opcode;
             o.mnemonic = this->op_list[idx].mnemonic;
             return;

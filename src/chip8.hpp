@@ -77,36 +77,15 @@ class C8Proc
         C8Proc();
         ~C8Proc();
         C8Proc(const C8Proc& that);
+
         void init(void);
         // Print format
         std::string toString(void) const;
         std::string diffStr(const C8Proc& that);
-        bool operator==(const C8Proc& that)
-        {
-            for(int r = 0; r < 16; ++r)
-            {
-                if(this->V[r] != that.V[r])
-                    return false;
-            }
-            if(this->pc != that.pc)
-                return false;
-            if(this->sp != that.sp)
-                return false;
-            if(this->I != that.I)
-                return false;
-            if(this->dt != that.dt)
-                return false;
-            if(this->st != that.st)
-                return false;
-            for(int s = 0; s < 12; s++)
-            {
-                if(this->stack[s] != that.stack[s])
-                    return false;
-            }
-
-            return true;
-        }
+        bool operator==(const C8Proc& that);
+        bool operator!=(const C8Proc& that);
 };
+
 
 // Thin wrapper around a vector of processor states 
 class C8StateLog

@@ -115,10 +115,10 @@ std::string C8Proc::diffStr(const C8Proc& that)
     {
         if(this->V[r] != that.V[r])
             oss << "this->V" << std::hex << std::uppercase << r 
-                << " (" << std::hex << std::setw(2) << std::setfill('0')
-                << this->V[r] << ") != that.V" << std::hex << r
-                << " (" << std::hex << std::setw(2) << std::setfill('0')
-                << that.V[r] << ")" << std::endl;
+                << " r" << std::hex << std::setw(2) << std::setfill('0')
+                << this->V[r] << "] != that.V" << std::hex << r
+                << " r" << std::hex << std::setw(2) << std::setfill('0')
+                << that.V[r] << "]" << std::endl;
     }
     // check stack
     for(int s = 0; s < 12; ++s)
@@ -163,6 +163,40 @@ std::string C8Proc::diffStr(const C8Proc& that)
     //}
 
     return oss.str();
+}
+
+bool C8Proc::operator==(const C8Proc& that)
+{
+    // registers
+    for(int r = 0; r < 16; ++r)
+    {
+        if(this->V[r] != that.V[r])
+            return false;
+    }
+    if(this->pc != that.pc)
+        return false;
+    if(this->sp != that.sp)
+        return false;
+    if(this->I != that.I)
+        return false;
+    if(this->dt != that.dt)
+        return false;
+    if(this->st != that.st)
+        return false;
+
+    // stack
+    for(int s = 0; s < 12; s++)
+    {
+        if(this->stack[s] != that.stack[s])
+            return false;
+    }
+
+    return true;
+}
+
+bool C8Proc::operator!=(const C8Proc& that)
+{
+    return (*this == that);
 }
 
 /*
