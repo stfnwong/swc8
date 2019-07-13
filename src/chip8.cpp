@@ -53,60 +53,11 @@ void C8Proc::init(void)
     this->st = 0;
 }
 
-// TODO : make this more horizontal, up to 80 chars
 std::string C8Proc::toString(void) const
 {
     std::ostringstream oss;
-    // TODO : make non-zero values some color (eg: red) for easy 
-    // recognition
     
-    // register section
-    oss << "---------------------------------------------------------------------" << std::endl;
-    oss << "Registers :" << std::endl;
-    oss << "V0   V1   V2   V3   V4   V5   V6   V7   " << std::endl;
-    for(int r = 0; r < 8; ++r)
-    {
-        oss << "0x" << std::hex << std::setfill('0') << 
-            std::setw(2) << unsigned(this->V[r]) << " ";
-    }
-    oss << std::endl;
-    oss << "V8   V9   VA   VB   VC   VD   VE   VF" << std::endl;
-    for(int r = 8; r < 16; ++r)
-    {
-        oss << "0x" << std::hex << std::setfill('0') << 
-            std::setw(2) << unsigned(this->V[r]) << " ";
-    }
-    oss << std::endl;
-
-    // stack section
-    oss << "---------------------------------------------------------------------" << std::endl;
-    oss << "Stack :" << std::endl;
-    oss << "  ";
-    for(int s = 0; s < 6; ++s)
-        oss << "S" << std::dec << std::setw(2) << s << "  ";
-
-    oss << std::endl;
-    //oss << "S0   S1   S2   S3   S4   S5   S6   S7   S8   S9   SA   SB " << std::endl;
-    oss << "  ";
-    for(int s = 0; s < 6; ++s)
-    {
-        oss << "0x" << std::hex << std::setfill('0') << 
-            std::setw(4) << unsigned(this->stack[s]) << " ";
-    }
-    oss << std::endl;
-    oss << "  ";
-    for(int s = 6; s < 12; ++s)
-        oss << "S" << std::dec << std::setw(2) << s << "  ";
-
-    oss << std::endl;
-    for(int s = 6; s < 12; ++s)
-    {
-        oss << "0x" << std::hex << std::setfill('0') << 
-            std::setw(4) << unsigned(this->stack[s]) << " ";
-    }
-    oss << std::endl;
-
-    // Othew registers
+    // Program counter, Stack pointer, I register
     oss << "[PC]   [SP]   [I]     " << std::endl;
     oss << "0x" << std::hex << std::setw(4) << std::setfill('0') << this->pc << " ";
     oss << "0x" << std::hex << std::setw(2) << std::setfill('0') << this->sp << "   ";
@@ -161,10 +112,10 @@ std::string C8Proc::diffStr(const C8Proc& that)
     {
         if(this->V[r] != that.V[r])
             oss << "this->V" << std::hex << std::uppercase << r 
-                << " r" << std::hex << std::setw(2) << std::setfill('0')
-                << this->V[r] << "] != that.V" << std::hex << r
-                << " r" << std::hex << std::setw(2) << std::setfill('0')
-                << that.V[r] << "]" << std::endl;
+                << " [" << std::hex << std::setw(2) << std::setfill('0')
+                << unsigned(this->V[r]) << "] != that.V" << std::hex << r
+                << " [" << std::hex << std::setw(2) << std::setfill('0')
+                << unsigned(that.V[r]) << "]" << std::endl;
     }
     // check stack
     for(int s = 0; s < 12; ++s)
@@ -173,31 +124,34 @@ std::string C8Proc::diffStr(const C8Proc& that)
         {
             oss << "this->stack[" << std::hex << std::uppercase << s 
                 << "] (" << std::hex << std::setw(2) << std::setfill('0')
-                << this->stack[s] << ") != that.stack[" << std::hex << s
-                << "] (" << std::hex << std::setw(2) << std::setfill('0')
-                << that.stack[s] << ")" << std::endl;
+                << unsigned(this->stack[s]) << ") != that.stack[" 
+                << std::hex << s << "] (" << std::hex << std::setw(2) 
+                << std::setfill('0') << unsigned(that.stack[s]) 
+                << ")" << std::endl;
         }
     }
     // rest of state 
     if(this->pc != that.pc)
     {
         oss << "this->pc (" << std::hex << std::setw(4) 
-            << std::setfill('0') << this->pc << ") != that.pc ("
-            << std::setw(4) << std::setfill('0') << that.pc 
+            << std::setfill('0') << unsigned(this->pc) 
+            << ") != that.pc (" << std::setw(4) 
+            << std::setfill('0') << unsigned(that.pc)
             << ")" << std::endl;
     }
     if(this->sp != that.sp)
     {
         oss << "this->sp (" << std::hex << std::setw(4) 
-            << std::setfill('0') << this->sp << ") != that.sp ("
-            << std::setw(4) << std::setfill('0') << that.sp 
-            << ")" << std::endl;
+            << std::setfill('0') << unsigned(this->sp) 
+            << ") != that.sp (" << std::setw(4) << std::setfill('0') 
+            << unsigned(that.sp) << ")" << std::endl;
     }
     if(this->I != that.I)
     {
         oss << "this->I (" << std::hex << std::setw(4) 
-            << std::setfill('0') << this->I << ") != that.I ("
-            << std::setw(4) << std::setfill('0') << that.I 
+            << std::setfill('0') << unsigned(this->I) 
+            << ") != that.I (" << std::setw(4) 
+            << std::setfill('0') << unsigned(that.I)
             << ")" << std::endl;
     }
     //if(this->dt != that.dt)

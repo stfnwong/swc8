@@ -66,8 +66,8 @@ class C8Proc
         // special registers 
         uint16_t I;
         // Timers 
-        uint8_t dt;             // Delay timer
-        uint8_t st;             // Sound timer
+        uint8_t  dt;             // Delay timer
+        uint8_t  st;             // Sound timer
         // Stack 
         uint16_t stack[12];     // stack memory
         // keys 
