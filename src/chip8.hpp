@@ -169,7 +169,7 @@ class Chip8
         uint16_t cur_addr;
 
     private:
-        // internal execution
+        // internal execution of opcodes starting with 0x00
         void exec_zero_op(void);
 
     public:

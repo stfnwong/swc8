@@ -57,15 +57,16 @@ std::string C8Proc::toString(void) const
 {
     std::ostringstream oss;
     
+    oss << "---------------------------------------------------------------------" << std::endl;
     // Program counter, Stack pointer, I register
-    oss << "[PC]   [SP]   [I]     " << std::endl;
-    oss << "0x" << std::hex << std::setw(4) << std::setfill('0') << this->pc << " ";
-    oss << "0x" << std::hex << std::setw(2) << std::setfill('0') << this->sp << "   ";
-    oss << "0x" << std::hex << std::setw(4) << std::setfill('0') << this->I << " ";
+    oss << " [PC]    [SP]   [I]     " << std::endl;
+    oss << " 0x" << std::hex << std::setw(4) << std::setfill('0') << this->pc << "  ";
+    oss << " 0x" << std::hex << std::setw(2) << std::setfill('0') << this->sp << "   ";
+    oss << " 0x" << std::hex << std::setw(4) << std::setfill('0') << this->I << " ";
 
     // Make a little 'stack diagram that goes next to a 'register' 
     // diagram and print that line by line 
-    oss << std::endl;
+    oss << std::endl << std::endl;
     oss << " Stack           Registers " << std::endl;
     for(int r = 0; r < 16; ++r)
     {
@@ -74,28 +75,28 @@ std::string C8Proc::toString(void) const
         {
             oss << " " << std::dec << std::setw(2) << r;
             oss << " [ 0x" << std::hex << std::setw(4) << std::setfill('0') 
-                << this->stack[r] << " ] ";
+                << unsigned(this->stack[r]) << " ] ";
         }
         else if(r == 13)
         {
             oss << " ST: [ 0x" << std::hex << std::setw(2) 
-                << std::setfill('0') << this->st << " ]"; 
-            oss << "   ";
+                << std::setfill('0') << unsigned(this->st) << " ]"; 
+            oss << "  ";
         }
         else if(r == 14)
         {
             oss << " DT: [ 0x" << std::hex << std::setw(2)
-                << std::setfill('0') << this->dt << " ]"; 
-            oss << "   ";
+                << std::setfill('0') << unsigned(this->dt) << " ]"; 
+            oss << "  ";
         }
         else 
             oss << std::setw(15) << std::setfill(' ') << " ";
 
         // registers 
-        oss << " V" << std::hex << std::setw(1) << std::setfill(' ') 
+        oss << "V" << std::hex << std::setw(1) << std::setfill(' ') 
             << std::uppercase << r;
         oss << " [ 0x" << std::hex << std::setw(2) << std::setfill('0') 
-                << std::to_string(this->V[r]) << " ] ";
+                << unsigned(this->V[r]) << " ] ";
         oss << std::endl;
     }
 
@@ -125,34 +126,34 @@ std::string C8Proc::diffStr(const C8Proc& that)
             oss << "this->stack[" << std::hex << std::uppercase << s 
                 << "] (" << std::hex << std::setw(2) << std::setfill('0')
                 << unsigned(this->stack[s]) << ") != that.stack[" 
-                << std::hex << s << "] (" << std::hex << std::setw(2) 
+                << std::hex << s << "] [" << std::hex << std::setw(2) 
                 << std::setfill('0') << unsigned(that.stack[s]) 
-                << ")" << std::endl;
+                << "]" << std::endl;
         }
     }
     // rest of state 
     if(this->pc != that.pc)
     {
-        oss << "this->pc (" << std::hex << std::setw(4) 
+        oss << "this->pc [" << std::hex << std::setw(4) 
             << std::setfill('0') << unsigned(this->pc) 
-            << ") != that.pc (" << std::setw(4) 
+            << "] != that.pc [" << std::setw(4) 
             << std::setfill('0') << unsigned(that.pc)
-            << ")" << std::endl;
+            << "]" << std::endl;
     }
     if(this->sp != that.sp)
     {
-        oss << "this->sp (" << std::hex << std::setw(4) 
+        oss << "this->sp [" << std::hex << std::setw(4) 
             << std::setfill('0') << unsigned(this->sp) 
-            << ") != that.sp (" << std::setw(4) << std::setfill('0') 
-            << unsigned(that.sp) << ")" << std::endl;
+            << ") != that.sp [" << std::setw(4) << std::setfill('0') 
+            << unsigned(that.sp) << "]" << std::endl;
     }
     if(this->I != that.I)
     {
-        oss << "this->I (" << std::hex << std::setw(4) 
+        oss << "this->I [" << std::hex << std::setw(4) 
             << std::setfill('0') << unsigned(this->I) 
-            << ") != that.I (" << std::setw(4) 
+            << "] != that.I [" << std::setw(4) 
             << std::setfill('0') << unsigned(that.I)
-            << ")" << std::endl;
+            << "]" << std::endl;
     }
     //if(this->dt != that.dt)
     //{
@@ -327,7 +328,7 @@ void Chip8::exec_zero_op(void)
     switch(zero_code)
     {
         case 0x00E0:        // CLS 
-            std::cout << "[" << __FUNCTION__ << "] got CLS" << std::endl;
+            std::cout << "[" << __func__ << "] got CLS" << std::endl;
             break;
 
         case 0x00EE:        // RET 
@@ -337,7 +338,11 @@ void Chip8::exec_zero_op(void)
 
         default:            // SYS  (nop in this interpreter)
             if(this->verbose)
-                std::cout << "[" << __FUNCTION__ << "] got SYS" << std::endl;
+            {
+                std::cout << "[" << __func__ << "] got SYS (0x" <<
+                   std::hex << std::setw(2) << std::setfill('0') << 
+                   unsigned(this->cur_opcode) << ")" << std::endl;
+            }
             break;
     }
 }
@@ -363,6 +368,7 @@ void Chip8::cycle(void)
     this->exec.nnn = (this->cur_opcode      ) & 0x0FFF;
 
     instr_code = 0x0000 | (this->exec.u << 12) | (this->exec.p);
+
     // Modify the code here for the jump table 
     switch(this->exec.u)
     {
@@ -388,7 +394,7 @@ void Chip8::cycle(void)
             break;
     }
 
-    //std::cout << "[" << __FUNCTION__ << "] instr_code " 
+    //std::cout << "[" << __func__ << "] instr_code " 
     //    << std::hex << std::setw(4) << std::setfill('0')
     //    << instr_code << std::endl;
 
@@ -494,7 +500,7 @@ void Chip8::cycle(void)
             break;
 
         case C8_DRW:
-            std::cout << "TODO: DRW" << std::endl;
+            std::cout << "[" << __func__ << "] TODO: DRW" << std::endl;
             break;
 
         case C8_SKP:    // SKP Vx
@@ -530,7 +536,7 @@ void Chip8::cycle(void)
             break;
 
         default:
-            std::cout << "[" << __FUNCTION__ << "] invalid op <0x" 
+            std::cout << "[" << __func__ << "] invalid op <0x" 
                 << std::hex << std::setw(4) << std::setfill('0') 
                 << this->cur_opcode << ">" << "instr code <" 
                 << std::hex << std::setw(4) << std::setfill('0') 
@@ -559,7 +565,7 @@ int Chip8::loadMem(const std::string& filename, int offset)
         infile.read((char*) &this->mem[offset], sizeof(uint8_t) * num_bytes);
     }
     catch(std::ios_base::failure& e) {
-        std::cerr << "[" << __FUNCTION__ << "] caught execption [%s]" << 
+        std::cerr << "[" << __func__ << "] caught execption [%s]" << 
             e.what() << " while reading file " << filename << std::endl;
         status = -1;
     }

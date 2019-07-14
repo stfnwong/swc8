@@ -586,6 +586,7 @@ TEST_F(TestChip8, test_subn_vxvy)
 //    }
 //}
 
+// TODO : double check that this assembly fragment is in fact correct...
 TEST_F(TestChip8, test_call_ret)
 {
     Chip8 c8;
@@ -625,18 +626,18 @@ TEST_F(TestChip8, test_call_ret)
     expected_state.push_back(proc);
     // Call 
     proc.init();
-    proc.pc     = 0x208;
-    proc.V[0x3] = 0xB;
-    proc.V[0x4] = 0x04;
+    proc.pc       = 0x208;
+    proc.V[0x3]   = 0xB;
+    proc.V[0x4]   = 0x04;
     proc.stack[0] = 0x208;
     proc.sp = 1;
     expected_state.push_back(proc);
     // "subroutine"
     proc.init();
-    proc.pc     = 0x20A;
-    proc.V[0x3] = 0xB;
-    proc.V[0x4] = 0x04;
-    proc.V[0x5] = 0x01;
+    proc.pc       = 0x20A;
+    proc.V[0x3]   = 0xB;
+    proc.V[0x4]   = 0x04;
+    proc.V[0x5]   = 0x01;
     proc.stack[0] = 0x208;
     proc.sp = 1;
     expected_state.push_back(proc);
