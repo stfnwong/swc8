@@ -101,7 +101,7 @@ int main(int argc, char *argv[])
     Assembler assembler;
     Program as_prog;
 
-    //lexer.setVerbose(opts.verbose);
+    lexer.setVerbose(opts.verbose);
     //assembler.setVerbose(opts.verbose);
     status = lexer.loadFile(opts.infile);
     if(status < 0)

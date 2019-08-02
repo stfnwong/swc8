@@ -325,7 +325,7 @@ TEST_F(TestLexer, test_draw_asm)
         exp_line = exp_output.get(idx);
         std::cout << "Checking instruction " << std::dec << idx 
             << "/" << lex_output.getNumLines() << std::endl;
-        printLineDiff(exp_line, lex_line);
+        std::cout << exp_line.toDiffString(lex_line);
         ASSERT_EQ(exp_line, lex_line);
     }
 }
@@ -592,7 +592,7 @@ TEST_F(TestLexer, test_instr_asm)
         lex_line = lex_output.get(idx);
         exp_line = exp_output.get(idx);
         std::cout << "Checking line " << std::dec << idx << "/" << lex_output.getNumLines() << std::endl;
-        printLineDiff(exp_line, lex_line);
+        std::cout << exp_line.toDiffString(lex_line);
         ASSERT_EQ(exp_line, lex_line);
     }
 }

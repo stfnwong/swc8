@@ -53,7 +53,7 @@ static const std::vector<std::string> token_type_str = {
  * LexToken
  * A token emitted by the lexer
  */
-struct  Token
+struct Token
 {
     TokenType type;
     std::string val;
@@ -75,6 +75,11 @@ class TokenTable
     private: 
         Token null_token;
         std::vector<Token> tokens;
+
+    // diable copying
+    private:
+        TokenTable(const TokenTable& that) = delete;
+        TokenTable& operator=(const TokenTable& that) const = delete;
 
     public:
         TokenTable();
@@ -162,9 +167,10 @@ struct LineInfo
         bool operator==(const LineInfo& that) const;
         bool operator!=(const LineInfo& that) const;
         std::string toString(void) const;
+        std::string toDiffString(const LineInfo& that) const;
+        std::string toInstrString(void) const;
 };
 
-void printLineDiff(const LineInfo& a, const LineInfo& b);
 
 /* 
  * SourceInfo

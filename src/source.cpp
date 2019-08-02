@@ -303,37 +303,52 @@ std::string LineInfo::toString(void) const
 }
 
 
-void printLineDiff(const LineInfo& a, const LineInfo& b)
+std::string LineInfo::toDiffString(const LineInfo& that) const
 {
-    if(a.symbol != b.symbol)
-        std::cout << "a.symbol [" << a.symbol << "] != b.symbol [" << b.symbol << "]" << std::endl;
-    if(a.label != b.label)
-        std::cout << "a.label [" << a.label << "] != b.label [" << b.label << "]" << std::endl;
-    if(a.opcode.opcode != b.opcode.opcode)
-        std::cout << "a.opcode [" << a.opcode.opcode << "] != b.opcode [" << b.opcode.opcode << "]" << std::endl;
-    if(a.opcode.mnemonic != b.opcode.mnemonic)
-        std::cout << "a.mnemonic [" << a.opcode.mnemonic << "] != b.mnemonic [" << b.opcode.mnemonic << "]" << std::endl;
-    if(a.line_num != b.line_num)
-        std::cout << "a.line_num [" << a.line_num << "] != b.line_num [" << b.line_num << "]" << std::endl;
-    if(a.addr != b.addr)
-        std::cout << "a.addr [" << a.addr << "] != b.addr [" << b.addr << "]" << std::endl;
-    if(a.reg_flags != b.reg_flags)
-        std::cout << "a.reg_flags [" << a.reg_flags << "] != b.reg_flags [" << b.reg_flags << "]" << std::endl;
-    if(a.vx != b.vx)
-        std::cout << "a.vx [" << a.vx << "] != b.vx [" << b.vx << "]" << std::endl;
-    if(a.vy != b.vy)
-        std::cout << "a.vy [" << a.vy << "] != b.vy [" << b.vy << "]" << std::endl;
-    if(a.kk != b.kk)
-        std::cout << "a.kk [" << a.kk << "] != b.kk [" << b.kk << "]" << std::endl;
-    if(a.nnn != b.nnn)
-        std::cout << "a.nnn [" << a.nnn << "] != b.nnn [" << b.nnn << "]" << std::endl;
-    if(a.is_label != b.is_label)
-        std::cout << "a.is_label [" << a.is_label << "] != b.is_label [" << b.is_label << "]" << std::endl;
-    if(a.is_directive != b.is_directive)
-        std::cout << "a.is_directive [" << a.is_directive << "] != b.is_directive [" << b.is_directive << "]" << std::endl;
-    if(a.error != b.error)
-        std::cout << "a.error [" << a.error << "] != b.error [" << b.error << "]" << std::endl;
+    std::ostringstream oss;
+
+    if(this->symbol != that.symbol)
+        oss << "a.symbol [" << this->symbol << "] != b.symbol [" << that.symbol << "]" << std::endl;
+    if(this->label != that.label)
+        oss << "a.label [" << this->label << "] != b.label [" << that.label << "]" << std::endl;
+    if(this->opcode.opcode != that.opcode.opcode)
+        oss << "a.opcode [" << this->opcode.opcode << "] != b.opcode [" << that.opcode.opcode << "]" << std::endl;
+    if(this->opcode.mnemonic != that.opcode.mnemonic)
+        oss << "a.mnemonic [" << this->opcode.mnemonic << "] != b.mnemonic [" << that.opcode.mnemonic << "]" << std::endl;
+    if(this->line_num != that.line_num)
+        oss << "a.line_num [" << this->line_num << "] != b.line_num [" << that.line_num << "]" << std::endl;
+    if(this->addr != that.addr)
+        oss << "a.addr [" << this->addr << "] != b.addr [" << that.addr << "]" << std::endl;
+    if(this->reg_flags != that.reg_flags)
+        oss << "a.reg_flags [" << this->reg_flags << "] != b.reg_flags [" << that.reg_flags << "]" << std::endl;
+    if(this->vx != that.vx)
+        oss << "a.vx [" << this->vx << "] != b.vx [" << that.vx << "]" << std::endl;
+    if(this->vy != that.vy)
+        oss << "a.vy [" << this->vy << "] != b.vy [" << that.vy << "]" << std::endl;
+    if(this->kk != that.kk)
+        oss << "a.kk [" << this->kk << "] != b.kk [" << that.kk << "]" << std::endl;
+    if(this->nnn != that.nnn)
+        oss << "a.nnn [" << this->nnn << "] != b.nnn [" << that.nnn << "]" << std::endl;
+    if(this->is_label != that.is_label)
+        oss << "a.is_label [" << this->is_label << "] != b.is_label [" << that.is_label << "]" << std::endl;
+    if(this->is_directive != that.is_directive)
+        oss << "a.is_directive [" << this->is_directive << "] != b.is_directive [" << that.is_directive << "]" << std::endl;
+    if(this->error != that.error)
+        oss << "a.error [" << this->error << "] != b.error [" << that.error << "]" << std::endl;
+
+    return oss.str();
 }
+
+
+std::string LineInfo::toInstrString(void) const
+{
+    std::ostringstream oss;
+
+    oss << this->opcode.toString();
+
+    return oss.str();
+}
+
 
 /*
  * SOURCEINFO 

@@ -7,6 +7,7 @@
 #include <cctype>
 #include <iostream>
 #include <iomanip>
+#include <sstream>
 #include "opcode.hpp"
 
 
@@ -24,6 +25,16 @@ Opcode::Opcode(const uint16_t code, const std::string& m)
     this->opcode = code;
     this->mnemonic = m;
 }
+
+std::string Opcode::toString(void) const
+{
+    std::ostringstream oss;
+
+    oss << this->mnemonic << std::hex << std::setw(4) << this->opcode;
+
+    return oss.str();
+}
+
 
 bool Opcode::operator==(const Opcode& that) const
 {
