@@ -19,8 +19,6 @@ C8Proc::C8Proc()
     this->init();
 }
 
-C8Proc::~C8Proc() {}
-
 C8Proc::C8Proc(const C8Proc& that)
 {
     for(int r = 0; r < 16; r++)
@@ -258,8 +256,10 @@ C8Exec::C8Exec()
     this->nnn = 0;
 }
 
-C8Exec::~C8Exec() {} 
 
+/*
+ * copy ctor
+ */
 C8Exec::C8Exec(const C8Exec& that)
 {
     this->u   = that.u;
@@ -270,6 +270,32 @@ C8Exec::C8Exec(const C8Exec& that)
     this->nnn = that.nnn;
 }
 
+bool C8Exec::operator==(const C8Exec& that) const
+{
+    if(this->u != that.u)
+        return false;
+    if(this->p != that.p)
+        return false;
+    if(this->vx != that.vx)
+        return false;
+    if(this->vy != that.vy)
+        return false;
+    if(this->kk != that.kk)
+        return false;
+    if(this->nnn != that.nnn)
+        return false;
+
+    return true;
+}
+
+bool C8Exec::operator!=(const C8Exec& that) const
+{
+    return !(*this == that);
+}
+
+/*
+ * toString()
+ */
 std::string C8Exec::toString(void)
 {
     std::ostringstream oss;
@@ -299,8 +325,9 @@ Chip8::Chip8()
     this->state.init();
 }
 
-Chip8::~Chip8() {} 
-
+/*
+ * copy ctor
+ */
 Chip8::Chip8(const Chip8& that)
 {
     this->state    = that.state;
@@ -309,6 +336,9 @@ Chip8::Chip8(const Chip8& that)
         this->mem[m] = that.mem[m];
 }
 
+/*
+ * init_mem()
+ */
 void Chip8::init_mem(void)
 {
     for(unsigned int m = 0; m < this->mem_size; ++m)
@@ -316,6 +346,7 @@ void Chip8::init_mem(void)
     // insert JP 0x200 instruction at start of memory
     this->mem[0] = 0x12;
     this->mem[1] = 0x00;
+
     // TODO : place  simulator internals at start of memory ?
 }
 
@@ -327,7 +358,7 @@ void Chip8::exec_zero_op(void)
     uint16_t zero_code = this->cur_opcode & 0x0FFF;
     switch(zero_code)
     {
-        case 0x00E0:        // CLS 
+        case 0x00E0:        // CLS  (not yet implemented)
             std::cout << "[" << __func__ << "] got CLS" << std::endl;
             break;
 
@@ -605,6 +636,16 @@ std::vector<uint8_t> Chip8::dumpMem(void) const
 uint8_t Chip8::readMem(const unsigned int addr) const
 {
     return this->mem[addr];
+}
+
+unsigned int Chip8::getMemSize(void) const
+{
+    return C8_MEM_SIZE;
+}
+
+const uint8_t* Chip8::getMemArray(void) const
+{
+    return this->mem;
 }
 
 void Chip8::setTrace(const bool v)

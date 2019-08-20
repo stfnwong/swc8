@@ -47,23 +47,19 @@ bool Opcode::operator==(const Opcode& that) const
 
 bool Opcode::operator!=(const Opcode& that) const
 {
-    if(this->opcode == that.opcode)
-        return false;
-    if(this->mnemonic == that.mnemonic)
-        return false;
-    return true;
+    return !(*this == that);
 }
 
 
+// ======== OPCODE TABLE ======== //
 
 void OpcodeTable::add(const Opcode& o)
 {
     this->op_list.push_back(o);
 }
 
-// TODO : something faster than linear search
-// LC3 is small enough to get away with this but may as well
-// come back and do it properly once things are working
+// NOTE: could use a map here or something, but to be honest the search here 
+// is so small that just walking the array is probably not much of a bottleneck
 void OpcodeTable::get(const std::string& mnemonic, Opcode& o) const
 {
     unsigned int idx;

@@ -75,7 +75,6 @@ class C8Proc
 
     public:
         C8Proc();
-        ~C8Proc();
         C8Proc(const C8Proc& that);
 
         void init(void);
@@ -105,35 +104,39 @@ class C8StateLog
 };
 
 
-// TODO: this class seems unweildy..
 /*
  * C8Exec
  * Chip-8 execution context. Allows saving and resuming
  * of pipeline state.
  */
-class C8Exec
+struct C8Exec
 {
-    public:
-        uint8_t u;
-        uint8_t p;
-        uint8_t vx;
-        uint8_t vy;
-        uint8_t kk;
-        uint16_t nnn;
+    uint8_t u;
+    uint8_t p;
+    uint8_t vx;
+    uint8_t vy;
+    uint8_t kk;
+    uint16_t nnn;
 
     public:
         C8Exec();
-        ~C8Exec();
         C8Exec(const C8Exec& that);
         std::string toString(void);
+
+        bool operator==(const C8Exec& that) const;
+        bool operator!=(const C8Exec& that) const;
 };
+
+// NOTE: Could put a debug switch that puts an opcode table here so that 
+// we can convert opcodes to strings?
 
 /*
  * Chip8
  * Chip-8 object
  */
-static constexpr const unsigned int W = 64;
-static constexpr const unsigned int H = 64;
+constexpr const unsigned int DISP_H = 64;
+constexpr const unsigned int DISP_W = 64;
+constexpr const unsigned int C8_MEM_SIZE = 0x1000;
 
 class Chip8
 {
@@ -155,12 +158,12 @@ class Chip8
 
     private:
         // Display memory 
-        uint8_t disp_mem[W * H / 8];
+        uint8_t disp_mem[DISP_W * DISP_H / 8];
         uint8_t fontmem[16 * 5];
 
     public:
         // Memory 
-        uint8_t mem[0x1000];
+        uint8_t mem[C8_MEM_SIZE];
         uint16_t mem_size;
         void init_mem(void);
 
@@ -174,7 +177,6 @@ class Chip8
 
     public:
         Chip8();
-        ~Chip8();
         Chip8(const Chip8& that);
 
         void cycle(void);
@@ -199,6 +201,18 @@ class Chip8
          * Read a single byte from memory
          */
         uint8_t readMem(const unsigned int addr) const;
+        
+        /*
+         * getMemSize()
+         * Returns the size of ROM
+         */
+        unsigned int getMemSize(void) const;
+
+        /*
+         * getMemArray()
+         * Get a pointer to the entire memory contents
+         */
+        const uint8_t* getMemArray(void) const;
 
         /*
          * setTrace()

@@ -12,6 +12,8 @@
 #include "assembler.hpp"
 #include "source.hpp"
 #include "program.hpp"
+#include "memory.hpp"
+
 
 class TestChip8 : public ::testing::Test
 {
@@ -586,69 +588,80 @@ TEST_F(TestChip8, test_subn_vxvy)
 //    }
 //}
 
-// TODO : double check that this assembly fragment is in fact correct...
+
+// RET
 TEST_F(TestChip8, test_call_ret)
 {
     Chip8 c8;
     C8Proc proc;
     std::vector<C8Proc> trace_out;
 
-    // LD V3, 0x08
-    // LD V4, 0x04
-    // ADD V3, V4
-    // CALL 0x20A
-    // LD V5 0x01
-    // ADD V3, V5
-    // RET
-    // LD V6, 0xFF
+    // Assembly
     std::vector<uint8_t> test_data = {
-        0x63, 0x08, 0x64, 0x04, 0x83, 0x44, 0x22, 0x0A,
-        0x65, 0x01, 0x83, 0x54, 0x00, 0xEE, 0x66, 0xFF};
+        0x63, 0x08, // [0x200] LD V3, 0x08
+        0x64, 0x04, // [0x202] LD V4, 0x04
+        0x83, 0x44, // [0x204] ADD V3, V4
+        0x22, 0x08, // [0x206] CALL 0x208
+        0x65, 0x01, // [0x208] LD V5 0x01           // TODO : not loading?
+        0x83, 0x54, // [0x20A] ADD V3, V5
+        0x00, 0xEE, // [0x20C] RET
+        0x66, 0xFF  // [0x20E] LD V6, 0xFF
+    };
     std::vector<C8Proc> expected_state;
 
     // Create the expected state sequence
+    // State 1 
     proc.init();
     proc.pc     = 0x200;
     expected_state.push_back(proc);
+    // State 2 
+    proc.init();
+    proc.pc     = 0x200;
+    proc.V[0x3] = 0x08;
+    expected_state.push_back(proc);
+    // State 3
     proc.init();
     proc.pc     = 0x202;
     proc.V[0x3] = 0x08;
-    expected_state.push_back(proc);
-    proc.init();
-    proc.pc     = 0x204;
-    proc.V[0x3] = 0x08;
     proc.V[0x4] = 0x04;
     expected_state.push_back(proc);
+    // State 4 (ADD)
     proc.init();
-    proc.pc     = 0x206;
+    proc.pc     = 0x204;
     proc.V[0x3] = 0x8 + 0x4;
     proc.V[0x4] = 0x04;
     expected_state.push_back(proc);
+    // Start 5
     // Call 
     proc.init();
-    proc.pc       = 0x208;
-    proc.V[0x3]   = 0xB;
+    //proc.pc       = 0x208;
+    proc.pc       = 0x206;
+    proc.V[0x3]   = 0xC;
     proc.V[0x4]   = 0x04;
     proc.stack[0] = 0x208;
     proc.sp = 1;
     expected_state.push_back(proc);
+    // State 6
     // "subroutine"
     proc.init();
-    proc.pc       = 0x20A;
-    proc.V[0x3]   = 0xB;
+    proc.pc       = 0x208;
+    proc.V[0x3]   = 0xC;
     proc.V[0x4]   = 0x04;
     proc.V[0x5]   = 0x01;
     proc.stack[0] = 0x208;
     proc.sp = 1;
     expected_state.push_back(proc);
+
+    // State 7
     proc.init();
     proc.pc     = 0x20C;
-    proc.V[0x3] = 0xC;
+    proc.V[0x3] = 0xD;
     proc.V[0x4] = 0x04;
     proc.V[0x5] = 0x01;
     proc.stack[0] = 0x208;
     proc.sp = 1;
     expected_state.push_back(proc);
+    // State 8
     // RET
     proc.init();
     proc.pc     = 0x20E;
@@ -657,6 +670,7 @@ TEST_F(TestChip8, test_call_ret)
     proc.V[0x5] = 0x01;
     proc.sp = 0;
     expected_state.push_back(proc);
+    // State 9
     // Move to previous stack pointer 
     // positon
     proc.init();
@@ -669,6 +683,18 @@ TEST_F(TestChip8, test_call_ret)
     // Execute instruction
     c8.setTrace(true);
     c8.loadMem(test_data, 0x200);
+
+    // Dump the memory contents to terminal for inspection
+    unsigned int c8_mem_size = c8.getMemSize();
+    const uint8_t* c8_mem_contents = c8.getMemArray();
+
+    std::cout << "Dumping memory contents (without zeros)" << std::endl;
+    print_mem_dump(c8_mem_contents, c8_mem_size, 0, true);
+
+    std::cout << "Cycling through instructions " << std::endl;
+    // We expect the number of instructions that we need to cycle through to be one
+    // higher than the 'true' number to account for the jump to 0x200. In effect, there
+    // is always a no-op at the start of the program, hence the +1 in the loop.
     for(unsigned int i = 0; i < expected_state.size()+1; ++i)
         c8.cycle();
     trace_out = c8.getTrace();
