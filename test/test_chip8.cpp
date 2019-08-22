@@ -22,6 +22,7 @@ class TestChip8 : public ::testing::Test
 
     // State vector compare 
     public:
+        int load_offset = 0x200;
         void compare_state_vector(
                 const std::vector<C8Proc>& exp_vector,
                 const std::vector<C8Proc>& out_vector);
@@ -112,7 +113,7 @@ TEST_F(TestChip8, test_load_obj)
     ASSERT_EQ(0, status);
     std::cout << "Wrote object output to " << obj_filename << std::endl;
 
-    status = c8.loadMem(obj_filename, 0x200);
+    status = c8.loadMem(obj_filename, this->load_offset);
     ASSERT_EQ(0, status);
 
     std::vector<uint8_t> mem_contents = c8.dumpMem();
@@ -154,7 +155,7 @@ TEST_F(TestChip8, test_run_draw)
     ASSERT_EQ(0, status);
     std::cout << "Wrote object output to " << obj_filename << std::endl;
 
-    status = c8.loadMem(obj_filename, 0x200);
+    status = c8.loadMem(obj_filename, this->load_offset);
     ASSERT_EQ(0, status);
 
     // Now that the program binary is in memory, start 
@@ -207,7 +208,7 @@ TEST_F(TestChip8, test_add_vxvy)
 
     // Execute instruction
     c8.setTrace(true);
-    c8.loadMem(test_data, 0x200);
+    c8.loadMem(test_data, this->load_offset);
     for(unsigned int i = 0; i < expected_state.size()+1; ++i)
         c8.cycle();
     std::vector<C8Proc> trace_out = c8.getTrace();
@@ -248,7 +249,7 @@ TEST_F(TestChip8, test_add_vxkk)
 
     // Execute instruction
     c8.setTrace(true);
-    c8.loadMem(test_data, 0x200);
+    c8.loadMem(test_data, this->load_offset);
     for(unsigned int i = 0; i < expected_state.size()+1; ++i)
         c8.cycle();
     std::vector<C8Proc> trace_out = c8.getTrace();
@@ -300,7 +301,7 @@ TEST_F(TestChip8, test_and_vxvy)
 
     // Execute instruction
     c8.setTrace(true);
-    c8.loadMem(test_data, 0x200);
+    c8.loadMem(test_data, this->load_offset);
     for(unsigned int i = 0; i < expected_state.size()+1; ++i)
         c8.cycle();
     std::vector<C8Proc> trace_out = c8.getTrace();
@@ -348,7 +349,7 @@ TEST_F(TestChip8, test_or_vxvy)
 
     // Execute instruction
     c8.setTrace(true);
-    c8.loadMem(test_data, 0x200);
+    c8.loadMem(test_data, this->load_offset);
     for(unsigned int i = 0; i < expected_state.size()+1; ++i)
         c8.cycle();
     std::vector<C8Proc> trace_out = c8.getTrace();
@@ -401,7 +402,7 @@ TEST_F(TestChip8, test_xor_vxvy)
 
     // Execute instruction
     c8.setTrace(true);
-    c8.loadMem(test_data, 0x200);
+    c8.loadMem(test_data, this->load_offset);
     for(unsigned int i = 0; i < expected_state.size()+1; ++i)
         c8.cycle();
     std::vector<C8Proc> trace_out = c8.getTrace();
@@ -455,7 +456,7 @@ TEST_F(TestChip8, test_sub_vxvy)
 
     // Execute instruction
     c8.setTrace(true);
-    c8.loadMem(test_data, 0x200);
+    c8.loadMem(test_data, this->load_offset);
     for(unsigned int i = 0; i < expected_state.size()+1; ++i)
         c8.cycle();
     std::vector<C8Proc> trace_out = c8.getTrace();
@@ -509,7 +510,7 @@ TEST_F(TestChip8, test_subn_vxvy)
 
     // Execute instruction
     c8.setTrace(true);
-    c8.loadMem(test_data, 0x200);
+    c8.loadMem(test_data, this->load_offset);
     for(unsigned int i = 0; i < expected_state.size()+1; ++i)
         c8.cycle();
     std::vector<C8Proc> trace_out = c8.getTrace();
@@ -597,54 +598,56 @@ TEST_F(TestChip8, test_call_ret)
     std::vector<C8Proc> trace_out;
 
     // Assembly
+    // TODO : maybe move the subroutine to the end so that we don't just do
+    // it again as soon as we RET
     std::vector<uint8_t> test_data = {
         0x63, 0x08, // [0x200] LD V3, 0x08
         0x64, 0x04, // [0x202] LD V4, 0x04
         0x83, 0x44, // [0x204] ADD V3, V4
-        0x22, 0x08, // [0x206] CALL 0x208
-        0x65, 0x01, // [0x208] LD V5 0x01           // TODO : not loading?
-        0x83, 0x54, // [0x20A] ADD V3, V5
-        0x00, 0xEE, // [0x20C] RET
-        0x66, 0xFF  // [0x20E] LD V6, 0xFF
+        0x22, 0x0A, // [0x206] CALL 0x20A
+        0x12, 0x10, // [0x208] JP 0x210
+        0x65, 0x01, // [0x20A] LD V5 0x01           // TODO : not loading?
+        0x83, 0x54, // [0x20C] ADD V3, V5
+        0x00, 0xEE, // [0x20E] RET
+        0x66, 0xFF  // [0x210] LD V6, 0xFF
     };
     std::vector<C8Proc> expected_state;
 
     // Create the expected state sequence
+    // State 0 
+    proc.init();
+    proc.pc     = 0x200;
+    expected_state.push_back(proc);
     // State 1 
-    proc.init();
-    proc.pc     = 0x200;
-    expected_state.push_back(proc);
-    // State 2 
-    proc.init();
-    proc.pc     = 0x200;
-    proc.V[0x3] = 0x08;
-    expected_state.push_back(proc);
-    // State 3
     proc.init();
     proc.pc     = 0x202;
     proc.V[0x3] = 0x08;
-    proc.V[0x4] = 0x04;
     expected_state.push_back(proc);
-    // State 4 (ADD)
+    // State 2
     proc.init();
     proc.pc     = 0x204;
+    proc.V[0x3] = 0x08;
+    proc.V[0x4] = 0x04;
+    expected_state.push_back(proc);
+    // State 3 (ADD)
+    proc.init();
+    proc.pc     = 0x206;
     proc.V[0x3] = 0x8 + 0x4;
     proc.V[0x4] = 0x04;
     expected_state.push_back(proc);
-    // Start 5
+    // Start 4
     // Call 
     proc.init();
-    //proc.pc       = 0x208;
-    proc.pc       = 0x206;
+    proc.pc       = 0x20A; //would be 0x208, but should get set before trace copies state
     proc.V[0x3]   = 0xC;
     proc.V[0x4]   = 0x04;
     proc.stack[0] = 0x208;
     proc.sp = 1;
     expected_state.push_back(proc);
-    // State 6
+    // State 5
     // "subroutine"
     proc.init();
-    proc.pc       = 0x208;
+    proc.pc       = 0x20C;
     proc.V[0x3]   = 0xC;
     proc.V[0x4]   = 0x04;
     proc.V[0x5]   = 0x01;
@@ -652,37 +655,52 @@ TEST_F(TestChip8, test_call_ret)
     proc.sp = 1;
     expected_state.push_back(proc);
 
-    // State 7
+    // State 6 (RET)
     proc.init();
-    proc.pc     = 0x20C;
+    proc.pc     = 0x20E;
     proc.V[0x3] = 0xD;
     proc.V[0x4] = 0x04;
     proc.V[0x5] = 0x01;
     proc.stack[0] = 0x208;
     proc.sp = 1;
     expected_state.push_back(proc);
-    // State 8
-    // RET
+
+    // State 7
     proc.init();
-    proc.pc     = 0x20E;
-    proc.V[0x3] = 0xC;
+    proc.pc     = 0x208;
+    proc.V[0x3] = 0xD;
     proc.V[0x4] = 0x04;
     proc.V[0x5] = 0x01;
+    proc.stack[0] = 0x208;
     proc.sp = 0;
     expected_state.push_back(proc);
-    // State 9
+    // State 8
     // Move to previous stack pointer 
     // positon
     proc.init();
-    proc.pc     = 0x208;
-    proc.V[0x3] = 0xC;
+    // this is the JP line
+    proc.pc     = 0x210;
+    proc.V[0x3] = 0xD;
     proc.V[0x4] = 0x04;
     proc.V[0x5] = 0x01;
+    proc.stack[0] = 0x208;
     expected_state.push_back(proc);
+
+    // State 9,
+    // set V6 to 0xFF
+    proc.init();
+    proc.pc = 0x212;        // PC increments to 0x210 + 2 by the end of cycle
+    proc.V[0x3] = 0xD;
+    proc.V[0x4] = 0x04;
+    proc.V[0x5] = 0x01;
+    proc.V[0x6] = 0xFF;
+    proc.stack[0] = 0x208;
+    expected_state.push_back(proc);
+
 
     // Execute instruction
     c8.setTrace(true);
-    c8.loadMem(test_data, 0x200);
+    c8.loadMem(test_data, this->load_offset);
 
     // Dump the memory contents to terminal for inspection
     unsigned int c8_mem_size = c8.getMemSize();
@@ -700,8 +718,11 @@ TEST_F(TestChip8, test_call_ret)
     trace_out = c8.getTrace();
 
     // TODO : (debug) dump the whple trace here 
-    for(unsigned int t = 0; t < 8; ++t)
+    for(unsigned int t = 0; t < expected_state.size(); ++t)
+    {
+        std::cout << "Trace vector " << t << std::endl;
         std::cout << trace_out[t].toString();
+    }
 
     this->compare_state_vector(expected_state, trace_out);
 }

@@ -362,6 +362,7 @@ void Chip8::exec_zero_op(void)
             std::cout << "[" << __func__ << "] got CLS" << std::endl;
             break;
 
+        // TODO: trap overflow/underflow
         case 0x00EE:        // RET 
             this->state.sp--;
             this->state.pc = this->state.stack[this->state.sp % 12];
@@ -389,7 +390,6 @@ void Chip8::cycle(void)
     // decode 
     this->cur_opcode = (this->mem[this->state.pc] << 8) |  
                        (this->mem[this->state.pc + 1]);
-    this->state.pc += 2;
 
     this->exec.u  =  (this->cur_opcode >> 12) & 0x0F;
     this->exec.p  =  (this->cur_opcode      ) & 0x0F;
@@ -425,6 +425,9 @@ void Chip8::cycle(void)
             break;
     }
 
+    // increment program counter
+    this->state.pc += 2;
+
     //std::cout << "[" << __func__ << "] instr_code " 
     //    << std::hex << std::setw(4) << std::setfill('0')
     //    << instr_code << std::endl;
@@ -440,6 +443,8 @@ void Chip8::cycle(void)
             break;
 
         case C8_CALL:   // CALL nnn
+            // need to wind back the program counter
+            //this->state.pc -= 2;
             this->state.stack[this->state.sp % 12] = this->state.pc;
             this->state.sp++;
             this->state.pc = this->exec.nnn;

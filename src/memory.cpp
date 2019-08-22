@@ -38,15 +38,6 @@ std::string mem_line_to_string(int addr, uint8_t byte1, uint8_t byte2)
 std::string mem_to_string(const uint8_t* data, int length, int start_offset, bool skip_zeros)
 {
     std::ostringstream oss;
-    //int len_with_pad = 0;
-
-    // TODO : maybe kill padding....
-    //len_with_pad = length;
-    //if((length % 2) != 0)
-    //{
-    //    while((len_with_pad % 2) != 0)
-    //        len_with_pad++;
-    //}
 
     // Print some preamble 
     oss << "Printing " << unsigned(length) << " bytes starting at offset [0x" 
@@ -58,6 +49,7 @@ std::string mem_to_string(const uint8_t* data, int length, int start_offset, boo
     oss << "---------------------" << std::endl;
 
     int cur_addr = start_offset;
+    int zeros_skipped = 0;
     // each 'line' in the output is two bytes long
     for(int b = 0; b < length; ++b)
     {
@@ -66,7 +58,10 @@ std::string mem_to_string(const uint8_t* data, int length, int start_offset, boo
             if(skip_zeros)
             {
                 if((data[b] == 0) && (data[b+1] == 0))
+                {
+                    zeros_skipped++;
                     goto ADVANCE_ADDR;
+                }
             }
             oss << mem_line_to_string(cur_addr, data[b], data[b+1]);
             oss << std::endl;
@@ -75,6 +70,8 @@ ADVANCE_ADDR:
         cur_addr++;
     }
     oss << std::endl;
+    if(skip_zeros)
+        oss << "Skipped " << std::dec << unsigned(zeros_skipped) << " zeros in memory" << std::endl;
 
     return oss.str();
 }
