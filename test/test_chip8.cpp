@@ -73,25 +73,6 @@ TEST_F(TestChip8, test_init)
     // rest of state 
 }
 
-//TEST_F(TestChip8, test_instr_asm)
-//{
-//    int status;
-//    std::string prog_filename = "data/instr.asm";
-//    Chip8 c8;
-//
-//    // Ensure the program is assembled, etc before execution 
-//    Lexer lexer;
-//    Assembler assembler;
-//
-//    // Assemble the source into a program
-//    status = lexer.loadFile(prog_filename);
-//    ASSERT_EQ(0, status);
-//    std::cout << "\t Assembing file " << prog_filename << std::endl;
-//    lexer.lex();
-//    assembler.loadSource(lexer.getSourceInfo());
-//    assembler.assemble();
-//
-//}
 
 TEST_F(TestChip8, test_load_obj)
 {
@@ -255,17 +236,6 @@ TEST_F(TestChip8, test_add_vxkk)
     std::vector<C8Proc> trace_out = c8.getTrace();
 
     this->compare_state_vector(expected_state, trace_out);
-
-    //bool eq;
-    //for(unsigned int i = 0; i < expected_state.size(); ++i)
-    //{
-    //    C8Proc exp_proc = expected_state[i];
-    //    C8Proc out_proc = trace_out[i];
-    //    eq = exp_proc == out_proc;
-    //    if(!eq)
-    //        std::cout << trace_out[i].toString();
-    //    ASSERT_EQ(true, eq);
-    //}
 }
 
 // AND 
@@ -598,15 +568,13 @@ TEST_F(TestChip8, test_call_ret)
     std::vector<C8Proc> trace_out;
 
     // Assembly
-    // TODO : maybe move the subroutine to the end so that we don't just do
-    // it again as soon as we RET
     std::vector<uint8_t> test_data = {
         0x63, 0x08, // [0x200] LD V3, 0x08
         0x64, 0x04, // [0x202] LD V4, 0x04
         0x83, 0x44, // [0x204] ADD V3, V4
         0x22, 0x0A, // [0x206] CALL 0x20A
         0x12, 0x10, // [0x208] JP 0x210
-        0x65, 0x01, // [0x20A] LD V5 0x01           // TODO : not loading?
+        0x65, 0x01, // [0x20A] LD V5 0x01
         0x83, 0x54, // [0x20C] ADD V3, V5
         0x00, 0xEE, // [0x20E] RET
         0x66, 0xFF  // [0x210] LD V6, 0xFF
@@ -717,7 +685,6 @@ TEST_F(TestChip8, test_call_ret)
         c8.cycle();
     trace_out = c8.getTrace();
 
-    // TODO : (debug) dump the whple trace here 
     for(unsigned int t = 0; t < expected_state.size(); ++t)
     {
         std::cout << "Trace vector " << t << std::endl;
