@@ -51,55 +51,114 @@ void C8Proc::init(void)
     this->st = 0;
 }
 
+
+// Try a new string format here 
 std::string C8Proc::toString(void) const
 {
     std::ostringstream oss;
-    
+
     oss << "---------------------------------------------------------------------" << std::endl;
     // Program counter, Stack pointer, I register
-    oss << " [PC]    [SP]   [I]     " << std::endl;
+    oss << " [PC]    [SP]     [I]     DT    ST" << std::endl;
     oss << " 0x" << std::hex << std::setw(4) << std::setfill('0') << this->pc << "  ";
     oss << " 0x" << std::hex << std::setw(2) << std::setfill('0') << this->sp << "   ";
     oss << " 0x" << std::hex << std::setw(4) << std::setfill('0') << this->I << " ";
+    oss << " 0x" << std::hex << std::setw(4) << std::setfill('0') << this->dt << " ";
+    oss << " 0x" << std::hex << std::setw(4) << std::setfill('0') << this->st << " ";
 
-    // Make a little 'stack diagram that goes next to a 'register' 
-    // diagram and print that line by line 
-    oss << std::endl << std::endl;
-    oss << " Stack           Registers " << std::endl;
-    for(int r = 0; r < 16; ++r)
+    oss << std::endl;
+
+    // Try to cram 8 registers on each line
+    // First 8
+    for(int v = 0; v < 8; ++v)
+        oss << "  V" << std::hex << std::setw(1) << unsigned(v) << "  ";
+    oss << std::endl;
+
+    for(int v = 0; v < 8; ++v)
     {
-        // stack
-        if(r < 12)
-        {
-            oss << " " << std::dec << std::setw(2) << r;
-            oss << " [ 0x" << std::hex << std::setw(4) << std::setfill('0') 
-                << unsigned(this->stack[r]) << " ] ";
-        }
-        else if(r == 13)
-        {
-            oss << " ST: [ 0x" << std::hex << std::setw(2) 
-                << std::setfill('0') << unsigned(this->st) << " ]"; 
-            oss << "  ";
-        }
-        else if(r == 14)
-        {
-            oss << " DT: [ 0x" << std::hex << std::setw(2)
-                << std::setfill('0') << unsigned(this->dt) << " ]"; 
-            oss << "  ";
-        }
-        else 
-            oss << std::setw(15) << std::setfill(' ') << " ";
+        oss << "[0x" << std::hex << std::setw(2) << std::uppercase
+            << std::setfill('0') << unsigned(this->V[v]) << "]";
+    } 
+    oss << std::endl;
+    // Next 8
+    for(int v = 8; v < 16; ++v)
+        oss << "  V" << std::hex << std::setw(1) << unsigned(v) << "  ";
+    oss << std::endl;
+    for(int v = 8; v < 16; ++v)
+    {
+        oss << "[0x" << std::hex << std::setw(2) << std::uppercase
+            << std::setfill('0') << unsigned(this->V[v]) << "]";
+    } 
 
-        // registers 
-        oss << "V" << std::hex << std::setw(1) << std::setfill(' ') 
-            << std::uppercase << r;
-        oss << " [ 0x" << std::hex << std::setw(2) << std::setfill('0') 
-                << unsigned(this->V[r]) << " ] ";
-        oss << std::endl;
+    oss << std::endl;
+
+    // Add stack - this might fit on one like
+    for(int s = 0; s < 12; ++s)
+        oss << "  S" << std::hex << std::setw(1) << unsigned(s) << " ";
+    oss << std::endl;
+    for(int s = 0; s < 12; ++s)
+    {
+        oss << "0x" << std::hex << std::setw(2) << std::setfill('0') 
+            << std::uppercase << unsigned(this->stack[s]) << " ";
     }
+    oss << std::endl;
+
+
+
+    oss << "---------------------------------------------------------------------" << std::endl;
 
     return oss.str();
 }
+
+//std::string C8Proc::toString(void) const
+//{
+//    std::ostringstream oss;
+//    
+//    oss << "---------------------------------------------------------------------" << std::endl;
+//    // Program counter, Stack pointer, I register
+//    oss << " [PC]    [SP]   [I]     " << std::endl;
+//    oss << " 0x" << std::hex << std::setw(4) << std::setfill('0') << this->pc << "  ";
+//    oss << " 0x" << std::hex << std::setw(2) << std::setfill('0') << this->sp << "   ";
+//    oss << " 0x" << std::hex << std::setw(4) << std::setfill('0') << this->I << " ";
+//
+//    // Make a little 'stack diagram that goes next to a 'register' 
+//    // diagram and print that line by line 
+//    oss << std::endl << std::endl;
+//    oss << " Stack           Registers " << std::endl;
+//    for(int r = 0; r < 16; ++r)
+//    {
+//        // stack
+//        if(r < 12)
+//        {
+//            oss << " " << std::dec << std::setw(2) << r;
+//            oss << " [ 0x" << std::hex << std::setw(4) << std::setfill('0') 
+//                << unsigned(this->stack[r]) << " ] ";
+//        }
+//        else if(r == 13)
+//        {
+//            oss << " ST: [ 0x" << std::hex << std::setw(2) 
+//                << std::setfill('0') << unsigned(this->st) << " ]"; 
+//            oss << "  ";
+//        }
+//        else if(r == 14)
+//        {
+//            oss << " DT: [ 0x" << std::hex << std::setw(2)
+//                << std::setfill('0') << unsigned(this->dt) << " ]"; 
+//            oss << "  ";
+//        }
+//        else 
+//            oss << std::setw(15) << std::setfill(' ') << " ";
+//
+//        // registers 
+//        oss << "V" << std::hex << std::setw(1) << std::setfill(' ') 
+//            << std::uppercase << r;
+//        oss << " [ 0x" << std::hex << std::setw(2) << std::setfill('0') 
+//                << unsigned(this->V[r]) << " ] ";
+//        oss << std::endl;
+//    }
+//
+//    return oss.str();
+//}
 
 std::string C8Proc::diffStr(const C8Proc& that)
 {

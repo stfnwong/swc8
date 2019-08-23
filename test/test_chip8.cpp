@@ -687,7 +687,7 @@ TEST_F(TestChip8, test_call_ret)
 
     for(unsigned int t = 0; t < expected_state.size(); ++t)
     {
-        std::cout << "Trace vector " << t << std::endl;
+        std::cout << "\tTrace vector " << t << std::endl;
         std::cout << trace_out[t].toString();
     }
 

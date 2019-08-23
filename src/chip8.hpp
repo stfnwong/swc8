@@ -56,22 +56,21 @@
  * C8Proc
  * Chip-8 processor state
  */
-class C8Proc
+struct C8Proc
 {
-    public:
-        // Internals
-        uint8_t  V[16];
-        uint16_t pc;            // program counter
-        uint16_t sp;            // stack pointer 
-        // special registers 
-        uint16_t I;
-        // Timers 
-        uint8_t  dt;             // Delay timer
-        uint8_t  st;             // Sound timer
-        // Stack 
-        uint16_t stack[12];     // stack memory
-        // keys 
-        uint8_t  keys[16];      // key input
+    // Internals
+    uint8_t  V[16];
+    uint16_t pc;            // program counter
+    uint16_t sp;            // stack pointer 
+    // special registers 
+    uint16_t I;
+    // Timers 
+    uint8_t  dt;             // Delay timer
+    uint8_t  st;             // Sound timer
+    // Stack 
+    uint16_t stack[12];     // stack memory
+    // keys 
+    uint8_t  keys[16];      // key input
 
     public:
         C8Proc();
@@ -179,6 +178,10 @@ class Chip8
         Chip8();
         Chip8(const Chip8& that);
 
+        /*
+         * cycle()
+         * Run the CPU for a single cycle.
+         */
         void cycle(void);
         /*
          * loadMem()

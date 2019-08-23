@@ -58,8 +58,6 @@ void OpcodeTable::add(const Opcode& o)
     this->op_list.push_back(o);
 }
 
-// NOTE: could use a map here or something, but to be honest the search here 
-// is so small that just walking the array is probably not much of a bottleneck
 /*
  * get()
  * Get by mnemonic
