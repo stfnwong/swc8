@@ -37,16 +37,33 @@ struct Opcode
 class OpcodeTable
 {
     private:
+        Opcode null_op;
         std::vector<Opcode> op_list;
         
     public:
         OpcodeTable() {} 
 
         void add(const Opcode& o);
-        void get(const std::string& mnemonic, Opcode& o) const;
-        void get(const uint16_t opcode, Opcode& o) const;
+        /*
+         * get()
+         * Lookup opcode in table by mnemonic
+         */
+        Opcode get(const std::string& mnemonic) const;
+        /*
+         * get()
+         * Look up opcode in table by code
+         */
+        Opcode get(const uint16_t opcode) const;
+        /*
+         * getIdx()
+         * Return the n-th opcode in the table
+         */
+        Opcode getIdx(const unsigned int idx) const;
+        /*
+         * getMnemonic()
+         * Return the mnemonic for a particular opcode.
+         */
         std::string getMnemonic(const uint16_t opcode) const;
-        void getIdx(const unsigned int idx, Opcode& o) const;
         void init(void);
 
         void print(void) const;

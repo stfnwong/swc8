@@ -56,7 +56,7 @@ std::string Token::toString(void) const
 /* 
  * TokenTable 
  */
-TokenTable::TokenTable() {} 
+TokenTable::TokenTable() : null_token() {}
 
 
 void TokenTable::add(const Token& t)
@@ -117,7 +117,7 @@ bool Symbol::operator!=(const Symbol& that) const
 /*
  * SYMBOLTABLE 
  */
-SymbolTable::SymbolTable() {} 
+SymbolTable::SymbolTable() : null_sym() {} 
 
 
 void SymbolTable::add(const Symbol& s)
@@ -134,12 +134,12 @@ void SymbolTable::update(const unsigned int idx, const Symbol& s)
 
 Symbol SymbolTable::get(const unsigned int idx) const
 {
-    // Worth doing bounds check?
-    return this->syms[idx];
+    if(idx < this->syms.size())
+        return this->syms[idx];
+    return this->null_sym;
 }
 
-// TODO: Currently implemented as linear search,
-// change to map or something
+// Linear search isn't that fancy, but probably fast enough for this
 uint16_t SymbolTable::getAddr(const std::string& s) const
 {
     uint16_t addr;

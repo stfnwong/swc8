@@ -50,7 +50,6 @@ const Opcode lex_instr_codes[] = {
 };
 
 
-
 /* 
  * Lexer
  * Create a sequence of Chip-8 tokens.

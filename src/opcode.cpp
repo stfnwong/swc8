@@ -60,41 +60,48 @@ void OpcodeTable::add(const Opcode& o)
 
 // NOTE: could use a map here or something, but to be honest the search here 
 // is so small that just walking the array is probably not much of a bottleneck
-void OpcodeTable::get(const std::string& mnemonic, Opcode& o) const
+/*
+ * get()
+ * Get by mnemonic
+ */
+Opcode OpcodeTable::get(const std::string& mnemonic) const
 {
-    unsigned int idx;
-
-    for(idx = 0; idx < this->op_list.size(); idx++)
+    for(unsigned int idx = 0; idx < this->op_list.size(); idx++)
     {
         if(mnemonic == this->op_list[idx].mnemonic)
-        {
-            o.opcode   = this->op_list[idx].opcode;
-            o.mnemonic = this->op_list[idx].mnemonic;
-            return;
-        }
+            return this->op_list[idx];
     }
-    o.opcode = 0;
-    o.mnemonic = "\0";
+
+    return this->null_op;
 }
 
-void OpcodeTable::get(const uint16_t opcode, Opcode& o) const
+/*
+ * get()
+ * Get by opcode
+ */
+Opcode OpcodeTable::get(const uint16_t opcode) const
 {
-    // TODO : same as above but 'search by opcode'
-    unsigned int idx;
-
-    for(idx = 0; idx < this->op_list.size(); idx++)
+    for(unsigned int idx = 0; idx < this->op_list.size(); idx++)
     {
         if(opcode == this->op_list[idx].opcode)
-        {
-            o.opcode   = this->op_list[idx].opcode;
-            o.mnemonic = this->op_list[idx].mnemonic;
-            return;
-        }
+            return this->op_list[idx];
     }
-    o.opcode = 0;
-    o.mnemonic = "M_INVALID";
+    return this->null_op;
 }
 
+/*
+ * getIdx()
+ */
+Opcode OpcodeTable::getIdx(const unsigned int idx) const
+{
+    if(idx < this->op_list.size())
+        return this->op_list[idx];
+    return this->null_op;
+}
+
+/*
+ * getMnemonic()
+ */
 std::string OpcodeTable::getMnemonic(const uint16_t opcode) const
 {
     // At some point maybe I should deal with all these linear scans..
@@ -105,12 +112,6 @@ std::string OpcodeTable::getMnemonic(const uint16_t opcode) const
     }
 
     return "OP_INVAILD";
-}
-
-void OpcodeTable::getIdx(const unsigned int idx, Opcode& o) const
-{
-    if(idx < this->op_list.size())
-        o = this->op_list[idx];
 }
 
 void OpcodeTable::init(void)

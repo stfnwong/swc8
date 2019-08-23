@@ -164,7 +164,7 @@ void Lexer::nextToken(void)
 
     this->scanToken();
     token_str = std::string(this->token_buf);
-    this->instr_code_table.get(token_str, op);
+    op = this->instr_code_table.get(token_str);
 
     // Check for special tokens 
     if(token_str.length() == 1)
@@ -613,7 +613,7 @@ void Lexer::parseLine(void)
 
     if(this->cur_token.type == SYM_INSTR)
     {
-        this->instr_code_table.get(this->cur_token.val, op);
+        op = this->instr_code_table.get(this->cur_token.val);
         if(this->verbose)
         {
             std::cout << "[" << __func__ << "] (line " << std::dec << this->cur_line 
