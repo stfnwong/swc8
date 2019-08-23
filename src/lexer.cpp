@@ -195,6 +195,7 @@ void Lexer::nextToken(void)
         goto TOKEN_END;
     }
 
+    // Check for DelayTimer and SoundTimer
     if(token_str.length() == 2)
     {
         if(token_str == "DT")
