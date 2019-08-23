@@ -19,6 +19,9 @@ C8Proc::C8Proc()
     this->init();
 }
 
+/*
+ * C8Proc()
+ */
 C8Proc::C8Proc(const C8Proc& that)
 {
     for(int r = 0; r < 16; r++)
@@ -34,6 +37,9 @@ C8Proc::C8Proc(const C8Proc& that)
         this->keys[k] = that.keys[k];
 }
 
+/*
+ * init()
+ */
 void C8Proc::init(void)
 {
     for(int r = 0; r < 16; r++)
@@ -52,14 +58,16 @@ void C8Proc::init(void)
 }
 
 
-// Try a new string format here 
+/*
+ * toString()
+ */
 std::string C8Proc::toString(void) const
 {
     std::ostringstream oss;
 
     oss << "---------------------------------------------------------------------" << std::endl;
     // Program counter, Stack pointer, I register
-    oss << " [PC]    [SP]     [I]     DT    ST" << std::endl;
+    oss << " [PC]     [SP]    [I]     DT    ST" << std::endl;
     oss << " 0x" << std::hex << std::setw(4) << std::setfill('0') << this->pc << "  ";
     oss << " 0x" << std::hex << std::setw(2) << std::setfill('0') << this->sp << "   ";
     oss << " 0x" << std::hex << std::setw(4) << std::setfill('0') << this->I << " ";
@@ -103,63 +111,15 @@ std::string C8Proc::toString(void) const
     }
     oss << std::endl;
 
-
-
     oss << "---------------------------------------------------------------------" << std::endl;
 
     return oss.str();
 }
 
-//std::string C8Proc::toString(void) const
-//{
-//    std::ostringstream oss;
-//    
-//    oss << "---------------------------------------------------------------------" << std::endl;
-//    // Program counter, Stack pointer, I register
-//    oss << " [PC]    [SP]   [I]     " << std::endl;
-//    oss << " 0x" << std::hex << std::setw(4) << std::setfill('0') << this->pc << "  ";
-//    oss << " 0x" << std::hex << std::setw(2) << std::setfill('0') << this->sp << "   ";
-//    oss << " 0x" << std::hex << std::setw(4) << std::setfill('0') << this->I << " ";
-//
-//    // Make a little 'stack diagram that goes next to a 'register' 
-//    // diagram and print that line by line 
-//    oss << std::endl << std::endl;
-//    oss << " Stack           Registers " << std::endl;
-//    for(int r = 0; r < 16; ++r)
-//    {
-//        // stack
-//        if(r < 12)
-//        {
-//            oss << " " << std::dec << std::setw(2) << r;
-//            oss << " [ 0x" << std::hex << std::setw(4) << std::setfill('0') 
-//                << unsigned(this->stack[r]) << " ] ";
-//        }
-//        else if(r == 13)
-//        {
-//            oss << " ST: [ 0x" << std::hex << std::setw(2) 
-//                << std::setfill('0') << unsigned(this->st) << " ]"; 
-//            oss << "  ";
-//        }
-//        else if(r == 14)
-//        {
-//            oss << " DT: [ 0x" << std::hex << std::setw(2)
-//                << std::setfill('0') << unsigned(this->dt) << " ]"; 
-//            oss << "  ";
-//        }
-//        else 
-//            oss << std::setw(15) << std::setfill(' ') << " ";
-//
-//        // registers 
-//        oss << "V" << std::hex << std::setw(1) << std::setfill(' ') 
-//            << std::uppercase << r;
-//        oss << " [ 0x" << std::hex << std::setw(2) << std::setfill('0') 
-//                << unsigned(this->V[r]) << " ] ";
-//        oss << std::endl;
-//    }
-//
-//    return oss.str();
-//}
 
+/*
+ * diffStr()
+ */
 std::string C8Proc::diffStr(const C8Proc& that)
 {
     std::ostringstream oss;
@@ -212,17 +172,27 @@ std::string C8Proc::diffStr(const C8Proc& that)
             << std::setfill('0') << unsigned(that.I)
             << "]" << std::endl;
     }
-    //if(this->dt != that.dt)
-    //{
-    //    oss << "this->dt (" << std::hex << std::setw(4) 
-    //        << std::setfill('0') << this->dt << ") != that.dt ("
-    //        << std::setw(4) << std::setfill('0') << that.dt 
-    //        << ")" << std::endl;
-    //}
+    if(this->dt != that.dt)
+    {
+        oss << "this->dt (" << std::hex << std::setw(4) 
+            << std::setfill('0') << unsigned(this->dt) << ") != that.dt ("
+            << std::setw(4) << std::setfill('0') << unsigned(that.dt)
+            << ")" << std::endl;
+    }
+    if(this->st != that.st)
+    {
+        oss << "this->st (" << std::hex << std::setw(4) 
+            << std::setfill('0') << unsigned(this->st) << ") != that.st ("
+            << std::setw(4) << std::setfill('0') << unsigned(that.st)
+            << ")" << std::endl;
+    }
 
     return oss.str();
 }
 
+/*
+ * ==
+ */
 bool C8Proc::operator==(const C8Proc& that)
 {
     // registers
@@ -252,6 +222,9 @@ bool C8Proc::operator==(const C8Proc& that)
     return true;
 }
 
+/*
+ * !=
+ */
 bool C8Proc::operator!=(const C8Proc& that)
 {
     return (*this == that);
