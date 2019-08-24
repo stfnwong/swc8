@@ -140,6 +140,7 @@ class SymbolTable
 #define LEX_OP_LABEL 0x02
 #define LEX_OP_DIR   0x04
 
+
 // Chip 8 LineInfo structure 
 struct LineInfo
 {
@@ -197,10 +198,6 @@ class SourceInfo
         unsigned int numInstance(const std::string& m) const;
         bool         hasError(void) const;
         void         setError(const bool e);
-
-        // Save/load data
-        int          write(const std::string& filename);
-        int          read(const std::string& filename);
 
         std::string  dumpErrors(void);
 }; 

@@ -468,25 +468,6 @@ void SourceInfo::setError(const bool e)
     this->error = e;
 }
 
-// Save/load data 
-// TODO : may need a serialization library here 
-int SourceInfo::write(const std::string& filename)
-{
-    int status = 0;
-    //uint32_t num_records, sym_len, label_len;
-
-    //num_records = this->line_info.size();
-
-    return status;
-}
-
-// TODO : May need serialization library here
-int SourceInfo::read(const std::string& filename)
-{
-    int status = 0;
-
-    return status;
-}
 
 std::string SourceInfo::dumpErrors(void)
 {
