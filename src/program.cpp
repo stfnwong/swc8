@@ -83,6 +83,9 @@ void Program::writeMem(const uint16_t addr, const uint16_t val)
     this->instructions.push_back(ins);
 }
 
+/*
+ * numInstr()
+ */
 unsigned int Program::numInstr(void) const
 {
     return this->instructions.size();
@@ -176,6 +179,99 @@ int Program::load(const std::string& filename)
 
     return 0;
 }
+
+/*
+ * writeObj()
+ */
+int Program::writeObj(const std::string& filename)
+{
+    std::ofstream outfile;
+    uint8_t ub, lb;
+
+    try {
+        outfile.open(filename, std::ios_base::binary);
+    }
+    catch(std::ios_base::failure& e) {
+        std::cerr << "[" << __FUNCTION__ << "] " << e.what() << std::endl;
+        return -1;
+    }
+
+    for(unsigned int i = 0; i < this->instructions.size(); ++i)
+    {
+        // write address
+        ub = (uint8_t) (this->instructions[i].adr >> 8) & 0xFF;
+        lb = (uint8_t) (this->instructions[i].adr >> 0) & 0xFF;
+        outfile.write(reinterpret_cast<char*>(&ub), sizeof(uint8_t));
+        outfile.write(reinterpret_cast<char*>(&lb), sizeof(uint8_t));
+        // Write data 
+        ub = (uint8_t) (this->instructions[i].ins >> 8) & 0xFF;
+        lb = (uint8_t) (this->instructions[i].ins >> 0) & 0xFF;
+        outfile.write(reinterpret_cast<char*>(&ub), sizeof(uint8_t));
+        outfile.write(reinterpret_cast<char*>(&lb), sizeof(uint8_t));
+        if(this->verbose)
+        {
+            std::cout << "[" << __FUNCTION__ << "] Writing instruction "
+                << i << "/" << this->instructions.size() << "\r";
+        }
+    }
+    if(this->verbose)
+        std::cout << std::endl << "...done" << std::endl;
+    outfile.close();
+
+    return 0;
+}
+
+/* 
+ * readObj()
+ */
+int Program::readObj(const std::string& filename)
+{
+    std::ifstream infile;
+    size_t num_bytes;
+    uint16_t num_records;
+    uint8_t ub, lb;
+
+    try {
+        infile.open(filename, std::ios_base::binary);
+    }
+    catch(std::ios_base::failure& e) {
+        std::cerr << "[" << __FUNCTION__ << "] " << e.what() << std::endl;
+        return -1;
+    }
+
+    // Figure out how long the file is.
+    infile.seekg(0, std::ios::end);
+    num_bytes = infile.tellg(); 
+    if(num_bytes % 4 != 0)
+    {
+        std::cerr << "[" << __FUNCTION__ << "] contains " 
+            << num_bytes << " bytes (" << num_bytes / 4 << " records)"
+            << std::endl;
+        return -1;
+    }
+    infile.seekg(0, std::ios::beg);
+    num_records = num_bytes / 4;
+    this->instructions.clear();
+
+    Instr instr;
+    for(unsigned int i = 0; i < num_records; ++i)
+    {
+        instr.adr = 0;
+        instr.ins = 0;
+        infile.read(reinterpret_cast<char*>(&ub), sizeof(uint8_t));
+        infile.read(reinterpret_cast<char*>(&lb), sizeof(uint8_t));
+        instr.adr = (ub << 8) | lb;
+        infile.read(reinterpret_cast<char*>(&ub), sizeof(uint8_t));
+        infile.read(reinterpret_cast<char*>(&lb), sizeof(uint8_t));
+        instr.ins = (ub << 8) | lb;
+        this->instructions.push_back(instr);
+    }
+
+    infile.close();
+
+    return 0;
+}
+
 
 void Program::setVerbose(const bool v)
 {

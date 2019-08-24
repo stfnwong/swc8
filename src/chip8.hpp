@@ -10,147 +10,232 @@
 #include <vector>
 #include <string>
 #include <cstdint>
+#include <random>
 #include "opcode.hpp"
 
 #define CHIP8_START_ADR 0x200
 // TODO: fontset
 
-// Chip-8 opcodes
-#define C8_JMP      0x1000
-#define C8_CALL     0x2000
-#define C8_SEVxkk   0x3000
-#define C8_SE       0x5000      // 'placeholder' instruction 
-#define C8_SNE      0x4000
-#define C8_LDVxkk   0x6000
-#define C8_ADDVx    0x7000
-#define C8_LD   0x8000
-#define C8_OR   0x8001
-#define C8_AND  0x8002
-#define C8_XOR  0x8003
-#define C8_ADD  0x8004
-#define C8_SUB  0x8005
-#define C8_SHR  0x8006
-#define C8_SUBN 0x8007
-#define C8_SHL  0x800E
+// Chip8 instruction codes 
+// effectively a kind of opcode mask 
+#define C8_ZERO   0x0000 // special case here for zeros
 
-#define C8_LDI      0xA000
-#define C8_JP       0xB000
-#define C8_DRW      0xD000
+#define C8_JP     0x1000
+#define C8_CALL   0x2000
+#define C8_SEI    0x3000
+#define C8_SNEI   0x4000
+#define C8_SE     0x5000
+#define C8_LDI    0x6000
+#define C8_ADDI   0x7000
+#define C8_LD     0x8000
+#define C8_OR     0x8001
+#define C8_AND    0x8002
+#define C8_XOR    0x8003
+#define C8_ADD    0x8004
+#define C8_SUB    0x8005
+#define C8_SHR    0x8006
+#define C8_SUBN   0x8007
+#define C8_SHL    0x800E
+#define C8_SNE    0x9000
+#define C8_LDII   0xA000
+#define C8_JPV    0xB000
+#define C8_RND    0xC000
+#define C8_DRW    0xD000
+#define C8_SKP    0xE09E
+#define C8_SKNP   0xE0A1
+#define C8_LDDTVX 0xF007
+#define C8_LDVXDT 0xF015
+#define C8_LDK    0xF00A
+#define C8_LDB    0xF033
+#define C8_LDIVX  0xF055
+#define C8_LDVXI  0xF065
 
-// Skip instructions
-#define C8_SEKK  0x3000
-#define C8_SNEKK 0x4000
-#define C8_SEVX  0x5000
-#define C8_SNEVX 0x9000
-//#define C8_SNE_EQ  0x9000
-
-// Lexer specific opcocdes...?
-
-
-// Chip-8 opcodes (for assembler)
-static Opcode chip8_opcodes[] = {
-    {C8_JMP,   "JMP"},
-    {C8_CALL,  "CALL"},
-    //{C8_SE,   "SE"},
-    {C8_SE,    "SE"},
-    {C8_SNE,   "SNE"},
-    {C8_SEKK,  "SE"},
-    {C8_SEVX,  "SE"},
-    {C8_SNEVX, "SNE"},
-    {C8_SNEKK, "SNE"},
-    {C8_LD,    "LD"},
-    {C8_ADD,   "ADD"},
-    {C8_LD,    "LD"},
-    {C8_OR,    "OR"},
-    {C8_AND,   "AND"},
-    {C8_XOR,   "XOR"},
-    {C8_ADD,   "ADD"},
-    {C8_SUB,   "SUB"},
-    {C8_SHR,   "SHR"},
-    {C8_SUBN,  "SUBN"},
-    {C8_SHL,   "SHL"},
-    {C8_JP,    "JP"},
-    {C8_DRW,   "DRW"}
-};
+// TODO : handle zero codes seperately
 
 /*
  * C8Proc
  * Chip-8 processor state
  */
-class C8Proc
+struct C8Proc
 {
-    public:
-        // Internals
-        uint8_t  V[16];
-        uint16_t VF;
-        uint16_t I;
-        uint16_t pc;
-        uint16_t sp;
+    // Internals
+    uint8_t  V[16];
+    uint16_t pc;            // program counter
+    uint16_t sp;            // stack pointer 
+    // special registers 
+    uint16_t I;
+    // Timers 
+    uint8_t  dt;             // Delay timer
+    uint8_t  st;             // Sound timer
+    // Stack 
+    uint16_t stack[12];     // stack memory
+    // keys 
+    uint8_t  keys[16];      // key input
 
     public:
         C8Proc();
-        ~C8Proc();
         C8Proc(const C8Proc& that);
+
+        void init(void);
         // Print format
         std::string toString(void) const;
+        std::string diffStr(const C8Proc& that);
+        bool operator==(const C8Proc& that);
+        bool operator!=(const C8Proc& that);
 };
+
+
+// Thin wrapper around a vector of processor states 
+class C8StateLog
+{
+    private: 
+        unsigned int max_log;
+        unsigned int log_ptr;
+        std::vector<C8Proc> log;
+
+    public:
+        C8StateLog();
+        ~C8StateLog();
+        C8StateLog(const C8StateLog& that);
+        void add(const C8Proc& state);
+        C8Proc get(const unsigned int idx) const;
+        std::vector<C8Proc> getLog(void) const;
+};
+
 
 /*
  * C8Exec
  * Chip-8 execution context. Allows saving and resuming
  * of pipeline state.
  */
-class C8Exec
+struct C8Exec
 {
-    public:
-        uint8_t u;
-        uint8_t p;
-        uint8_t x;
-        uint8_t y;
-        uint8_t kk;
-        uint16_t nnn;
+    uint8_t u;
+    uint8_t p;
+    uint8_t vx;
+    uint8_t vy;
+    uint8_t kk;
+    uint16_t nnn;
 
     public:
         C8Exec();
-        ~C8Exec();
         C8Exec(const C8Exec& that);
         std::string toString(void);
+
+        bool operator==(const C8Exec& that) const;
+        bool operator!=(const C8Exec& that) const;
 };
+
+// NOTE: Could put a debug switch that puts an opcode table here so that 
+// we can convert opcodes to strings?
 
 /*
  * Chip8
  * Chip-8 object
  */
+constexpr const unsigned int DISP_H = 64;
+constexpr const unsigned int DISP_W = 64;
+constexpr const unsigned int C8_MEM_SIZE = 0x1000;
+
 class Chip8
 {
     private:
+        bool verbose;
+        std::mt19937 rnd{};
+
+    private:
         // Processor state 
+        bool log_state;
+        C8StateLog state_log;
         C8Proc state;
 
     private:
         // Execution context
         C8Exec exec;
+        bool log_exec;
+        std::vector <C8Exec> exec_log;
+
+    private:
+        // Display memory 
+        uint8_t disp_mem[DISP_W * DISP_H / 8];
+        uint8_t fontmem[16 * 5];
 
     public:
         // Memory 
-        uint8_t* mem;
+        uint8_t mem[C8_MEM_SIZE];
         uint16_t mem_size;
-        void alloc_mem(void);
         void init_mem(void);
 
     private:
         uint16_t cur_opcode;
         uint16_t cur_addr;
 
+    private:
+        // internal execution of opcodes starting with 0x00
+        void exec_zero_op(void);
+
     public:
         Chip8();
-        ~Chip8();
         Chip8(const Chip8& that);
 
+        /*
+         * cycle()
+         * Run the CPU for a single cycle.
+         */
         void cycle(void);
+        /*
+         * loadMem()
+         * Load an object file into memory at at a particular offset
+         */
         int loadMem(const std::string& filename, int offset);
+        /*
+         * loadMem()
+         * Load a vector of arbitrary bytes directly into memory.
+         * Intended mainly for testing.
+         */
+        void loadMem(const std::vector<uint8_t>& data, int offset);
+        /* 
+         * dumpMem()
+         * Dump the memory contents into a vector. 
+         */
         std::vector<uint8_t> dumpMem(void) const;
+        /*
+         * readMem()
+         * Read a single byte from memory
+         */
+        uint8_t readMem(const unsigned int addr) const;
+        
+        /*
+         * getMemSize()
+         * Returns the size of ROM
+         */
+        unsigned int getMemSize(void) const;
 
+        /*
+         * getMemArray()
+         * Get a pointer to the entire memory contents
+         */
+        const uint8_t* getMemArray(void) const;
+
+        /*
+         * setTrace()
+         * Turn the state tracer on or off
+         */
+        void setTrace(const bool v);
+
+        /* 
+         * getTrace()
+         * Return the state trace as a vector 
+         */
+        std::vector<C8Proc> getTrace(void);
+        /* 
+         * getState()
+         * Get a copy of the state object 
+         */
+        C8Proc getState(void) const;
+
+        void setVerbose(const bool v);
+        bool getVerbose(void) const;
 };
 
 

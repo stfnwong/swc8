@@ -7,57 +7,99 @@
 #include <cctype>
 #include <iostream>
 #include <iomanip>
+#include <sstream>
 #include "opcode.hpp"
 
-OpcodeTable::OpcodeTable() {} 
 
-OpcodeTable::~OpcodeTable() {} 
+/*
+ * OPCODE
+ */
+Opcode::Opcode()
+{
+    this->opcode   = 0;
+    this->mnemonic = "\0";
+}
+
+Opcode::Opcode(const uint16_t code, const std::string& m)
+{
+    this->opcode = code;
+    this->mnemonic = m;
+}
+
+std::string Opcode::toString(void) const
+{
+    std::ostringstream oss;
+
+    oss << this->mnemonic << std::hex << std::setw(4) << this->opcode;
+
+    return oss.str();
+}
+
+
+bool Opcode::operator==(const Opcode& that) const
+{
+    if(this->opcode != that.opcode)
+        return false;
+    if(this->mnemonic != that.mnemonic)
+        return false;
+    return true;
+}
+
+bool Opcode::operator!=(const Opcode& that) const
+{
+    return !(*this == that);
+}
+
+
+// ======== OPCODE TABLE ======== //
 
 void OpcodeTable::add(const Opcode& o)
 {
     this->op_list.push_back(o);
 }
 
-// TODO : something faster than linear search
-// LC3 is small enough to get away with this but may as well
-// come back and do it properly once things are working
-void OpcodeTable::get(const std::string& mnemonic, Opcode& o) const
+/*
+ * get()
+ * Get by mnemonic
+ */
+Opcode OpcodeTable::get(const std::string& mnemonic) const
 {
-    unsigned int idx;
-
-    for(idx = 0; idx < this->op_list.size(); idx++)
+    for(unsigned int idx = 0; idx < this->op_list.size(); idx++)
     {
         if(mnemonic == this->op_list[idx].mnemonic)
-        {
-            o.opcode   = this->op_list[idx].opcode;
-            o.mnemonic = this->op_list[idx].mnemonic;
-            return;
-            //o = this->op_list[idx];
-        }
+            return this->op_list[idx];
     }
-    o.opcode = 0;
-    o.mnemonic = "\0";
+
+    return this->null_op;
 }
 
-void OpcodeTable::get(const uint16_t opcode, Opcode& o) const
+/*
+ * get()
+ * Get by opcode
+ */
+Opcode OpcodeTable::get(const uint16_t opcode) const
 {
-    // TODO : same as above but 'search by opcode'
-    unsigned int idx;
-
-    for(idx = 0; idx < this->op_list.size(); idx++)
+    for(unsigned int idx = 0; idx < this->op_list.size(); idx++)
     {
         if(opcode == this->op_list[idx].opcode)
-        {
-            //o = this->op_list[idx];
-            o.opcode   = this->op_list[idx].opcode;
-            o.mnemonic = this->op_list[idx].mnemonic;
-            return;
-        }
+            return this->op_list[idx];
     }
-    o.opcode = 0;
-    o.mnemonic = "M_INVALID";
+    return this->null_op;
 }
 
+/*
+ * getIdx()
+ */
+Opcode OpcodeTable::getIdx(const unsigned int idx) const
+{
+    if(idx < this->op_list.size())
+        return this->op_list[idx];
+    return this->null_op;
+}
+
+/*
+ * getMnemonic()
+ */
 std::string OpcodeTable::getMnemonic(const uint16_t opcode) const
 {
     // At some point maybe I should deal with all these linear scans..
@@ -68,12 +110,6 @@ std::string OpcodeTable::getMnemonic(const uint16_t opcode) const
     }
 
     return "OP_INVAILD";
-}
-
-void OpcodeTable::getIdx(const unsigned int idx, Opcode& o) const
-{
-    if(idx < this->op_list.size())
-        o = this->op_list[idx];
 }
 
 void OpcodeTable::init(void)

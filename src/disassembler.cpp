@@ -323,7 +323,7 @@ void Disassembler::disassemble(void)
         instr = this->program.get(i);
         instr_mask = (instr.ins & 0xF000) >> 12;
         this->cur_instr = instr.ins;
-        initLineInfo(this->cur_line);
+        this->cur_line.init();
 
         switch(instr_mask)
         {

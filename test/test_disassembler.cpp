@@ -42,7 +42,7 @@ SourceInfo get_instr_expected_source_info(void)
     // Note that we can't know about labels just from the object 
     // source. Will need a seperate symbol file for that.
     // LD, V1, 0x04
-    initLineInfo(line);
+    line.init();
     line.line_num        = 1;
     line.addr            = 0x200;
     //line.label           = "IMMEDIATE_SECTION";
@@ -53,7 +53,7 @@ SourceInfo get_instr_expected_source_info(void)
     //line.is_label        = true;
     info.add(line);
     // LD, VC, 0xAA
-    initLineInfo(line);
+    line.init();
     line.line_num        = 2;
     line.addr            = 0x201;
     line.opcode.opcode   = 0x7;
@@ -63,7 +63,7 @@ SourceInfo get_instr_expected_source_info(void)
     info.add(line);
 
     // SKP VA
-    initLineInfo(line);
+    line.init();
     line.line_num        = 3;
     line.addr            = 0x202;
     //line.label           = "PARSE_VX_SECTION";
@@ -73,7 +73,7 @@ SourceInfo get_instr_expected_source_info(void)
     //line.is_label        = true;
     info.add(line);
     // SKNP VB
-    initLineInfo(line);
+    line.init();
     line.line_num        = 4;
     line.addr            = 0x203;
     line.opcode.opcode   = 0x13;
@@ -83,7 +83,7 @@ SourceInfo get_instr_expected_source_info(void)
 
     // Special tokens 
     // LD [I] V5
-    initLineInfo(line);
+    line.init();
     line.line_num        = 5;
     line.addr            = 0x204;
     line.opcode.opcode   = 0x7;
@@ -95,7 +95,7 @@ SourceInfo get_instr_expected_source_info(void)
     line.is_imm          = true;
     info.add(line);
     // LD F V0
-    initLineInfo(line);
+    line.init();
     line.line_num        = 6;
     line.addr            = 0x205;
     line.opcode.opcode   = 0x7;
@@ -104,7 +104,7 @@ SourceInfo get_instr_expected_source_info(void)
     line.vy              = 0xF;
     info.add(line);
     // LD B, V8
-    initLineInfo(line);
+    line.init();
     line.line_num        = 7;
     line.addr            = 0x206;
     line.opcode.opcode   = 0x7;
@@ -113,7 +113,7 @@ SourceInfo get_instr_expected_source_info(void)
     line.vy              = 0x8;
     info.add(line);
     // LD VE, [I]
-    initLineInfo(line);
+    line.init();
     line.line_num        = 8;
     line.addr            = 0x207;
     line.opcode.opcode   = 0x7;
@@ -124,7 +124,7 @@ SourceInfo get_instr_expected_source_info(void)
 
     // ARITHMETIC SECTION
     // LD VA, VB
-    initLineInfo(line);
+    line.init();
     line.line_num        = 9;
     line.addr            = 0x208;
     line.opcode.opcode   = LEX_LD;
@@ -133,7 +133,7 @@ SourceInfo get_instr_expected_source_info(void)
     line.vy              = 0xB;
     info.add(line);
     // OR V1, V2
-    initLineInfo(line);
+    line.init();
     line.line_num        = 10;
     line.addr            = 0x209;
     line.opcode.opcode   = LEX_OR;
@@ -142,7 +142,7 @@ SourceInfo get_instr_expected_source_info(void)
     line.vy              = 0xF;
     info.add(line);
     // AND VC, VD
-    initLineInfo(line);
+    line.init();
     line.line_num        = 11;
     line.addr            = 0x20A;
     line.opcode.opcode   = LEX_AND;
@@ -151,7 +151,7 @@ SourceInfo get_instr_expected_source_info(void)
     line.vy              = 0xD;
     info.add(line);
     // XOR V3, V4
-    initLineInfo(line);
+    line.init();
     line.line_num        = 12;
     line.addr            = 0x20B;
     line.opcode.opcode   = LEX_XOR;
@@ -160,7 +160,7 @@ SourceInfo get_instr_expected_source_info(void)
     line.vy              = 0x4;
     info.add(line);
     // ADD V7, V7
-    initLineInfo(line);
+    line.init();
     line.line_num        = 13;
     line.addr            = 0x20C;
     line.opcode.opcode   = LEX_ADD;
@@ -169,7 +169,7 @@ SourceInfo get_instr_expected_source_info(void)
     line.vy              = 0x7;
     info.add(line);
     // SUB V3, V9
-    initLineInfo(line);
+    line.init();
     line.line_num        = 14;
     line.addr            = 0x20D;
     line.opcode.opcode   = LEX_SUB;
@@ -179,7 +179,7 @@ SourceInfo get_instr_expected_source_info(void)
     info.add(line);
 
     // SUBN V5, VA
-    initLineInfo(line);
+    line.init();
     line.line_num        = 15;
     line.addr            = 0x20E;
     line.opcode.opcode   = LEX_SUBN;
@@ -189,7 +189,7 @@ SourceInfo get_instr_expected_source_info(void)
     info.add(line);
 
     // RND VE, 0x56
-    initLineInfo(line);
+    line.init();
     line.line_num        = 16;
     line.addr            = 0x20F;
     line.opcode.opcode   = LEX_RND;
@@ -198,7 +198,7 @@ SourceInfo get_instr_expected_source_info(void)
     line.kk              = 0x56;
     info.add(line);
     // DRW VF, V4
-    initLineInfo(line);
+    line.init();
     line.line_num        = 17;
     line.addr            = 0x210;
     line.opcode.opcode   = LEX_DRW;
@@ -210,21 +210,21 @@ SourceInfo get_instr_expected_source_info(void)
 
     // JMP_AND_CALL
     // CLS 
-    initLineInfo(line);
+    line.init();
     line.line_num        = 18;
     line.addr            = 0x211;
     line.opcode.opcode   = LEX_CLS;
     line.opcode.mnemonic = "CLS";
     info.add(line);
     // RET 
-    initLineInfo(line);
+    line.init();
     line.line_num        = 19;
     line.addr            = 0x212;
     line.opcode.opcode   = LEX_RET;
     line.opcode.mnemonic = "RET";
     info.add(line);
     // SYS 0x040
-    initLineInfo(line);
+    line.init();
     line.line_num        = 20;
     line.addr            = 0x213;
     line.opcode.opcode   = LEX_SYS;
@@ -232,7 +232,7 @@ SourceInfo get_instr_expected_source_info(void)
     line.nnn             = 0x040;
     info.add(line);
     // SYS 0xA1A
-    initLineInfo(line);
+    line.init();
     line.line_num        = 21;
     line.addr            = 0x214;
     line.opcode.opcode   = LEX_SYS;
@@ -240,7 +240,7 @@ SourceInfo get_instr_expected_source_info(void)
     line.nnn             = 0xA1A;
     info.add(line);
     // CALL 0x443
-    initLineInfo(line);
+    line.init();
     line.line_num        = 22;
     line.addr            = 0x215;
     line.opcode.opcode   = LEX_CALL;
@@ -292,15 +292,14 @@ TEST_F(TestDisassembler, test_dis_instr)
 
     // Check actual contents 
     std::cout << "\t Checking disassembled output..." << std::endl;
-    bool diff;
     for(unsigned int idx = 0; idx < dis_out.getNumLines(); ++idx)
     {
         LineInfo exp_line = exp_out.get(idx);
         LineInfo dis_line = dis_out.get(idx);
-        printLineDiff(exp_line, dis_line);
-        std::cout << "Checking line " << std::dec << idx << "/" << dis_out.getNumLines() << std::endl;
-        diff = compLineInfo(exp_line, dis_line);
-        ASSERT_EQ(true, diff);
+        std::cout << exp_line.toDiffString(dis_line);
+        std::cout << "Checking line " << std::dec << idx << "/" << dis_out.getNumLines();
+        ASSERT_EQ(exp_line, dis_line);
+        std::cout << " <OK>" << std::endl;
     }
 }
 

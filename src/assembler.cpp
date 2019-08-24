@@ -372,7 +372,7 @@ void Assembler::assemble(void)
     this->program.initProgram();
     if(this->source.getNumLines() == 0)
     {
-        std::cout << "[" << __FUNCTION__ << "] error - no lines in source" << std::endl;
+        std::cout << "[" << __func__ << "] error - no lines in source" << std::endl;
         return;
     }
 
@@ -454,7 +454,7 @@ void Assembler::assemble(void)
             default:
                 if(this->verbose)
                 {
-                    std::cout << "[" << __FUNCTION__ << "] (line " 
+                    std::cout << "[" << __func__ << "] (line " 
                         << std::dec << cur_line.line_num 
                         << ") Unknown lexer code " << std::hex 
                         << cur_line.opcode.opcode << std::endl;
@@ -472,7 +472,7 @@ void Assembler::loadSource(const SourceInfo& s)
 
 Program Assembler::getProgram(void) const
 {
-    std::cout << "[" << __FUNCTION__ << "] program has " << std::dec 
+    std::cout << "[" << __func__ << "] program has " << std::dec 
         << this->program.numInstr() << " instructions " << std::endl;
     return this->program;
 }
