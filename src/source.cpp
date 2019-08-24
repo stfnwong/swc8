@@ -199,6 +199,8 @@ void LineInfo::init(void)
     this->is_imm    = false;
     this->error     = false;
     this->is_directive = false;
+    this->dt        = false;
+    this->st        = false;
 }
 
 bool LineInfo::operator==(const LineInfo& that) const

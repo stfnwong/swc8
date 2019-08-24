@@ -160,6 +160,8 @@ struct LineInfo
     bool         is_imm;
     bool         is_directive;
     bool         error;
+    bool         dt;
+    bool         st;
 
     public:
         LineInfo();

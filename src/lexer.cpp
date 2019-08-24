@@ -466,7 +466,7 @@ ARG_ERR:
     if(argn > 0)
     {
         this->line_info.error = true;
-        this->line_info.errstr = "Invalid LD argument " + std::to_string(argn) + " '" + this->cur_token.val + " : type " + 
+        this->line_info.errstr = "Invalid ADD argument " + std::to_string(argn) + " '" + this->cur_token.val + " : type " + 
             token_type_str[this->cur_token.type];
         if(this->verbose)
             std::cout << "[" << __func__ << "] " << this->line_info.errstr << std::endl;
@@ -481,6 +481,13 @@ void Lexer::parseLD(void)
 {
     int argn = 0;
 
+    // TODO : this is not the best way to handle the special registers. This is because its legal
+    // to do something like 
+    //
+    // LD V8 DT
+    // 
+    // to load the value of DT into V8. This means that DT, ST, etc has to be parsed for each argument.
+    
     this->nextToken();
     // First arg must be register or special registers
     if(this->cur_token.type == SYM_REG)
@@ -549,14 +556,17 @@ void Lexer::parseLD(void)
     }
     else
     {
-        // First arg was a special reg. Second arg must be a reg or symbol or DT
+        // First arg was a special reg. Second arg must be a reg or symbol or DT or literal
         this->nextToken();
+        std::cout << "[" << __func__ << "] LD 2nd arg : " << this->cur_token.toString() << std::endl;
         if(this->cur_token.type == SYM_REG)
             this->line_info.vy = std::stoi(this->cur_token.val.substr(1,1), nullptr, 16);
         else if(this->cur_token.type == SYM_DT)
             this->line_info.is_imm = true;
         else if(this->cur_token.type == SYM_LABEL)
             this->line_info.symbol = cur_token.val;
+        else if(this->cur_token.type == SYM_LITERAL)
+            this->line_info.kk = std::stoi(this->cur_token.val, nullptr, 16);
         else
         {
             argn = 2;
@@ -568,7 +578,7 @@ ARG_ERR:
     if(argn > 0)
     {
         this->line_info.error = true;
-        this->line_info.errstr = "Invalid LD argument " + std::to_string(argn) + " '" + this->cur_token.val + " : type " + 
+        this->line_info.errstr = "Invalid LD argument " + std::to_string(argn) + " " + this->cur_token.val + " : type " + 
             token_type_str[this->cur_token.type];
         if(this->verbose)
             std::cout << "[" << __func__ << "] " << this->line_info.errstr << std::endl;
