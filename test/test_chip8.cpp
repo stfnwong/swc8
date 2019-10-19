@@ -502,62 +502,62 @@ TEST_F(TestChip8, test_subn_vxvy)
 
 
 // PROGRAM CONTROL
-//TEST_F(TestChip8, test_jp)
-//{
-//    Chip8 c8;
-//    C8Proc proc;
-//
-//    // LD VE, 0x1
-//    // LD V2, VE
-//    // ADD VE, 0x1
-//    // LD V3, VE
-//    // ADD VE, 0x1
-//    // ... and so on through 
-//    // SUBN V3, VE
-//    std::vector<uint8_t> test_data = {0x63, 0x08, 0x6E, 0x04, 0x83, 0xE7};
-//    std::vector<C8Proc> expected_state;
-//
-//    // Create the expected state sequence
-//    proc.init();
-//    proc.pc     = 0x200;
-//    expected_state.push_back(proc);
-//    proc.init();
-//    proc.pc     = 0x202;
-//    proc.V[0x3] = 0x08;
-//    expected_state.push_back(proc);
-//    proc.init();
-//    proc.pc     = 0x204;
-//    proc.V[0x3] = 0x08;
-//    proc.V[0xE] = 0x04;
-//    expected_state.push_back(proc);
-//    proc.init();
-//    proc.pc     = 0x206;
-//    proc.V[0x3] = 0x4 - 0x8;
-//    proc.V[0xE] = 0x04;
-//    proc.V[0xF] = 0x1;      // not sure about this carry flag....
-//    expected_state.push_back(proc);
-//
-//    // Execute instruction
-//    c8.setTrace(true);
-//    c8.loadMem(test_data, 0x200);
-//    for(unsigned int i = 0; i < expected_state.size()+1; ++i)
-//        c8.cycle();
-//    std::vector<C8Proc> trace_out = c8.getTrace();
-//
-//    bool eq;
-//    for(unsigned int i = 0; i < expected_state.size(); ++i)
-//    {
-//        C8Proc exp_proc = expected_state[i];
-//        C8Proc out_proc = trace_out[i];
-//        eq = exp_proc == out_proc;
-//        if(!eq)
-//        {
-//            std::cout << "State " << i << ":" << std::endl << trace_out[i].toString();
-//            std::cout << trace_out[i].diffStr(expected_state[i]);
-//        }
-//        ASSERT_EQ(true, eq);
-//    }
-//}
+TEST_F(TestChip8, test_jp)
+{
+    Chip8 c8;
+    C8Proc proc;
+
+    // LD VE, 0x1
+    // LD V2, VE
+    // ADD VE, 0x1
+    // LD V3, VE
+    // ADD VE, 0x1
+    // ... and so on through 
+    // SUBN V3, VE
+    std::vector<uint8_t> test_data = {0x63, 0x08, 0x6E, 0x04, 0x83, 0xE7};
+    std::vector<C8Proc> expected_state;
+
+    // Create the expected state sequence
+    proc.init();
+    proc.pc     = 0x200;
+    expected_state.push_back(proc);
+    proc.init();
+    proc.pc     = 0x202;
+    proc.V[0x3] = 0x08;
+    expected_state.push_back(proc);
+    proc.init();
+    proc.pc     = 0x204;
+    proc.V[0x3] = 0x08;
+    proc.V[0xE] = 0x04;
+    expected_state.push_back(proc);
+    proc.init();
+    proc.pc     = 0x206;
+    proc.V[0x3] = 0x4 - 0x8;
+    proc.V[0xE] = 0x04;
+    proc.V[0xF] = 0x1;      // not sure about this carry flag....
+    expected_state.push_back(proc);
+
+    // Execute instruction
+    c8.setTrace(true);
+    c8.loadMem(test_data, 0x200);
+    for(unsigned int i = 0; i < expected_state.size()+1; ++i)
+        c8.cycle();
+    std::vector<C8Proc> trace_out = c8.getTrace();
+
+    bool eq;
+    for(unsigned int i = 0; i < expected_state.size(); ++i)
+    {
+        C8Proc exp_proc = expected_state[i];
+        C8Proc out_proc = trace_out[i];
+        eq = exp_proc == out_proc;
+        if(!eq)
+        {
+            std::cout << "State " << i << ":" << std::endl << trace_out[i].toString();
+            std::cout << trace_out[i].diffStr(expected_state[i]);
+        }
+        ASSERT_EQ(true, eq);
+    }
+}
 
 
 // RET

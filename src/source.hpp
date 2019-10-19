@@ -9,6 +9,7 @@
 
 #include <string>
 #include <cstdint>
+#include "codes.hpp"
 #include "opcode.hpp"
 
 // ======== TOKEN ======== //
@@ -125,20 +126,7 @@ class SymbolTable
         void         dump(void);
 };
 
-// Special register flags 
-#define LEX_IREG  0x01
-#define LEX_BREG  0x02
-#define LEX_FREG  0x04
-#define LEX_KREG  0x08
-#define LEX_DTREG 0x10
-#define LEX_STREG 0x20
-#define LEX_IST   0x40  // for LD [I] Vx
-#define LEX_ILD   0x80  // for LD Vx [I]
 
-// Opcode flags 
-#define LEX_OP_IMM   0x01
-#define LEX_OP_LABEL 0x02
-#define LEX_OP_DIR   0x04
 
 // Chip 8 LineInfo structure 
 struct LineInfo
@@ -159,6 +147,8 @@ struct LineInfo
     bool         is_imm;
     bool         is_directive;
     bool         error;
+    bool         dt;
+    bool         st;
 
     public:
         LineInfo();
@@ -197,10 +187,6 @@ class SourceInfo
         unsigned int numInstance(const std::string& m) const;
         bool         hasError(void) const;
         void         setError(const bool e);
-
-        // Save/load data
-        int          write(const std::string& filename);
-        int          read(const std::string& filename);
 
         std::string  dumpErrors(void);
 }; 

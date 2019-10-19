@@ -7,6 +7,7 @@
 #include <fstream>
 #include <iostream>
 #include <iomanip>
+#include "codes.hpp"
 #include "lexer.hpp"
 
 Lexer::Lexer()
@@ -520,7 +521,7 @@ ARG_ERR:
     if(argn > 0)
     {
         this->line_info.error = true;
-        this->line_info.errstr = "Invalid LD argument " + std::to_string(argn) + " '" + this->cur_token.val + " : type " + 
+        this->line_info.errstr = "Invalid ADD argument " + std::to_string(argn) + " '" + this->cur_token.val + " : type " + 
             token_type_str[this->cur_token.type];
         if(this->verbose)
             std::cout << "[" << __func__ << "] " << this->line_info.errstr << std::endl;
@@ -541,8 +542,6 @@ void Lexer::parseLD(void)
         this->line_info.vx = std::stoi(this->cur_token.val.substr(1,1), nullptr, 16);
     else
     {
-        //std::cout << "[" << __func__ << "] got token type " 
-        //    << token_type_str[this->cur_token.type] << std::endl;
         switch(this->cur_token.type)
         {
             case SYM_IREG:
@@ -595,6 +594,10 @@ void Lexer::parseLD(void)
             this->line_info.symbol = this->cur_token.val;
         else if(this->cur_token.type == SYM_LOC_I)
             this->line_info.reg_flags = LEX_ILD;
+        else if(this->cur_token.val == "ST")
+            this->line_info.st = true;
+        else if(this->cur_token.val == "DT")
+            this->line_info.dt = true;
         else
         {
             argn = 2;
@@ -603,14 +606,17 @@ void Lexer::parseLD(void)
     }
     else
     {
-        // First arg was a special reg. Second arg must be a reg or symbol or DT
+        // First arg was a special reg. Second arg must be a reg or symbol or DT or literal
         this->nextToken();
+        std::cout << "[" << __func__ << "] LD 2nd arg : " << this->cur_token.toString() << std::endl;
         if(this->cur_token.type == SYM_REG)
             this->line_info.vy = std::stoi(this->cur_token.val.substr(1,1), nullptr, 16);
         else if(this->cur_token.type == SYM_DT)
             this->line_info.is_imm = true;
         else if(this->cur_token.type == SYM_LABEL)
             this->line_info.symbol = cur_token.val;
+        else if(this->cur_token.type == SYM_LITERAL)
+            this->line_info.kk = std::stoi(this->cur_token.val, nullptr, 16);
         else
         {
             argn = 2;
@@ -622,7 +628,7 @@ ARG_ERR:
     if(argn > 0)
     {
         this->line_info.error = true;
-        this->line_info.errstr = "Invalid LD argument " + std::to_string(argn) + " '" + this->cur_token.val + " : type " + 
+        this->line_info.errstr = "Invalid LD argument " + std::to_string(argn) + " " + this->cur_token.val + " : type " + 
             token_type_str[this->cur_token.type];
         if(this->verbose)
             std::cout << "[" << __func__ << "] " << this->line_info.errstr << std::endl;

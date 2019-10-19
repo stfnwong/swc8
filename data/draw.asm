@@ -3,7 +3,6 @@
 LD V1, 0x08 ; height of letter
 LD V2, 0x00 ; height of current letter
 
-
 LD Va, 0x05     ; Start position of X
 LD Vb, 0x01     ; Start position of Y
 
@@ -16,7 +15,6 @@ Draw_Line_C:
     JP Draw_H ;
 
 Draw_Column_C:
-
     ADD Vb, 0x01    ; Add position to Y
     LD I, Column   ; Load column sprite
     DRW Va, Vb, 0x1
@@ -36,7 +34,6 @@ Draw_Column_H:
     JP Draw_Column_H  ; Repeate Draw_Column
 
 RET ;
-
 
 Line:
     DW 0x7000 ;

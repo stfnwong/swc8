@@ -199,6 +199,8 @@ void LineInfo::init(void)
     this->is_imm    = false;
     this->error     = false;
     this->is_directive = false;
+    this->dt        = false;
+    this->st        = false;
 }
 
 bool LineInfo::operator==(const LineInfo& that) const
@@ -269,6 +271,7 @@ std::string LineInfo::toString(void) const
     oss << "...";
     // Registers
     oss << "  ";
+    // first arg
     if(this->reg_flags & LEX_IREG)
         oss << "  I"; 
     else if(this->reg_flags & LEX_BREG)
@@ -285,8 +288,13 @@ std::string LineInfo::toString(void) const
         oss << " [I]";
     else
         oss << " V" << std::right << std::hex << std::setw(1) << this->vx;
+    // second arg
     if(this->reg_flags & LEX_ILD)
         oss << " [I]";
+    else if(this->st)
+        oss << "  ST";
+    else if(this->dt)
+        oss << "  DT";
     else
         oss << "  V" << std::right << std::hex << std::setw(1) << this->vy;
     oss << " 0x" << std::right << std::hex << std::setw(2) << std::setfill('0') << this->kk;
@@ -468,25 +476,6 @@ void SourceInfo::setError(const bool e)
     this->error = e;
 }
 
-// Save/load data 
-// TODO : may need a serialization library here 
-int SourceInfo::write(const std::string& filename)
-{
-    int status = 0;
-    //uint32_t num_records, sym_len, label_len;
-
-    //num_records = this->line_info.size();
-
-    return status;
-}
-
-// TODO : May need serialization library here
-int SourceInfo::read(const std::string& filename)
-{
-    int status = 0;
-
-    return status;
-}
 
 
 std::string SourceInfo::dumpErrors(void)
