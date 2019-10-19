@@ -7,6 +7,7 @@
 #include <fstream>
 #include <iostream>
 #include <iomanip>
+#include "codes.hpp"
 #include "lexer.hpp"
 
 Lexer::Lexer()
@@ -481,21 +482,12 @@ void Lexer::parseLD(void)
 {
     int argn = 0;
 
-    // TODO : this is not the best way to handle the special registers. This is because its legal
-    // to do something like 
-    //
-    // LD V8 DT
-    // 
-    // to load the value of DT into V8. This means that DT, ST, etc has to be parsed for each argument.
-    
     this->nextToken();
     // First arg must be register or special registers
     if(this->cur_token.type == SYM_REG)
         this->line_info.vx = std::stoi(this->cur_token.val.substr(1,1), nullptr, 16);
     else
     {
-        //std::cout << "[" << __func__ << "] got token type " 
-        //    << token_type_str[this->cur_token.type] << std::endl;
         switch(this->cur_token.type)
         {
             case SYM_IREG:
@@ -548,6 +540,10 @@ void Lexer::parseLD(void)
             this->line_info.symbol = this->cur_token.val;
         else if(this->cur_token.type == SYM_LOC_I)
             this->line_info.reg_flags = LEX_ILD;
+        else if(this->cur_token.val == "ST")
+            this->line_info.st = true;
+        else if(this->cur_token.val == "DT")
+            this->line_info.dt = true;
         else
         {
             argn = 2;

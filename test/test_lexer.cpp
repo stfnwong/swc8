@@ -7,6 +7,7 @@
 #include <vector>
 #include <string>
 #include <gtest/gtest.h>
+#include "codes.hpp"
 #include "lexer.hpp"
 
 
@@ -25,6 +26,7 @@ SourceInfo get_draw_expected_source_info(void)
     // Note that the "opcode" field should really be thought of as
     // the lexer instruction code field
     // Line 1 
+    // LD V1, 0x08
     line.init();
     line.line_num        = 3;
     line.addr            = 0x200;
@@ -35,6 +37,7 @@ SourceInfo get_draw_expected_source_info(void)
     line.is_imm          = true;
     info.add(line);
     // Line 2 
+    // LD V2, 0x00
     line.init();
     line.line_num        = 4;
     line.addr            = 0x201;
@@ -45,8 +48,9 @@ SourceInfo get_draw_expected_source_info(void)
     line.is_imm          = true;
     info.add(line);
     // Line 3 
+    // LD Va, 0x05
     line.init();
-    line.line_num        = 7;
+    line.line_num        = 6;
     line.addr            = 0x202;
     line.opcode.opcode   = 0x7;    
     line.opcode.mnemonic = "LD";
@@ -55,8 +59,9 @@ SourceInfo get_draw_expected_source_info(void)
     line.is_imm          = true;
     info.add(line);
     // Line 4 
+    // LD Vb, 0x01
     line.init();
-    line.line_num        = 8;
+    line.line_num        = 7;
     line.addr            = 0x203;
     line.opcode.opcode   = 0x7;    
     line.opcode.mnemonic = "LD";
@@ -65,8 +70,9 @@ SourceInfo get_draw_expected_source_info(void)
     line.is_imm          = true;
     info.add(line);
     // Line 5 
+    // Draw_Line_C: ADD Vb, 0x01
     line.init();
-    line.line_num        = 11;
+    line.line_num        = 10;
     line.addr            = 0x204;
     line.label           = "Draw_Line_C";
     line.opcode.opcode   = 0x8;    
@@ -77,8 +83,9 @@ SourceInfo get_draw_expected_source_info(void)
     line.is_label        = true;
     info.add(line);
     // Line 6 
+    // LD I, Line
     line.init();
-    line.line_num        = 12;
+    line.line_num        = 11;
     line.addr            = 0x205;
     line.symbol          = "Line";
     line.opcode.opcode   = 0x7;    
@@ -87,8 +94,9 @@ SourceInfo get_draw_expected_source_info(void)
     line.reg_flags       = LEX_IREG;
     info.add(line);
     // Line 7 
+    // DRW Va, Vb, 0x1
     line.init();
-    line.line_num        = 13;
+    line.line_num        = 12;
     line.addr            = 0x206;
     line.opcode.opcode   = 0x11;
     line.opcode.mnemonic = "DRW";
@@ -97,8 +105,9 @@ SourceInfo get_draw_expected_source_info(void)
     line.kk              = 0x1;
     info.add(line);
     // Line 8 
+    // SE Vb, V1
     line.init();
-    line.line_num        = 14;
+    line.line_num        = 13;
     line.addr            = 0x207;
     line.opcode.opcode   = 0x5;    
     line.opcode.mnemonic = "SE";
@@ -106,8 +115,9 @@ SourceInfo get_draw_expected_source_info(void)
     line.vy              = 0x1;
     info.add(line);
     // Line 9 
+    // JP Draw_Column_C
     line.init();
-    line.line_num        = 15;
+    line.line_num        = 14;
     line.addr            = 0x208;
     line.symbol          = "Draw_Column_C";
     line.opcode.opcode   = 0x3;    
@@ -115,8 +125,9 @@ SourceInfo get_draw_expected_source_info(void)
     line.nnn             = 0x20A;
     info.add(line);
     // Line 10 
+    // JP Draw_H
     line.init();
-    line.line_num        = 16;
+    line.line_num        = 15;
     line.addr            = 0x209;
     line.symbol          = "Draw_H";
     line.opcode.opcode   = 0x3;    
@@ -124,8 +135,9 @@ SourceInfo get_draw_expected_source_info(void)
     line.nnn             = 0x210;
     info.add(line);
     // Line 11 
+    // Draw_Column_C: ADD Vb, 0x01
     line.init();
-    line.line_num        = 20;
+    line.line_num        = 18;
     line.addr            = 0x20A;
     line.label           = "Draw_Column_C";
     line.opcode.opcode   = 0x8;    
@@ -136,8 +148,9 @@ SourceInfo get_draw_expected_source_info(void)
     line.is_label        = true;
     info.add(line);
     // Line 12 
+    // LD I, Column
     line.init();
-    line.line_num        = 21;
+    line.line_num        = 19;
     line.addr            = 0x20B;
     line.symbol          = "Column";
     line.opcode.opcode   = 0x7;    
@@ -146,8 +159,9 @@ SourceInfo get_draw_expected_source_info(void)
     line.nnn             = 0x219;
     info.add(line);
     // Line 13 
+    // DRW Va, Vb, 0x1
     line.init();
-    line.line_num        = 22;
+    line.line_num        = 20;
     line.addr            = 0x20C;
     line.opcode.opcode   = 0x11;
     line.opcode.mnemonic = "DRW";
@@ -156,8 +170,9 @@ SourceInfo get_draw_expected_source_info(void)
     line.kk              = 0x1;
     info.add(line);
     // Line 14
+    // SE Vb, 0x07
     line.init();
-    line.line_num        = 23;
+    line.line_num        = 21;
     line.addr            = 0x20D;
     line.opcode.opcode   = 0x5;
     line.opcode.mnemonic = "SE";
@@ -166,8 +181,9 @@ SourceInfo get_draw_expected_source_info(void)
     line.is_imm          = true;
     info.add(line);
     // Line 15
+    // JP Draw_Column_C
     line.init();
-    line.line_num        = 24;
+    line.line_num        = 22;
     line.addr            = 0x20E;
     line.symbol          = "Draw_Column_C";
     line.opcode.opcode   = 0x3;
@@ -175,8 +191,9 @@ SourceInfo get_draw_expected_source_info(void)
     line.nnn             = 0x20A;
     info.add(line);
     // Line 16
+    // JP Draw_Line_C
     line.init();
-    line.line_num        = 25;
+    line.line_num        = 23;
     line.addr            = 0x20F;
     line.symbol          = "Draw_Line_C";
     line.opcode.opcode   = 0x3;
@@ -184,8 +201,9 @@ SourceInfo get_draw_expected_source_info(void)
     line.nnn             = 0x204;
     info.add(line);
     // Line 17
+    // Draw_H: ADD Va, 0x05
     line.init();
-    line.line_num        = 28;
+    line.line_num        = 26;
     line.addr            = 0x210;
     line.label           = "Draw_H";
     line.opcode.opcode   = 0x8;
@@ -196,8 +214,9 @@ SourceInfo get_draw_expected_source_info(void)
     line.is_label        = true;
     info.add(line);
     // Line 18
+    // LD Vb, 0x01
     line.init();
-    line.line_num        = 29;
+    line.line_num        = 27;
     line.addr            = 0x211;
     line.opcode.opcode   = 0x7;
     line.opcode.mnemonic = "LD";
@@ -206,8 +225,9 @@ SourceInfo get_draw_expected_source_info(void)
     line.is_imm          = true;
     info.add(line);
     // Line 19
+    // Draw_Column_H: ADD Vb, 0x01
     line.init();
-    line.line_num        = 32;
+    line.line_num        = 30;
     line.addr            = 0x212;
     line.label           = "Draw_Column_H";
     line.opcode.opcode   = 0x8;
@@ -218,8 +238,9 @@ SourceInfo get_draw_expected_source_info(void)
     line.is_label        = true;
     info.add(line);
     // Line 20
+    // LD I, Column
     line.init();
-    line.line_num        = 33;
+    line.line_num        = 31;
     line.addr            = 0x213;
     line.symbol          = "Column";
     line.opcode.opcode   = 0x7;
@@ -228,8 +249,9 @@ SourceInfo get_draw_expected_source_info(void)
     line.reg_flags       = LEX_IREG;
     info.add(line);
     // Line 21
+    // DRW Va, Vb, 0x01
     line.init();
-    line.line_num        = 34;
+    line.line_num        = 32;
     line.addr            = 0x214;
     line.opcode.opcode   = 0x11;
     line.opcode.mnemonic = "DRW";
@@ -238,8 +260,9 @@ SourceInfo get_draw_expected_source_info(void)
     line.kk              = 0x1;
     info.add(line);
     // Line 22
+    // SE Vb, V1
     line.init();
-    line.line_num        = 35;
+    line.line_num        = 33;
     line.addr            = 0x215;
     line.opcode.opcode   = 0x5;
     line.opcode.mnemonic = "SE";
@@ -247,8 +270,9 @@ SourceInfo get_draw_expected_source_info(void)
     line.vy              = 0x1;
     info.add(line);
     // Line 23
+    // JP Draw_Column_H
     line.init();
-    line.line_num        = 36;
+    line.line_num        = 34;
     line.addr            = 0x216;
     line.symbol          = "Draw_Column_H";
     line.opcode.opcode   = 0x3;
@@ -258,14 +282,14 @@ SourceInfo get_draw_expected_source_info(void)
 
     // RET
     line.init();
-    line.line_num        = 38;
+    line.line_num        = 36;
     line.addr            = 0x217;
     line.opcode.opcode   = 0x2;
     line.opcode.mnemonic = "RET";
     info.add(line);
-    // DW 0x7000
+    // Line: DW 0x7000
     line.init();
-    line.line_num        = 42;
+    line.line_num        = 39;
     line.label           = "Line";
     line.addr            = 0x218;
     line.opcode.opcode   = 0x14;
@@ -273,9 +297,9 @@ SourceInfo get_draw_expected_source_info(void)
     line.nnn             = 0x7000;
     line.is_label        = true;
     info.add(line);
-    // DW 0x8000
+    // Column: DW 0x8000
     line.init();
-    line.line_num        = 45;
+    line.line_num        = 42;
     line.label           = "Column";
     line.addr            = 0x219;
     line.opcode.opcode   = 0x14;
@@ -323,7 +347,7 @@ TEST_F(TestLexer, test_draw_asm)
     {
         lex_line = lex_output.get(idx);
         exp_line = exp_output.get(idx);
-        std::cout << "Checking instruction " << std::dec << idx 
+        std::cout << "Checking instruction " << std::dec << idx + 1 
             << "/" << lex_output.getNumLines() << std::endl;
         std::cout << exp_line.toDiffString(lex_line);
         ASSERT_EQ(exp_line, lex_line);
@@ -610,9 +634,39 @@ SourceInfo get_reg_test_expected_info(void)
     line.addr            = 0x200;
     line.opcode.opcode   = 0x7;    
     line.opcode.mnemonic = "LD";
-    line.vx              = 0x1;
-    line.kk              = 0x08;
-    line.is_imm          = true;
+    line.kk              = 0x0F;
+    line.dt              = true;
+    line.reg_flags       = LEX_DTREG;
+    info.add(line);
+
+    // Line 2 
+    line.init();
+    line.line_num        = 9;
+    line.addr            = 0x201;
+    line.opcode.opcode   = 0x7;    
+    line.opcode.mnemonic = "LD";
+    line.kk              = 0x0F;
+    line.reg_flags       = LEX_STREG;
+    info.add(line);
+
+    // Line 3 
+    line.init();
+    line.line_num        = 11;
+    line.addr            = 0x202;
+    line.opcode.opcode   = 0x7;    
+    line.opcode.mnemonic = "LD";
+    line.vx              = 0x9;
+    line.st              = true;
+    info.add(line);
+
+    // Line 4 
+    line.init();
+    line.line_num        = 13;
+    line.addr            = 0x203;
+    line.opcode.opcode   = 0x7;    
+    line.opcode.mnemonic = "LD";
+    line.vx              = 0x8;
+    line.st              = true;
     info.add(line);
 
 

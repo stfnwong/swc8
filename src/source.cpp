@@ -271,6 +271,7 @@ std::string LineInfo::toString(void) const
     oss << "...";
     // Registers
     oss << "  ";
+    // first arg
     if(this->reg_flags & LEX_IREG)
         oss << "  I"; 
     else if(this->reg_flags & LEX_BREG)
@@ -287,8 +288,13 @@ std::string LineInfo::toString(void) const
         oss << " [I]";
     else
         oss << " V" << std::right << std::hex << std::setw(1) << this->vx;
+    // second arg
     if(this->reg_flags & LEX_ILD)
         oss << " [I]";
+    else if(this->st)
+        oss << "  ST";
+    else if(this->dt)
+        oss << "  DT";
     else
         oss << "  V" << std::right << std::hex << std::setw(1) << this->vy;
     oss << " 0x" << std::right << std::hex << std::setw(2) << std::setfill('0') << this->kk;

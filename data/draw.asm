@@ -15,7 +15,6 @@ Draw_Line_C:
     JP Draw_H
 
 Draw_Column_C:
-
     ADD Vb, 0x01    ; Add position to Y
     LD I, Column   ; Load column sprite
     DRW Va, Vb, 0x1
