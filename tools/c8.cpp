@@ -5,19 +5,28 @@
  * Stefan Wong 2019
  */
 
+#include <deque>
 #include <iostream>
 #include <string>
 #include <unordered_map>
+#include <utility>
 
 // For SDL (drawing)
 #include <SDL2/SDL.h>
 #include "chip8.hpp"
 
+static std::deque<std::pair<unsigned int, bool>> AudioQueue;
 
 int main(int argc, char *argv[])
 {
     constexpr const unsigned W = 64;
     constexpr const unsigned H = 32;
+
+    if(argc < 2)
+    {
+        std::cout << "No input file specified, exiting" << std::endl;
+        return -1;
+    }
 
     int status;
     Chip8 cpu;
