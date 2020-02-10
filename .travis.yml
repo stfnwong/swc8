@@ -13,6 +13,7 @@ before_install:
     - sudo apt-get -q update
     - sudo apt-get remove gcc g++
     - sudo apt-get -y install gcc-7 g++-7
+    - sudo apt-get -y install libsdl2-dev libsdl2-2.0-0
     - sudo update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-7 60 --slave /usr/bin/g++ g++ /usr/bin/g++-7
     - sudo update-alternatives --install /usr/bin/gcc-ar gcc-ar /usr/bin/gcc-ar-7 60
     - sudo update-alternatives --install /usr/bin/gcc-ranlib gcc-ranlib /usr/bin/gcc-ranlib-7 60
