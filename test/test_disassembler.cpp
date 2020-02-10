@@ -4,9 +4,11 @@
  * Stefan Wong 2018
  */
 
+#define CATCH_CONFIG_MAIN
+#include "catch/catch.hpp"
+
 #include <string>
 #include <vector>
-#include <gtest/gtest.h>
 #include "disassembler.hpp"
 #include "source.hpp"
 // Since there is also an assembly pass, we need the assembler
@@ -14,11 +16,6 @@
 #include "assembler.hpp"
 #include "program.hpp"
 
-class TestDisassembler : public ::testing::Test
-{
-    virtual void SetUp() {}
-    virtual void TearDown() {}
-};
 
 void assemble_source(const std::string& infile, const std::string& outfile)
 {
@@ -252,7 +249,7 @@ SourceInfo get_instr_expected_source_info(void)
     return info;
 }
 
-TEST_F(TestDisassembler, test_dis_instr)
+TEST_CASE("test_dis_instr", "[classic]")
 {
     int status;
     std::string src_file = "data/instr.asm";
@@ -265,7 +262,7 @@ TEST_F(TestDisassembler, test_dis_instr)
 
     std::cout << "\t Loading data from file " << obj_file << std::endl;
     status = dis.load(obj_file);
-    ASSERT_EQ(0, status);
+    REQUIRE(0 == status);
 
     // Dump the object file from disk 
     std::cout << "\t Dumping contents of file " << obj_file << std::endl;
@@ -298,14 +295,7 @@ TEST_F(TestDisassembler, test_dis_instr)
         LineInfo dis_line = dis_out.get(idx);
         std::cout << exp_line.toDiffString(dis_line);
         std::cout << "Checking line " << std::dec << idx << "/" << dis_out.getNumLines();
-        ASSERT_EQ(exp_line, dis_line);
+        REQUIRE(exp_line == dis_line);
         std::cout << " <OK>" << std::endl;
     }
-}
-
-
-int main(int argc, char *argv[])
-{
-    ::testing::InitGoogleTest(&argc, argv);
-    return RUN_ALL_TESTS();
 }
