@@ -22,3 +22,8 @@ before_install:
 # Ubuntu's packaging on travis
 script:
     - make clean && make all
+    - ./bin/test/test_assembler
+    - ./bin/test/test_chip8
+    - ./bin/test/test_disassembler
+    - ./bin/test/test_lexer
+    - ./bin/test/test_program
