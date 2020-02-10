@@ -55,6 +55,7 @@ void C8Proc::init(void)
     // timers 
     this->dt = 0;
     this->st = 0;
+    this->keypress = 0;
 }
 
 
@@ -228,48 +229,6 @@ bool C8Proc::operator==(const C8Proc& that)
 bool C8Proc::operator!=(const C8Proc& that)
 {
     return (*this == that);
-}
-
-/*
- * C8StateLog()
- */
-C8StateLog::C8StateLog() 
-{
-    this->max_log = 32;
-    this->log_ptr = 0;
-    this->log = std::vector<C8Proc>(this->max_log);
-}
-C8StateLog::~C8StateLog() {} 
-
-C8StateLog::C8StateLog(const C8StateLog& that)
-{
-    this->max_log = that.max_log;
-    this->log_ptr = 0;
-    this->log = std::vector<C8Proc>(this->max_log);
-    for(unsigned int l = 0; l < this->max_log; ++l)
-        this->log[l] = that.log[l];
-}
-
-void C8StateLog::add(const C8Proc& state)
-{
-    if(this->log_ptr >= this->max_log-1)
-        this->log_ptr = 0;
-    this->log[this->log_ptr] = state;
-    this->log_ptr++;
-}
-
-C8Proc C8StateLog::get(const unsigned int idx) const
-{
-    if(idx >= 0 && idx < this->max_log)
-        return this->log[idx];
-    
-    C8Proc p;
-    return p;
-}
-
-std::vector<C8Proc> C8StateLog::getLog(void) const
-{
-    return this->log;
 }
 
 
@@ -642,6 +601,96 @@ int Chip8::loadMem(const std::string& filename, int offset)
 }
 
 /*
+ * renderTo()
+ */
+void Chip8::renderTo(uint32_t* pixels, int W, int H)
+{
+    for(int pos = 0; pos < (W * H); ++pos)
+        pixels[pos] = 0xFFFFFF * ((this->disp_mem[pos / 8] >> (7 - pos % 8)) & 1);
+}
+
+/*
+ * getKey()
+ */
+uint8_t Chip8::getKey(uint8_t k) const
+{
+    if(k < 16)
+        return this->state.keys[k];
+
+    return 0;
+}
+
+/*
+ * getKeyPress()
+ */
+uint8_t Chip8::getKeyPress(void) const
+{
+    return (this->state.keypress & 0x80);
+}
+
+/*
+ * updateKey()
+ */
+void Chip8::updateKey(int k, uint8_t v)
+{
+    this->state.keys[k] = v;
+}
+
+/*
+ * setKey()
+ */
+void Chip8::setKey(uint8_t k)
+{
+    this->state.keys[k] = 1;
+}
+
+void Chip8::clearKey(uint8_t k)
+{
+    this->state.keys[k] = 0;
+}
+
+/*
+ * setKeyPress()
+ */
+void Chip8::setKeyPress(uint8_t kp)
+{
+    this->state.keypress &= 0x7F;
+    this->state.keys[this->state.keypress] = kp;
+}
+
+/*
+ * getST()
+ */
+uint8_t Chip8::getST(void) const
+{
+    return this->state.st;
+}
+
+/*
+ * getDT()
+ */
+uint8_t Chip8::getDT(void) const
+{
+    return this->state.dt;
+}
+
+/*
+ * setST()
+ */
+void Chip8::setST(uint8_t s)
+{
+    this->state.st = s;
+}
+
+/*
+ * setDT()
+ */
+void Chip8::setDT(uint8_t d)
+{
+    this->state.dt = d;
+}
+
+/*
  * loadMem()
  */
 void Chip8::loadMem(const std::vector<uint8_t>& data, int offset)
@@ -708,3 +757,49 @@ bool Chip8::getVerbose(void) const
 {
     return this->verbose;
 }
+
+
+
+
+/*
+ * C8StateLog()
+ */
+C8StateLog::C8StateLog() 
+{
+    this->max_log = 32;
+    this->log_ptr = 0;
+    this->log = std::vector<C8Proc>(this->max_log);
+}
+C8StateLog::~C8StateLog() {} 
+
+C8StateLog::C8StateLog(const C8StateLog& that)
+{
+    this->max_log = that.max_log;
+    this->log_ptr = 0;
+    this->log = std::vector<C8Proc>(this->max_log);
+    for(unsigned int l = 0; l < this->max_log; ++l)
+        this->log[l] = that.log[l];
+}
+
+void C8StateLog::add(const C8Proc& state)
+{
+    if(this->log_ptr >= this->max_log-1)
+        this->log_ptr = 0;
+    this->log[this->log_ptr] = state;
+    this->log_ptr++;
+}
+
+C8Proc C8StateLog::get(const unsigned int idx) const
+{
+    if(idx >= 0 && idx < this->max_log)
+        return this->log[idx];
+    
+    C8Proc p;
+    return p;
+}
+
+std::vector<C8Proc> C8StateLog::getLog(void) const
+{
+    return this->log;
+}
+

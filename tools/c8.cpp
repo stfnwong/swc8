@@ -5,6 +5,7 @@
  * Stefan Wong 2019
  */
 
+#include <chrono>
 #include <deque>
 #include <iostream>
 #include <string>
@@ -21,6 +22,7 @@ int main(int argc, char *argv[])
 {
     constexpr const unsigned W = 64;
     constexpr const unsigned H = 32;
+    uint32_t pixels[W * H];     // pixel memory for SDL display
 
     if(argc < 2)
     {
@@ -88,6 +90,90 @@ int main(int argc, char *argv[])
 
     SDL_OpenAudio(&spec, &obtained);
     SDL_PauseAudio(0);
+
+    // Setup the execution loop
+    unsigned int instr_per_frame = 50000;
+    int max_consecutive_instr = 2;         
+    int frames_done = 0;
+
+    // Operation loop
+    bool run = true;
+    auto start_time = std::chrono::system_clock::now();
+    while(run)
+    {
+        // Process some instructions 
+        for(int i = 0; i < max_consecutive_instr; ++i)
+        {
+            if(cpu.getKeyPress())
+                break;
+            cpu.cycle();        // TODO : key press
+        }
+
+        // handle keypresses
+        for(SDL_Event ev; SDL_PollEvent(&ev); )
+        {
+            switch(ev.type)
+            {
+                case SDL_QUIT:
+                    run = false;
+                    break;
+
+                case SDL_KEYDOWN:
+                case SDL_KEYUP:
+                    auto i = keymap.find(ev.key.keysym.sym);
+                    if(i == keymap.end())
+                        break;
+                    if(i->second == -1)
+                    {
+                        run = false;
+                        break;
+                    }
+                    if(ev.type == SDL_KEYDOWN)
+                        cpu.updateKey(i->second, 1);
+                    else
+                        cpu.updateKey(i->second, 0);
+
+                    if(ev.type == SDL_KEYDOWN && cpu.getKeyPress())
+                        cpu.setKeyPress(i->second);
+
+                    break;
+            }
+        }
+
+        // Work out how many frames need to be rendered
+        auto cur_time = std::chrono::system_clock::now();
+        std::chrono::duration<float> elapsed_time = cur_time - start_time;
+        int num_frames = int(elapsed_time.count() * 60) - frames_done;
+
+        if(num_frames > 0)
+        {
+            frames_done += num_frames;
+            int st = int(cpu.getST()) - std::min(num_frames, int(cpu.getST()));
+            int dt = int(cpu.getDT()) - std::min(num_frames, int(cpu.getDT()));
+
+            cpu.setST(st);
+            cpu.setDT(dt);
+
+            // Render display
+            cpu.renderTo(pixels, W, H);
+            SDL_UpdateTexture(texture, nullptr, pixels, 4 * W);
+            SDL_RenderCopy(renderer, texture, nullptr, nullptr);
+            SDL_RenderPresent(renderer);
+        
+            // Render sound
+            SDL_LockAudio();
+            AudioQueue.emplace_back(obtained.freq * st / 60, true);
+            AudioQueue.emplace_back(obtained.freq * (num_frames - st) / 60, true);
+            SDL_UnlockAudio();
+        }
+
+        // Compensate for render speed 
+        max_consecutive_instr = std::max(num_frames, 1) * instr_per_frame;
+        if(cpu.getKeyPress() || !num_frames)
+            SDL_Delay(1000 / 60);
+    }
+
+    SDL_Quit();
 
     return 0;
 }

@@ -71,6 +71,7 @@ struct C8Proc
     uint16_t stack[12];     // stack memory
     // keys 
     uint8_t  keys[16];      // key input
+    uint8_t  keypress;
 
     public:
         C8Proc();
@@ -101,7 +102,6 @@ class C8StateLog
         C8Proc get(const unsigned int idx) const;
         std::vector<C8Proc> getLog(void) const;
 };
-
 
 /*
  * C8Exec
@@ -184,6 +184,24 @@ class Chip8
          */
         void cycle(void);
         /*
+         * renderTo()
+         */
+        void    renderTo(uint32_t* pixels, int W, int H);
+        // Key presses
+        uint8_t getKey(uint8_t k) const;
+        uint8_t getKeyPress(void) const;
+        void    updateKey(int k, uint8_t v);
+        void    setKey(uint8_t k);
+        void    clearKey(uint8_t k);
+        void    setKeyPress(uint8_t kp);
+
+        // Timers 
+        uint8_t getST(void) const;
+        uint8_t getDT(void) const;
+        void    setST(uint8_t s);
+        void    setDT(uint8_t d);
+
+        /*
          * loadMem()
          * Load an object file into memory at at a particular offset
          */
@@ -237,6 +255,8 @@ class Chip8
         void setVerbose(const bool v);
         bool getVerbose(void) const;
 };
+
+
 
 
 #endif /*__CHIP_8_HPP*/
