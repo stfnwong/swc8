@@ -8,6 +8,7 @@
 #include <iomanip>
 #include <sstream>
 #include <fstream>
+#include <cstring>      //for memset()
 #include "chip8.hpp"
 
 /*
@@ -319,13 +320,13 @@ Chip8::Chip8()
 /*
  * copy ctor
  */
-Chip8::Chip8(const Chip8& that)
-{
-    this->state    = that.state;
-    this->mem_size = that.mem_size;
-    for(int m = 0; m < this->mem_size; m++)
-        this->mem[m] = that.mem[m];
-}
+//Chip8::Chip8(const Chip8& that)
+//{
+//    this->state    = that.state;
+//    this->mem_size = that.mem_size;
+//    for(int m = 0; m < this->mem_size; m++)
+//        this->mem[m] = that.mem[m];
+//}
 
 /*
  * init_mem()
@@ -338,7 +339,13 @@ void Chip8::init_mem(void)
     this->mem[0] = 0x12;
     this->mem[1] = 0x00;
 
-    // TODO : place  simulator internals at start of memory ?
+    // init font mem
+    int n = 16;          // pick an address where font mem starts
+    for(auto f : FONT_MEM)
+    {
+        this->mem[n] = (f & 0xFF);
+        n++;
+    }
 }
 
 /*
@@ -350,7 +357,8 @@ void Chip8::exec_zero_op(void)
     switch(zero_code)
     {
         case 0x00E0:        // CLS  (not yet implemented)
-            std::cout << "[" << __func__ << "] got CLS" << std::endl;
+            memset(this->disp_mem, 0, DISP_MEM_SIZE);
+            // TODO : set draw flag
             break;
 
         // TODO: trap overflow/underflow
@@ -368,6 +376,68 @@ void Chip8::exec_zero_op(void)
             }
             break;
     }
+}
+
+/*
+ * draw()
+ */
+void Chip8::draw(void)
+{
+    //uint16_t sprite_ptr = this->state.I;
+    uint8_t flip = 0;
+    int xpos, ypos;
+    int i, bit;
+    uint8_t cur_bit, cur_sprite;
+    uint8_t* cur_pixel;
+
+    // debug only, remove
+    int cur_pixel_pos;
+
+    xpos = this->exec.vx % DISP_W;
+    ypos = this->exec.vy % DISP_H;
+
+    // Note:  pixels are bit-coded
+    for(i = 0; i < this->exec.nnn; ++i)
+    {
+        //uint8_t cur_sprite = this->mem[sprite_ptr];
+        cur_sprite = this->mem[this->state.I + i];
+        for(bit = 0; bit < 8; ++bit)
+        {
+            cur_bit = (cur_sprite >> (7 - bit)) & 0x1;
+            cur_pixel_pos = (ypos + i) % DISP_H + (xpos % DISP_W);      // TODO : remove
+            cur_pixel = &this->disp_mem[cur_pixel_pos];
+
+            //cur_pixel = &this->disp_mem[(ypos + i) % DISP_H + (xpos % DISP_W)];
+            //uint8_t* cur_pixel = &this->disp_mem[(ypos + i) % DISP_H + (xpos + (7 - bit)) % DISP_W];
+
+            if(cur_bit == 0x1 && *cur_pixel == 1)
+                this->state.V[0xF] = 1;
+            // XOR onto display
+            *cur_pixel = *cur_pixel ^ cur_bit;
+
+            //// TODO : trying out another technique that I've seen...
+            //if(cur_sprite & (0x0080 >> col))
+            //{
+            //    if(this->disp_mem[(ypos + row) * DISP_W + xpos + col] > 0)
+            //    {
+            //        this->state.V[0xF] = 1;
+            //        this->disp_mem[ypos + row * DISP_W + xpos + col] = 0;
+            //    }
+            //    else
+            //        this->disp_mem[ypos + row * DISP_W + xpos + col] = 255;
+            //}
+
+            //this->disp_mem[row * DISP_W + col] ^= (cur_sprite & (0x1 << col));
+            //this->state.V[0xF] |= this->disp_mem[row * DISP_W + col];
+            //this->disp_mem[row * DISP_W + col] ^= this->mem[sprite_ptr];
+            //sprite_ptr++;
+        }
+    }
+}
+
+void Chip8::keypress(void)
+{
+
 }
 
 /*
@@ -526,8 +596,8 @@ void Chip8::cycle(void)
             this->state.V[this->exec.vx] = std::uniform_int_distribution<>(0,255)(rnd) & this->exec.kk;
             break;
 
-        case C8_DRW:
-            std::cout << "[" << __func__ << "] TODO: DRW" << std::endl;
+        case C8_DRW:    // D Vx, Vy, N
+            this->draw();
             break;
 
         case C8_SKP:    // SKP Vx
@@ -538,6 +608,26 @@ void Chip8::cycle(void)
         case C8_SKNP:   // SNKP Vx
             if(!this->state.keys[this->state.V[this->exec.vx] & 0xF])
                this->state.pc += 2; 
+            break;
+
+        case C8_LDK:    // LD Vx, K
+            // algorithm is something like 
+            // if(no key waiting)
+            // {
+            //   key_waiting = true;
+            //   save_key_flags = key_flags;
+            //   stay on KEY instr without advancing PC
+            // }
+            // else
+            // {
+            //   if(key pressed)
+            //   {
+            //     move key into Vx
+            //     key_waiting = false;
+            //     advance PC and return;
+            //   }
+            //   else
+            //     stay on KEY instr, don't advance PC, return
             break;
 
         case C8_LDB:    // LD B, Vx
@@ -634,19 +724,6 @@ uint8_t Chip8::getKeyPress(void) const
 void Chip8::updateKey(int k, uint8_t v)
 {
     this->state.keys[k] = v;
-}
-
-/*
- * setKey()
- */
-void Chip8::setKey(uint8_t k)
-{
-    this->state.keys[k] = 1;
-}
-
-void Chip8::clearKey(uint8_t k)
-{
-    this->state.keys[k] = 0;
 }
 
 /*

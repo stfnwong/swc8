@@ -79,7 +79,6 @@ int main(int argc, char *argv[])
         short* target = (short*) stream;
         while(len > 0 && !AudioQueue.empty())
         {
-
             auto& data = AudioQueue.front();
             for( ; len && data.first; target += 2, len -= 4, --data.first)
                 target[0] = target[1] = data.second * 300 * ((len & 128) - 64);
@@ -106,7 +105,7 @@ int main(int argc, char *argv[])
         {
             if(cpu.getKeyPress())
                 break;
-            cpu.cycle();        // TODO : key press
+            cpu.cycle();        
         }
 
         // handle keypresses
@@ -151,6 +150,7 @@ int main(int argc, char *argv[])
             int st = int(cpu.getST()) - std::min(num_frames, int(cpu.getST()));
             int dt = int(cpu.getDT()) - std::min(num_frames, int(cpu.getDT()));
 
+            // TODO: move into CPU structure
             cpu.setST(st);
             cpu.setDT(dt);
 
@@ -162,8 +162,9 @@ int main(int argc, char *argv[])
         
             // Render sound
             SDL_LockAudio();
-            AudioQueue.emplace_back(obtained.freq * st / 60, true);
-            AudioQueue.emplace_back(obtained.freq * (num_frames - st) / 60, true);
+            // TODO : turn audio off during debugging (as its quite irritating)
+            AudioQueue.emplace_back(obtained.freq * st / 60, false);
+            AudioQueue.emplace_back(obtained.freq * (num_frames - st) / 60, false);
             SDL_UnlockAudio();
         }
 

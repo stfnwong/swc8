@@ -45,12 +45,34 @@
 #define C8_SKNP   0xE0A1
 #define C8_LDDTVX 0xF007
 #define C8_LDVXDT 0xF015
-#define C8_LDK    0xF00A
+#define C8_LDFVX  0xF029        // TODO : need this for font mem?
+#define C8_LDK    0xF00A        // keypress
 #define C8_LDB    0xF033
 #define C8_LDIVX  0xF055
 #define C8_LDVXI  0xF065
 
 // TODO : handle zero codes seperately
+
+// TODO : implement fonts here
+constexpr uint16_t FONT_MEM[16 * 5] =
+{
+    0x00F0, 0x0090, 0x0090, 0x0090, 0x00F0,     // 0
+    0x0020, 0x0060, 0x0020, 0x0020, 0x0070,     // 1
+    0x00F0, 0x0010, 0x00F0, 0x0080, 0x00F0,     // 2
+    0x00F0, 0x0010, 0x00F0, 0x0010, 0x00F0,     // 3
+    0x0090, 0x0090, 0x00F0, 0x0010, 0x0010,     // 4
+    0x00F0, 0x0080, 0x00F0, 0x0010, 0x00F0,     // 5
+    0x00F0, 0x0080, 0x00F0, 0x0090, 0x00F0,     // 6
+    0x00F0, 0x0010, 0x0020, 0x0040, 0x0040,     // 7
+    0x00F0, 0x0090, 0x00F0, 0x0010, 0x00F0,     // 8
+    0x00F0, 0x0090, 0x00F0, 0x0010, 0x00F0,     // 9
+    0x00F0, 0x0090, 0x00F0, 0x0090, 0x0090,     // A
+    0x00E0, 0x0090, 0x00E0, 0x0090, 0x00E0,     // B
+    0x00F0, 0x0080, 0x0080, 0x0080, 0x00F0,     // C
+    0x00E0, 0x0090, 0x0090, 0x0090, 0x00E0,     // D
+    0x00F0, 0x0080, 0x00F0, 0x0080, 0x00F0,     // E
+    0x00F0, 0x0080, 0x00F0, 0x0080, 0x0080,     // F
+};
 
 /*
  * C8Proc
@@ -136,6 +158,7 @@ struct C8Exec
 constexpr const unsigned int DISP_H = 64;
 constexpr const unsigned int DISP_W = 64;
 constexpr const unsigned int C8_MEM_SIZE = 0x1000;
+constexpr const unsigned int DISP_MEM_SIZE = DISP_W * DISP_H / 8;
 
 class Chip8
 {
@@ -157,7 +180,7 @@ class Chip8
 
     private:
         // Display memory 
-        uint8_t disp_mem[DISP_W * DISP_H / 8];
+        uint8_t disp_mem[DISP_MEM_SIZE];
         uint8_t fontmem[16 * 5];
 
     public:
@@ -174,9 +197,13 @@ class Chip8
         // internal execution of opcodes starting with 0x00
         void exec_zero_op(void);
 
+    private:
+        void draw(void);
+        void keypress(void);
+
     public:
         Chip8();
-        Chip8(const Chip8& that);
+        Chip8(const Chip8& that) = delete;
 
         /*
          * cycle()
@@ -191,8 +218,6 @@ class Chip8
         uint8_t getKey(uint8_t k) const;
         uint8_t getKeyPress(void) const;
         void    updateKey(int k, uint8_t v);
-        void    setKey(uint8_t k);
-        void    clearKey(uint8_t k);
         void    setKeyPress(uint8_t kp);
 
         // Timers 

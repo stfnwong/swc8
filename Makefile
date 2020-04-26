@@ -71,6 +71,7 @@ tools : $(TOOLS)
 
 clean:
 	rm -rfv *.o $(OBJ_DIR)/*.o 
+	rm -fv $(BIN_DIR)/c8*
 
 print-%:
 	@echo $* = $($*)
