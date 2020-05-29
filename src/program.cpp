@@ -103,7 +103,7 @@ int Program::save(const std::string& filename)
         outfile.open(filename, std::ios::binary);
     }
     catch(std::ios_base::failure& e) {
-        std::cerr << "[" << __FUNCTION__ << "] " << e.what() << std::endl;
+        std::cerr << "[" << __func__ << "] " << e.what() << std::endl;
         return -1;
     }
 
@@ -111,7 +111,7 @@ int Program::save(const std::string& filename)
     outfile.write(reinterpret_cast<char*>(&N), sizeof(uint16_t));
 
     // Debug, remove 
-    std::cout << "[" << __FUNCTION__ << "] first address is " 
+    std::cout << "[" << __func__ << "] first address is " 
         << std::hex << std::setw(4) << this->instructions[0].adr 
         << std::endl;
 
@@ -152,14 +152,14 @@ int Program::load(const std::string& filename)
         infile.open(filename, std::ios_base::binary);
     }
     catch(std::ios_base::failure& e) {
-        std::cerr << "[" << __FUNCTION__ << "] " << e.what() << std::endl;
+        std::cerr << "[" << __func__ << "] " << e.what() << std::endl;
         return -1;
     }
 
     infile.read(reinterpret_cast<char*>(&num_records), sizeof(uint16_t));
     if(num_records == 0)
     {
-        std::cerr << "[" << __FUNCTION__ << "] no records in file " 
+        std::cerr << "[" << __func__ << "] no records in file " 
             << filename << std::endl;
         return -1;
     }
@@ -177,6 +177,9 @@ int Program::load(const std::string& filename)
     }
     infile.close();
 
+    std::cout << "[" << __func__ << "] read " << this->instructions.size() 
+        << " lines from file [" << filename << "]" << std::endl;
+
     return 0;
 }
 
@@ -192,7 +195,7 @@ int Program::writeObj(const std::string& filename)
         outfile.open(filename, std::ios_base::binary);
     }
     catch(std::ios_base::failure& e) {
-        std::cerr << "[" << __FUNCTION__ << "] " << e.what() << std::endl;
+        std::cerr << "[" << __func__ << "] " << e.what() << std::endl;
         return -1;
     }
 
@@ -210,7 +213,7 @@ int Program::writeObj(const std::string& filename)
         outfile.write(reinterpret_cast<char*>(&lb), sizeof(uint8_t));
         if(this->verbose)
         {
-            std::cout << "[" << __FUNCTION__ << "] Writing instruction "
+            std::cout << "[" << __func__ << "] Writing instruction "
                 << i << "/" << this->instructions.size() << "\r";
         }
     }
@@ -235,7 +238,7 @@ int Program::readObj(const std::string& filename)
         infile.open(filename, std::ios_base::binary);
     }
     catch(std::ios_base::failure& e) {
-        std::cerr << "[" << __FUNCTION__ << "] " << e.what() << std::endl;
+        std::cerr << "[" << __func__ << "] " << e.what() << std::endl;
         return -1;
     }
 
@@ -244,7 +247,7 @@ int Program::readObj(const std::string& filename)
     num_bytes = infile.tellg(); 
     if(num_bytes % 4 != 0)
     {
-        std::cerr << "[" << __FUNCTION__ << "] contains " 
+        std::cerr << "[" << __func__ << "] contains " 
             << num_bytes << " bytes (" << num_bytes / 4 << " records)"
             << std::endl;
         return -1;
