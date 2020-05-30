@@ -28,7 +28,7 @@ void assemble_source(const std::string& infile, const std::string& outfile)
     assem.assemble();
 
     Program prog_out = assem.getProgram();
-    prog_out.save(outfile);
+    prog_out.writeObj(outfile);
 }
 
 SourceInfo get_instr_expected_source_info(void)

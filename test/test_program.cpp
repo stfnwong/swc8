@@ -45,12 +45,12 @@ TEST_CASE("test_load_program", "[classic]")
     }
 
     std::cout << "\t Writing program to file " << program_filename << std::endl;
-    status = program.save(program_filename);
+    status = program.writeObj(program_filename);
     REQUIRE(0 == status);
 
     std::cout << "\t Reading output file " << program_filename << " into new program object" << std::endl;
     Program read_prog;
-    status = read_prog.load(program_filename);
+    status = read_prog.readObj(program_filename);
     REQUIRE(0 == status);
 
     std::cout << "Comparing output program with program in file " << program_filename << std::endl;

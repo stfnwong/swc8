@@ -85,25 +85,6 @@ class Program
          */
         unsigned int numInstr(void) const;
 
-        // TODO : the idea here was something like - one of these 
-        // would be a kind of 'intermediate' format that would have 
-        // the address of each instruction next to it in the binary.
-        // I think now that its far more confusing to have two 
-        // implementations here.
-        /*
-         * save()
-         * 
-         * Inputs: std::string filename
-         * Write the program binary to the file given by filename
-         */
-        int save(const std::string& filename);
-        /* 
-         * load()
-         * Load the object file with name filename into memory as 
-         * a Program object.
-         */
-        int load(const std::string& filename);
-
         /*
          * writeObj()
          * Write program as a binary file to be read by an interpreter/

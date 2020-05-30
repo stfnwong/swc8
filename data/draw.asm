@@ -1,6 +1,5 @@
 ; DRAW 
 ; Taken from https://raw.githubusercontent.com/fakeezz/chasm/master/programs/asms/DRAW.asm
-
 LD V1, 0x08 ; height of letter
 LD V2, 0x00 ; height of current letter
 
