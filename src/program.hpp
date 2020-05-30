@@ -11,17 +11,25 @@
 #include <vector>
 #include "source.hpp"
 
-typedef struct
+/*
+ * Instr
+ * Represents a single instruction in a chip-8 program
+ */
+struct Instr
 {
     uint16_t adr;
     uint16_t ins;
-} Instr;
 
-/* 
- * initInstr()
- * Initialize the instruction object i
- */
-void initInstr(Instr& i);
+    public:
+        Instr();
+        Instr(const Instr& that) = default;
+
+        bool operator==(const Instr& that) const;
+        bool operator!=(const Instr& that) const;
+
+        void init(void);
+        std::string toString(void) const;
+};
 
 /* 
  * Program
@@ -77,6 +85,11 @@ class Program
          */
         unsigned int numInstr(void) const;
 
+        // TODO : the idea here was something like - one of these 
+        // would be a kind of 'intermediate' format that would have 
+        // the address of each instruction next to it in the binary.
+        // I think now that its far more confusing to have two 
+        // implementations here.
         /*
          * save()
          * 
@@ -93,10 +106,13 @@ class Program
 
         /*
          * writeObj()
+         * Write program as a binary file to be read by an interpreter/
+         * emulator.
          */
         int writeObj(const std::string& filename);
         /*
          * readObj()
+         * Read a binary file.
          */
         int readObj(const std::string& filename);
 

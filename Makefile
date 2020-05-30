@@ -56,11 +56,11 @@ $(TESTS): $(TEST_OBJECTS) $(OBJECTS)
 		-o $(TEST_BIN_DIR)/$@ $(LIBS) $(TEST_LIBS)
 
 # ===== TOOL TARGETS ===== # 
-TOOLS = c8asm c8dis
+TOOLS = c8asm c8dis 
 
 $(TOOLS): $(OBJECTS) $(TOOL_OBJECTS)
 	$(CXX) $(LDFLAGS) $(OBJECTS) $(OBJ_DIR)/$@.o \
-		$(INCS) -o $(BIN_DIR)/$@ $(LIBS)
+		$(INCS) -o  $@ $(LIBS)
 
 # Main targets 
 all : test tools

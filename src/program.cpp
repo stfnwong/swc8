@@ -10,12 +10,57 @@
 #include <iostream>
 #include "program.hpp"
 
-void initInstr(Instr& i)
+
+
+// ================ INSTR ================ //
+Instr::Instr() : adr(0), ins(0) {} 
+
+/*
+ * Instr::==
+ */
+bool Instr::operator==(const Instr& that) const
 {
-    i.adr = 0;
-    i.ins = 0;
+    if(this->ins != that.ins)
+        return false;
+    if(this->adr != that.adr)
+        return false;
+
+    return true;
 }
 
+/*
+ * Instr::!=
+ */
+bool Instr::operator!=(const Instr& that) const
+{
+    return !(*this == that);
+}
+
+/*
+ * Instr::init()
+ */
+void Instr::init(void)
+{
+    this->ins = 0;
+    this->adr = 0;
+}
+
+/*
+ * Instr::toString()
+ */
+std::string Instr::toString(void) const
+{
+    std::ostringstream oss;
+
+    oss <<  "[0x" << std::hex << std::setfill('0') 
+        << std::setw(4) << this->adr << "] $" << this->ins;
+
+    return oss.str();
+}
+
+
+
+// ================ PROGRAM ================ //
 Program::Program() {} 
 
 Program::~Program() {} 
@@ -56,9 +101,7 @@ Instr Program::get(const unsigned int idx) const
     if(idx >= 0 && idx < this->instructions.size())
         return this->instructions[idx];
 
-    Instr i;
-    initInstr(i);
-    return i;
+    return Instr();
 }
 
 /*
@@ -156,16 +199,17 @@ int Program::load(const std::string& filename)
         return -1;
     }
 
-    infile.read(reinterpret_cast<char*>(&num_records), sizeof(uint16_t));
-    if(num_records == 0)
-    {
-        std::cerr << "[" << __func__ << "] no records in file " 
-            << filename << std::endl;
-        return -1;
-    }
-    // Load the first (only) address pointer 
-    infile.read(reinterpret_cast<char*>(&addr), sizeof(uint16_t));
+    infile.seekg(0, std::ios::end);
+    int file_len = infile.tellg();
 
+    // divide by two here so that size is in 16-bit words
+    num_records = infile.tellg() / 2;
+    std::cout << "" << __func__ << "] " << num_records << " records in file (" 
+        << file_len << " bytes) " << std::endl;
+
+    infile.seekg(0, std::ios::beg);
+
+   
     Instr instr;
     for(unsigned int idx = 0; idx < num_records; ++idx)
     {
@@ -179,6 +223,17 @@ int Program::load(const std::string& filename)
 
     std::cout << "[" << __func__ << "] read " << this->instructions.size() 
         << " lines from file [" << filename << "]" << std::endl;
+
+    // TODO: debug only - remove 
+    std::cout << "[" << __func__ << "] instructions in buffer: " << std::endl;
+    for(unsigned int idx = 0; idx < this->instructions.size(); ++idx)
+    {
+        std::cout << std::hex << std::setw(4) << std::setfill('0') 
+            << this->instructions[idx].ins << " ";
+    }
+    std::cout << std::endl;
+
+
 
     return 0;
 }
@@ -201,16 +256,11 @@ int Program::writeObj(const std::string& filename)
 
     for(unsigned int i = 0; i < this->instructions.size(); ++i)
     {
-        // write address
-        ub = (uint8_t) (this->instructions[i].adr >> 8) & 0xFF;
-        lb = (uint8_t) (this->instructions[i].adr >> 0) & 0xFF;
-        outfile.write(reinterpret_cast<char*>(&ub), sizeof(uint8_t));
-        outfile.write(reinterpret_cast<char*>(&lb), sizeof(uint8_t));
-        // Write data 
         ub = (uint8_t) (this->instructions[i].ins >> 8) & 0xFF;
         lb = (uint8_t) (this->instructions[i].ins >> 0) & 0xFF;
         outfile.write(reinterpret_cast<char*>(&ub), sizeof(uint8_t));
         outfile.write(reinterpret_cast<char*>(&lb), sizeof(uint8_t));
+
         if(this->verbose)
         {
             std::cout << "[" << __func__ << "] Writing instruction "
@@ -253,22 +303,22 @@ int Program::readObj(const std::string& filename)
         return -1;
     }
     infile.seekg(0, std::ios::beg);
-    num_records = num_bytes / 4;
+    num_records = num_bytes / 2;
     this->instructions.clear();
 
     Instr instr;
     for(unsigned int i = 0; i < num_records; ++i)
     {
-        instr.adr = 0;
-        instr.ins = 0;
-        infile.read(reinterpret_cast<char*>(&ub), sizeof(uint8_t));
-        infile.read(reinterpret_cast<char*>(&lb), sizeof(uint8_t));
-        instr.adr = (ub << 8) | lb;
         infile.read(reinterpret_cast<char*>(&ub), sizeof(uint8_t));
         infile.read(reinterpret_cast<char*>(&lb), sizeof(uint8_t));
         instr.ins = (ub << 8) | lb;
+        instr.adr = 0x200 + i;
+        // TODO : debug only, remove
+        std::cout << std::hex << std::setw(4) << std::setfill('0')
+            << instr.ins << " ";
         this->instructions.push_back(instr);
     }
+    std::cout << std::endl;
 
     infile.close();
 

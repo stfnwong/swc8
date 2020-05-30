@@ -224,7 +224,7 @@ void Lexer::nextToken(void)
     // Check for special tokens 
     if(token_str.length() == 1)
     { 
-        std::cout << "[" << __FUNCTION__ << "] checking for special token (" << token_str << ")" << std::endl;
+        std::cout << "[" << __func__ << "] checking for special token (" << token_str << ")" << std::endl;
         if(token_str == "I" || token_str == "i")
         {
             this->cur_token.type = SYM_IREG;
