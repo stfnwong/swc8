@@ -195,7 +195,7 @@ std::string C8Proc::diffStr(const C8Proc& that)
 /*
  * ==
  */
-bool C8Proc::operator==(const C8Proc& that)
+bool C8Proc::operator==(const C8Proc& that) const
 {
     // registers
     for(int r = 0; r < 16; ++r)
@@ -227,7 +227,7 @@ bool C8Proc::operator==(const C8Proc& that)
 /*
  * !=
  */
-bool C8Proc::operator!=(const C8Proc& that)
+bool C8Proc::operator!=(const C8Proc& that) const
 {
     return (*this == that);
 }
@@ -238,29 +238,11 @@ bool C8Proc::operator!=(const C8Proc& that)
  * Chip-8 execution context. Allows saving and resuming
  * of pipeline state.
  */
-C8Exec::C8Exec()
+C8Exec::C8Exec() 
 {
-    this->u   = 0;
-    this->p   = 0;
-    this->vx  = 0;
-    this->vy  = 0;
-    this->kk  = 0;
-    this->nnn = 0;
+    this->init();
 }
 
-
-/*
- * copy ctor
- */
-C8Exec::C8Exec(const C8Exec& that)
-{
-    this->u   = that.u;
-    this->p   = that.p;
-    this->vx  = that.vx;
-    this->vy  = that.vy;
-    this->kk  = that.kk;
-    this->nnn = that.nnn;
-}
 
 bool C8Exec::operator==(const C8Exec& that) const
 {
@@ -286,7 +268,7 @@ bool C8Exec::operator!=(const C8Exec& that) const
 }
 
 /*
- * toString()
+ * C8Exec::toString()
  */
 std::string C8Exec::toString(void)
 {
@@ -303,6 +285,20 @@ std::string C8Exec::toString(void)
 
     return oss.str();
 }
+
+/*
+ * C8Exec::init()
+ */
+void C8Exec::init(void)
+{
+    this->u   = 0;
+    this->p   = 0;
+    this->vx  = 0;
+    this->vy  = 0;
+    this->kk  = 0;
+    this->nnn = 0;
+}
+
 
 /*
  * Chip8
@@ -639,30 +635,6 @@ void Chip8::cycle(void)
         this->state_log.add(this->state);
 }
 
-/*
- * loadMem()
- */
-int Chip8::loadMem(const std::string& filename, int offset)
-{
-    int status = 0;
-    int num_bytes = 0;
-    std::ifstream infile(filename, std::ios::binary);
-
-    infile.seekg(0, std::ios::end);
-    num_bytes = infile.tellg();
-    infile.seekg(0, std::ios::beg);
-
-    try{
-        infile.read((char*) &this->mem[offset], sizeof(uint8_t) * num_bytes);
-    }
-    catch(std::ios_base::failure& e) {
-        std::cerr << "[" << __func__ << "] caught execption [%s]" << 
-            e.what() << " while reading file " << filename << std::endl;
-        status = -1;
-    }
-
-    return status;
-}
 
 /*
  * renderTo()
@@ -746,7 +718,32 @@ void Chip8::setDT(uint8_t d)
 /*
  * loadMem()
  */
-void Chip8::loadMem(const std::vector<uint8_t>& data, int offset)
+int Chip8::loadMem(const std::string& filename, int offset=0x200)
+{
+    int status = 0;
+    int num_bytes = 0;
+    std::ifstream infile(filename, std::ios::binary);
+
+    infile.seekg(0, std::ios::end);
+    num_bytes = infile.tellg();
+    infile.seekg(0, std::ios::beg);
+
+    try{
+        infile.read((char*) &this->mem[offset], sizeof(uint8_t) * num_bytes);
+    }
+    catch(std::ios_base::failure& e) {
+        std::cerr << "[" << __func__ << "] caught execption [%s]" << 
+            e.what() << " while reading file " << filename << std::endl;
+        status = -1;
+    }
+
+    return status;
+}
+
+/*
+ * loadMem()
+ */
+void Chip8::loadMem(const std::vector<uint8_t>& data, int offset=0x200)
 {
     unsigned int addr = offset;
     for(unsigned int i = 0; i < data.size(); ++i)

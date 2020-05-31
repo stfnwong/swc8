@@ -103,8 +103,8 @@ struct C8Proc
         // Print format
         std::string toString(void) const;
         std::string diffStr(const C8Proc& that);
-        bool operator==(const C8Proc& that);
-        bool operator!=(const C8Proc& that);
+        bool operator==(const C8Proc& that) const;
+        bool operator!=(const C8Proc& that) const;
 };
 
 
@@ -141,8 +141,9 @@ struct C8Exec
 
     public:
         C8Exec();
-        C8Exec(const C8Exec& that);
+        C8Exec(const C8Exec& that) = default;
         std::string toString(void);
+        void init(void);
 
         bool operator==(const C8Exec& that) const;
         bool operator!=(const C8Exec& that) const;

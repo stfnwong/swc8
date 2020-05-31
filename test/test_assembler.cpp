@@ -13,6 +13,7 @@
 #include "lexer.hpp"
 #include "source.hpp"
 
+
 Program get_draw_expected_program(void)
 {
     Program prog;
@@ -140,7 +141,7 @@ TEST_CASE("test_asm_draw", "[classic]")
     std::string filename = "data/draw.asm";
 
     Lexer lexer;
-    lexer.setVerbose(true);
+    //lexer.setVerbose(true);
     lexer.loadFile(filename);
     std::cout << "\t Lexing source file " << filename << std::endl;
     lexer.lex();
@@ -158,7 +159,6 @@ TEST_CASE("test_asm_draw", "[classic]")
     }
     std::cout << std::endl;
 
-
     Assembler as;
     as.setVerbose(true);
     std::cout <<"\t Loading lexer output into assembler" << std::endl;
@@ -168,19 +168,13 @@ TEST_CASE("test_asm_draw", "[classic]")
 
     Program as_program = as.getProgram();
     std::cout << "Assembled " << as_program.numInstr() << " instructions in program " << filename << std::endl;
-    std::cout << "\t Dumping assembly output...." << std::endl;
-    for(unsigned int i = 0; i < as_program.numInstr(); ++i)
-    {
-        std::cout << "<" << std::right << std::setw(3) << i << "> " << std::right << as_program.getStr(i);
-    }
 
     Program expected_program = get_draw_expected_program();
     for(unsigned int i = 0; i < as_program.numInstr(); ++i)
     {
         Instr as_instr = as_program.get(i);
         Instr ex_instr = expected_program.get(i);
-        REQUIRE(ex_instr.ins == as_instr.ins);
-        REQUIRE(ex_instr.adr == as_instr.adr);
+        REQUIRE(ex_instr == as_instr);
     }
 }
 
@@ -294,7 +288,7 @@ TEST_CASE("test_asm_instr", "[classic]")
     std::string filename = "data/instr.asm";
 
     Lexer lexer;
-    lexer.setVerbose(true);
+    //lexer.setVerbose(true);
     lexer.loadFile(filename);
     std::cout << "\t Lexing source file " << filename << std::endl;
     lexer.lex();
@@ -322,18 +316,12 @@ TEST_CASE("test_asm_instr", "[classic]")
 
     Program as_program = as.getProgram();
     std::cout << "Assembled " << as_program.numInstr() << " instructions in program " << filename << std::endl;
-    std::cout << "\t Dumping assembly output...." << std::endl;
-    for(unsigned int i = 0; i < as_program.numInstr(); ++i)
-    {
-        std::cout << "<" << std::right << std::setw(3) << i << "> " << std::right << as_program.getStr(i);
-    }
 
     Program expected_program = get_instr_expected_program();
     for(unsigned int i = 0; i < as_program.numInstr(); ++i)
     {
         Instr as_instr = as_program.get(i);
         Instr ex_instr = expected_program.get(i);
-        REQUIRE(ex_instr.ins == as_instr.ins);
-        REQUIRE(ex_instr.adr == as_instr.adr);
+        REQUIRE(ex_instr == as_instr);
     }
 }
