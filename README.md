@@ -24,4 +24,5 @@ At which point you would do something like  `./c8 input.asm <options>` to run it
 - Finish the rendering part
 - Test more asms
 - Maybe even write some kind of n-fangled live memory trace/breakpoint thing? Who knows
+- Write up docs
 - *More to come*

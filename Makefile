@@ -60,7 +60,7 @@ TOOLS = c8asm c8dis
 
 $(TOOLS): $(OBJECTS) $(TOOL_OBJECTS)
 	$(CXX) $(LDFLAGS) $(OBJECTS) $(OBJ_DIR)/$@.o \
-		$(INCS) -o $(BIN_DIR)/$@ $(LIBS)
+		$(INCS) -o $@ $(LIBS)
 
 # Main targets 
 all : test tools
@@ -71,6 +71,9 @@ tools : $(TOOLS)
 
 clean:
 	rm -rfv *.o $(OBJ_DIR)/*.o 
+	rm -fv c8
+	rm -fv c8asm
+	rm -fv c8dis
 
 print-%:
 	@echo $* = $($*)
