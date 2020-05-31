@@ -192,10 +192,10 @@ int Program::readObj(const std::string& filename)
     // Figure out how long the file is.
     infile.seekg(0, std::ios::end);
     num_bytes = infile.tellg(); 
-    if(num_bytes % 4 != 0)
+    if(num_bytes % 2 != 0)
     {
-        std::cerr << "[" << __func__ << "] contains " 
-            << num_bytes << " bytes (" << num_bytes / 4 << " records)"
+        std::cerr << "[" << __func__ << "] file <" << filename << "> contains " 
+            << num_bytes << " bytes (" << num_bytes / 2 << " records)"
             << std::endl;
         return -1;
     }
@@ -210,13 +210,8 @@ int Program::readObj(const std::string& filename)
         infile.read(reinterpret_cast<char*>(&lb), sizeof(uint8_t));
         instr.ins = (ub << 8) | lb;
         instr.adr = 0x200 + i;
-        // TODO : debug only, remove
-        std::cout << std::hex << std::setw(4) << std::setfill('0')
-            << instr.ins << " ";
         this->instructions.push_back(instr);
     }
-    std::cout << std::endl;
-
     infile.close();
 
     return 0;

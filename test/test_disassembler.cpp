@@ -267,25 +267,12 @@ TEST_CASE("test_dis_instr", "[classic]")
     // Dump the object file from disk 
     std::cout << "\t Dumping contents of file " << obj_file << std::endl;
     Program obj_prog = dis.getProgram();
-    Instr instr;
-    for(unsigned int idx = 0; idx < obj_prog.numInstr(); ++idx)
-    {
-        instr = obj_prog.get(idx);
-        std::cout << "[" << std::right << std::hex << std::setw(4) << std::setfill('0') << instr.adr << "]  ";
-        std::cout << "$" << std::right << std::hex << std::setw(4) << std::setfill('0') << instr.ins << std::endl;
-    }
 
     dis.disassemble();
     SourceInfo dis_out = dis.getSourceInfo();
     SourceInfo exp_out = get_instr_expected_source_info();
     std::cout << dis_out.getNumLines() << " lines in source output" << std::endl;
 
-    // Dump the disassembled source 
-    std::cout << "\t Dumping disassembled source..." << std::endl;
-    for(unsigned int idx = 0; idx < dis_out.getNumLines(); ++idx)
-    {
-        std::cout << dis_out.getStr(idx);
-    }
 
     // Check actual contents 
     std::cout << "\t Checking disassembled output..." << std::endl;
@@ -293,9 +280,15 @@ TEST_CASE("test_dis_instr", "[classic]")
     {
         LineInfo exp_line = exp_out.get(idx);
         LineInfo dis_line = dis_out.get(idx);
-        std::cout << exp_line.toDiffString(dis_line);
-        std::cout << "Checking line " << std::dec << idx << "/" << dis_out.getNumLines();
+
+        if(exp_line != dis_line)
+        {
+            std::cout << "Got : " << std::endl << dis_line.toString() << std::endl;
+            std::cout << "Expected : " << std::endl << exp_line.toString() << std::endl;
+            std::cout << exp_line.toDiffString(dis_line);
+        }
         REQUIRE(exp_line == dis_line);
-        std::cout << " <OK>" << std::endl;
     }
 }
+
+

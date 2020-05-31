@@ -179,11 +179,9 @@ TEST_CASE("test_asm_draw", "[classic]")
     {
         Instr as_instr = as_program.get(i);
         Instr ex_instr = expected_program.get(i);
-        std::cout << "Checking instruction " << i << "/" << expected_program.numInstr() << "\n";
         REQUIRE(ex_instr.ins == as_instr.ins);
         REQUIRE(ex_instr.adr == as_instr.adr);
     }
-    std::cout << std::endl << "done " << std::endl;
 }
 
 
@@ -335,9 +333,7 @@ TEST_CASE("test_asm_instr", "[classic]")
     {
         Instr as_instr = as_program.get(i);
         Instr ex_instr = expected_program.get(i);
-        std::cout << "Checking instruction " << i << "/" << expected_program.numInstr() << "\n";
         REQUIRE(ex_instr.ins == as_instr.ins);
         REQUIRE(ex_instr.adr == as_instr.adr);
     }
-    std::cout << std::endl << "done " << std::endl;
 }

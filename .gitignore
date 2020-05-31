@@ -2,3 +2,14 @@
 *.obj
 # Ignore swap files 
 *.swp
+
+# Ignore c8 binary files 
+*.c8
+*.ch8
+# Ignore other binary files
+*.bin
+
+# Ignore the output binaries 
+c8
+c8asm
+c8dis

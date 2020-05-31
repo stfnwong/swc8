@@ -343,13 +343,11 @@ void Disassembler::disassemble(void)
         this->cur_instr = instr.ins;
         this->cur_line.init();
 
-        // TODO : debug only
-        std::cout << "[" << __func__ << "] cur instr = " << instr.toString() << std::endl;
 
         // TODO : I want to use something more elegant here...
         switch(instr_mask)
         {
-            case 0x0:       // TODO : named constants 
+            case 0x0:       // TODO : named constants ? 
                 this->dis_zero();
                 break;
 
