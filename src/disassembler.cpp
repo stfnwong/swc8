@@ -106,12 +106,23 @@ void Disassembler::dis_snekk(void)
 }
 
 
+/*
+ * dis_add_imm()
+ */
+void Disassembler::dis_add_imm(void)
+{
+    this->cur_line.opcode.opcode = LEX_ADD;
+    this->cur_line.opcode.mnemonic = "ADD";
+    this->cur_line.vx = this->dis_vx(this->cur_instr);
+    this->cur_line.kk = this->dis_kk(this->cur_instr);
+    this->cur_line.is_imm = true;
+}
 
 
 /*
- * dis_arith()
+ * dis_logic()
  */
-void Disassembler::dis_arith(void)
+void Disassembler::dis_logic(void)
 {
     uint8_t arith_mask;
 
@@ -158,7 +169,7 @@ void Disassembler::dis_arith(void)
             break;
 
         default:
-            std::cerr << "[" << __FUNCTION__ << "] unknown arithmetic op in instruction <" << std::hex << std::setw(4) << this->cur_instr << ">" << std::endl;
+            std::cerr << "[" << __func__ << "] unknown arithmetic op in instruction <" << std::hex << std::setw(4) << this->cur_instr << ">" << std::endl;
             break;
     }
     this->cur_line.vx = this->dis_vx(this->cur_instr);
@@ -188,7 +199,7 @@ void Disassembler::dis_skp(void)
             this->cur_line.error = true;
             this->cur_line.errstr = "unknown SKP opcode " + std::to_string(this->cur_instr);
             if(this->verbose)
-                std::cout << "[" << __FUNCTION__ << "] " << this->cur_line.errstr << std::endl;
+                std::cout << "[" << __func__ << "] " << this->cur_line.errstr << std::endl;
     }
 
     this->cur_line.vx = this->dis_vx(this->cur_instr);
@@ -249,8 +260,15 @@ void Disassembler::dis_ld_special(void)
             this->cur_line.error = true;
             this->cur_line.errstr = "Unknown LD opcode " + std::to_string(this->cur_instr);
             if(this->verbose)
-                std::cout << "[" << __FUNCTION__ << "] " << this->cur_line.errstr << std::endl;
+                std::cout << "[" << __func__ << "] " << this->cur_line.errstr << std::endl;
     }
+}
+
+void Disassembler::dis_jp(void)
+{
+    this->cur_line.opcode.opcode = LEX_JP;
+    this->cur_line.opcode.mnemonic = "JP";
+    this->cur_line.nnn = this->dis_nnn(this->cur_instr);
 }
 
 void Disassembler::dis_rnd(void)
@@ -300,7 +318,7 @@ void Disassembler::dis_zero(void)
  */
 int Disassembler::load(const std::string& filename)
 {
-    return this->program.load(filename);
+    return this->program.readObj(filename);
 }
 
 /*
@@ -314,7 +332,7 @@ void Disassembler::disassemble(void)
 
     if(this->program.numInstr() == 0)
     {
-        std::cerr << "[" << __FUNCTION__ << "] No instructions in program" << std::endl;
+        std::cerr << "[" << __func__ << "] No instructions in program" << std::endl;
         return;
     }
 
@@ -325,10 +343,16 @@ void Disassembler::disassemble(void)
         this->cur_instr = instr.ins;
         this->cur_line.init();
 
+
+        // TODO : I want to use something more elegant here...
         switch(instr_mask)
         {
-            case 0x0:       // TODO : named constants 
+            case 0x0:       // TODO : named constants ? 
                 this->dis_zero();
+                break;
+
+            case 0x1:
+                this->dis_jp();
                 break;
 
             case 0x3:
@@ -347,12 +371,20 @@ void Disassembler::disassemble(void)
                 this->dis_ldkk();
                 break;
 
+            case 0x7:
+                this->dis_add_imm();
+                break;
+
             case 0x8:
-                this->dis_arith();
+                this->dis_logic();
                 break;
 
             case 0xA: // LD I nnn
                 this->dis_ldi();
+                break;
+
+            case 0xB:
+                this->dis_jp();
                 break;
 
             case 0xC:   // RND Vx, kk
@@ -374,7 +406,7 @@ void Disassembler::disassemble(void)
             default:
                 this->cur_line.error = true;
                 this->cur_line.errstr = "Unknown instruction opcode";
-                std::cerr << "[" << __FUNCTION__ << "] unknown instrucion opcode 0x" << std::hex << std::setw(4) << instr.ins << std::endl;
+                std::cerr << "[" << __func__ << "] unknown instrucion opcode 0x" << std::hex << std::setw(4) << instr.ins << std::endl;
                 break;;
         }
 
