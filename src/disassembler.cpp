@@ -106,12 +106,23 @@ void Disassembler::dis_snekk(void)
 }
 
 
+/*
+ * dis_add_imm()
+ */
+void Disassembler::dis_add_imm(void)
+{
+    this->cur_line.opcode.opcode = LEX_ADD;
+    this->cur_line.opcode.mnemonic = "ADD";
+    this->cur_line.vx = this->dis_vx(this->cur_instr);
+    this->cur_line.kk = this->dis_kk(this->cur_instr);
+    this->cur_line.is_imm = true;
+}
 
 
 /*
- * dis_arith()
+ * dis_logic()
  */
-void Disassembler::dis_arith(void)
+void Disassembler::dis_logic(void)
 {
     uint8_t arith_mask;
 
@@ -253,6 +264,13 @@ void Disassembler::dis_ld_special(void)
     }
 }
 
+void Disassembler::dis_jp(void)
+{
+    this->cur_line.opcode.opcode = LEX_JP;
+    this->cur_line.opcode.mnemonic = "JP";
+    this->cur_line.nnn = this->dis_nnn(this->cur_instr);
+}
+
 void Disassembler::dis_rnd(void)
 {
     this->cur_line.opcode.opcode = LEX_RND;
@@ -325,10 +343,16 @@ void Disassembler::disassemble(void)
         this->cur_instr = instr.ins;
         this->cur_line.init();
 
+
+        // TODO : I want to use something more elegant here...
         switch(instr_mask)
         {
-            case 0x0:       // TODO : named constants 
+            case 0x0:       // TODO : named constants ? 
                 this->dis_zero();
+                break;
+
+            case 0x1:
+                this->dis_jp();
                 break;
 
             case 0x3:
@@ -347,12 +371,20 @@ void Disassembler::disassemble(void)
                 this->dis_ldkk();
                 break;
 
+            case 0x7:
+                this->dis_add_imm();
+                break;
+
             case 0x8:
-                this->dis_arith();
+                this->dis_logic();
                 break;
 
             case 0xA: // LD I nnn
                 this->dis_ldi();
+                break;
+
+            case 0xB:
+                this->dis_jp();
                 break;
 
             case 0xC:   // RND Vx, kk

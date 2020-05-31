@@ -5,20 +5,17 @@
  * Stefan Wong 2018
  */
 
+#define CATCH_CONFIG_MAIN
+#include "catch/catch.hpp"
+
 #include <string>
 #include <vector>
-#include <gtest/gtest.h>
 #include "lexer.hpp"
 #include "assembler.hpp"
 #include "program.hpp"
 
-class TestProgram : public ::testing::Test
-{
-    virtual void SetUp() {}
-    virtual void TearDown() {}
-};
 
-TEST_F(TestProgram, test_load_program)
+TEST_CASE("test_load_program", "[classic]")
 {
     int status;
     Lexer lexer;
@@ -48,16 +45,16 @@ TEST_F(TestProgram, test_load_program)
     }
 
     std::cout << "\t Writing program to file " << program_filename << std::endl;
-    status = program.save(program_filename);
-    ASSERT_EQ(0, status);
+    status = program.writeObj(program_filename);
+    REQUIRE(0 == status);
 
     std::cout << "\t Reading output file " << program_filename << " into new program object" << std::endl;
     Program read_prog;
-    status = read_prog.load(program_filename);
-    ASSERT_EQ(0, status);
+    status = read_prog.readObj(program_filename);
+    REQUIRE(0 == status);
 
     std::cout << "Comparing output program with program in file " << program_filename << std::endl;
-    ASSERT_EQ(program.numInstr(), read_prog.numInstr());
+    REQUIRE(program.numInstr() == read_prog.numInstr());
     std::cout << "\t Dumping program output for file " << program_filename << std::endl;
     for(unsigned int idx = 0; idx < read_prog.numInstr(); ++idx)
     {
@@ -72,12 +69,12 @@ TEST_F(TestProgram, test_load_program)
         std::cout << "Comparing instruction " << idx << "/" << program.numInstr() << std::endl;
         Instr prog_instr = program.get(idx);
         Instr file_instr = read_prog.get(idx);
-        ASSERT_EQ(prog_instr.adr, file_instr.adr);
-        ASSERT_EQ(prog_instr.ins, file_instr.ins);
+        REQUIRE(prog_instr.adr == file_instr.adr);
+        REQUIRE(prog_instr.ins == file_instr.ins);
     }
 }
 
-TEST_F(TestProgram, test_read_write_object)
+TEST_CASE("test_read_write_object", "[classic]")
 {
     int status;
     Lexer lexer;
@@ -110,13 +107,13 @@ TEST_F(TestProgram, test_read_write_object)
     // Write the program object file to disk 
     std::cout << "\t Writing program object to file " << obj_filename << std::endl;
     status = program.writeObj(obj_filename);
-    ASSERT_EQ(0, status);
+    REQUIRE(0 == status);
     // Now read into a new program
     std::cout << "\t Reading object file (" << obj_filename << ") into new Program" << std::endl;
     Program obj_prog;
     obj_prog.setVerbose(true);
     status = obj_prog.readObj(obj_filename);
-    ASSERT_EQ(0, status);
+    REQUIRE(0 == status);
 
     std::cout << "\t Dumping object file output from file " << obj_filename << std::endl;
     for(unsigned int idx = 0; idx < obj_prog.numInstr(); ++idx)
@@ -133,14 +130,7 @@ TEST_F(TestProgram, test_read_write_object)
         std::cout << "Checking instruction " << idx << "/" << program.numInstr() << std::endl;
         Instr prog_instr = program.get(idx);
         Instr obj_instr  = obj_prog.get(idx);
-        ASSERT_EQ(prog_instr.adr, obj_instr.adr);
-        ASSERT_EQ(prog_instr.ins, obj_instr.ins);
+        REQUIRE(prog_instr.adr == obj_instr.adr);
+        REQUIRE(prog_instr.ins == obj_instr.ins);
     }
 }
-
-int main(int argc, char *argv[])
-{
-    ::testing::InitGoogleTest(&argc, argv);
-    return RUN_ALL_TESTS();
-}
-

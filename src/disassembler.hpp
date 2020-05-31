@@ -40,9 +40,12 @@ class Disassembler
         void dis_sne(void);
 
         // Arithmetic instructions 
-        void dis_arith(void);
+        void dis_add_imm(void);
+        void dis_logic(void);
         void dis_skp(void);
         void dis_ld_special(void);
+
+        void dis_jp(void);
 
         void dis_rnd(void);
         void dis_drw(void);

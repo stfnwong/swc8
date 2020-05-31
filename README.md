@@ -15,7 +15,7 @@ Its not really complete, so it can't be *used* properly as of this writing, but 
 At which point you would do something like  `./c8 input.asm <options>` to run it.
 
 # Requirements
-- Uses gtest for unit tests
+- Uses [catch2](https://github.com/catchorg/Catch2) for unit tests
 - SDL for drawing (not in master branch yet though)
 - I used GCC 9.1.1, but anything with C++14 support should work.
 - Only requires C++14 because I put it in the Makefile, really its not even a fancy enough implementation to *need* anything in C++14 (in fact, it may as well be written in C).

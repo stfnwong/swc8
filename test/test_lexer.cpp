@@ -4,18 +4,14 @@
  * Stefan Wong 2018
  */
 
+#define CATCH_CONFIG_MAIN
+#include "catch/catch.hpp"
+
 #include <vector>
 #include <string>
-#include <gtest/gtest.h>
 #include "codes.hpp"
 #include "lexer.hpp"
 
-
-class TestLexer : public ::testing::Test
-{
-    virtual void SetUp() {}
-    virtual void TearDown() {}
-};
 
 // Generate expected source info for draw.asm
 SourceInfo get_draw_expected_source_info(void)
@@ -312,7 +308,7 @@ SourceInfo get_draw_expected_source_info(void)
 }
 
 
-TEST_F(TestLexer, test_draw_asm)
+TEST_CASE("test_draw_asm", "[classic]")
 {
     std::string src_filename = "data/draw.asm";
     Lexer lexer;
@@ -325,32 +321,17 @@ TEST_F(TestLexer, test_draw_asm)
     SourceInfo exp_output = get_draw_expected_source_info();
     LineInfo   exp_line, lex_line;
 
-    // Show the expected output 
-    std::cout << "\t Expected lexer output for source file " << src_filename << std::endl;
-    for(unsigned int idx = 0; idx < exp_output.getNumLines(); ++idx)
-    {
-        exp_line = exp_output.get(idx);
-        std::cout << exp_line.toString() << std::endl;
-    }
-    std::cout << std::endl;
-    // Show the actual lexer output 
-    std::cout << "\t Lexer output for file " << src_filename << std::endl;
-    for(unsigned int idx = 0; idx < lex_output.getNumLines(); ++idx)
-    {
-        lex_line = lex_output.get(idx);
-        std::cout << lex_line.toString() << std::endl;
-    }
-
     // Automatically compare
-    ASSERT_EQ(exp_output.getNumLines(), lex_output.getNumLines());
+    REQUIRE(exp_output.getNumLines() == lex_output.getNumLines());
     for(unsigned int idx = 0; idx < lex_output.getNumLines(); ++idx)
     {
         lex_line = lex_output.get(idx);
         exp_line = exp_output.get(idx);
-        std::cout << "Checking instruction " << std::dec << idx + 1 
-            << "/" << lex_output.getNumLines() << std::endl;
-        std::cout << exp_line.toDiffString(lex_line);
-        ASSERT_EQ(exp_line, lex_line);
+        std::cout << "Got : " << std::endl << lex_line.toString() << std::endl;
+        std::cout << "Expected " << std::endl << exp_line.toString() << std::endl;
+        if(exp_line != lex_line)
+            std::cout << exp_line.toDiffString(lex_line);
+        REQUIRE(exp_line == lex_line);
     }
 }
 
@@ -572,11 +553,10 @@ SourceInfo get_instr_expected_source_info(void)
     line.nnn             = 0x443;
     info.add(line);
 
-
     return info;
 }
 
-TEST_F(TestLexer, test_instr_asm)
+TEST_CASE("test_instr_asm", "[classic]")
 {
     std::string src_filename = "data/instr.asm";
     Lexer lexer;
@@ -588,36 +568,21 @@ TEST_F(TestLexer, test_instr_asm)
     SourceInfo lex_output = lexer.getSourceInfo();
     SourceInfo exp_output = get_instr_expected_source_info();
     LineInfo   exp_line, lex_line;
-
-    // Show the expected output 
-    std::cout << "\t Expected lexer output for source file " << src_filename << std::endl;
-    for(unsigned int idx = 0; idx < exp_output.getNumLines(); ++idx)
-    {
-        exp_line = exp_output.get(idx);
-        std::cout << exp_line.toString() << std::endl;
-    }
-
-    std::cout << std::endl;
-    // Show the actual lexer output 
-    std::cout << "\t Lexer output for file " << src_filename << std::endl;
-    for(unsigned int idx = 0; idx < lex_output.getNumLines(); ++idx)
-    {
-        lex_line = lex_output.get(idx);
-        std::cout << lex_line.toString() << std::endl;
-    }
     
     std::cout << lex_output.dumpErrors() << std::endl;
-    ASSERT_EQ(0, lex_output.getNumError());
+    REQUIRE(0 == lex_output.getNumError());
 
     // Automatically compare
-    ASSERT_EQ(exp_output.getNumLines(), lex_output.getNumLines());
+    REQUIRE(exp_output.getNumLines() == lex_output.getNumLines());
     for(unsigned int idx = 0; idx < lex_output.getNumLines(); ++idx)
     {
         lex_line = lex_output.get(idx);
         exp_line = exp_output.get(idx);
-        std::cout << "Checking line " << std::dec << idx << "/" << lex_output.getNumLines() << std::endl;
-        std::cout << exp_line.toDiffString(lex_line);
-        ASSERT_EQ(exp_line, lex_line);
+        std::cout << "Got : " << std::endl << lex_line.toString() << std::endl;
+        std::cout << "Expected " << std::endl << exp_line.toString() << std::endl;
+        if(exp_line != lex_line)
+            std::cout << exp_line.toDiffString(lex_line);
+        REQUIRE(exp_line == lex_line);
     }
 }
 
@@ -673,7 +638,7 @@ SourceInfo get_reg_test_expected_info(void)
     return info;
 }
 
-TEST_F(TestLexer, test_reg_expected)
+TEST_CASE("test_reg_expected", "[classic]")
 {
     std::string src_filename = "data/reg_test.asm";
     Lexer lexer;
@@ -704,25 +669,18 @@ TEST_F(TestLexer, test_reg_expected)
     }
     
     std::cout << lex_output.dumpErrors() << std::endl;
-    ASSERT_EQ(0, lex_output.getNumError());
+    REQUIRE(0 == lex_output.getNumError());
 
     // Automatically compare
-    ASSERT_EQ(exp_output.getNumLines(), lex_output.getNumLines());
+    REQUIRE(exp_output.getNumLines() == lex_output.getNumLines());
     for(unsigned int idx = 0; idx < lex_output.getNumLines(); ++idx)
     {
         lex_line = lex_output.get(idx);
         exp_line = exp_output.get(idx);
-        std::cout << "Checking line " << std::dec << idx << "/" << lex_output.getNumLines() << std::endl;
-        std::cout << exp_line.toDiffString(lex_line);
-        ASSERT_EQ(exp_line, lex_line);
+        std::cout << "Got : " << std::endl << lex_line.toString() << std::endl;
+        std::cout << "Expected " << std::endl << exp_line.toString() << std::endl;
+        if(exp_line != lex_line)
+            std::cout << exp_line.toDiffString(lex_line);
+        REQUIRE(exp_line == lex_line);
     }
 }
-
-
-int main(int argc, char *argv[])
-{
-    ::testing::InitGoogleTest(&argc, argv);
-    return RUN_ALL_TESTS();
-}
-
-

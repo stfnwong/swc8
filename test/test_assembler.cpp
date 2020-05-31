@@ -4,18 +4,14 @@
  * Stefan Wong 2018
  */
 
+#define CATCH_CONFIG_MAIN
+#include "catch/catch.hpp"
+
 #include <string>
 #include <vector>
-#include <gtest/gtest.h>
 #include "assembler.hpp"
 #include "lexer.hpp"
 #include "source.hpp"
-
-class TestAssembler : public ::testing::Test
-{
-    virtual void SetUp() {}
-    virtual void TearDown() {}
-};
 
 Program get_draw_expected_program(void)
 {
@@ -137,7 +133,8 @@ Program get_draw_expected_program(void)
     return prog;
 }
 
-TEST_F(TestAssembler, test_asm_draw)
+
+TEST_CASE("test_asm_draw", "[classic]")
 {
     SourceInfo lex_output;
     std::string filename = "data/draw.asm";
@@ -182,11 +179,9 @@ TEST_F(TestAssembler, test_asm_draw)
     {
         Instr as_instr = as_program.get(i);
         Instr ex_instr = expected_program.get(i);
-        std::cout << "Checking instruction " << i << "/" << expected_program.numInstr() << "\n";
-        ASSERT_EQ(ex_instr.ins, as_instr.ins);
-        ASSERT_EQ(ex_instr.adr, as_instr.adr);
+        REQUIRE(ex_instr.ins == as_instr.ins);
+        REQUIRE(ex_instr.adr == as_instr.adr);
     }
-    std::cout << std::endl << "done " << std::endl;
 }
 
 
@@ -292,7 +287,8 @@ Program get_instr_expected_program(void)
     return prog;
 }
 
-TEST_F(TestAssembler, test_asm_instr)
+
+TEST_CASE("test_asm_instr", "[classic]")
 {
     SourceInfo lex_output;
     std::string filename = "data/instr.asm";
@@ -337,17 +333,7 @@ TEST_F(TestAssembler, test_asm_instr)
     {
         Instr as_instr = as_program.get(i);
         Instr ex_instr = expected_program.get(i);
-        std::cout << "Checking instruction " << i << "/" << expected_program.numInstr() << "\n";
-        ASSERT_EQ(ex_instr.ins, as_instr.ins);
-        ASSERT_EQ(ex_instr.adr, as_instr.adr);
+        REQUIRE(ex_instr.ins == as_instr.ins);
+        REQUIRE(ex_instr.adr == as_instr.adr);
     }
-    std::cout << std::endl << "done " << std::endl;
-
 }
-
-int main(int argc, char *argv[])
-{
-    ::testing::InitGoogleTest(&argc, argv);
-    return RUN_ALL_TESTS();
-}
-

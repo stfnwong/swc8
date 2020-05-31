@@ -11,17 +11,25 @@
 #include <vector>
 #include "source.hpp"
 
-typedef struct
+/*
+ * Instr
+ * Represents a single instruction in a chip-8 program
+ */
+struct Instr
 {
     uint16_t adr;
     uint16_t ins;
-} Instr;
 
-/* 
- * initInstr()
- * Initialize the instruction object i
- */
-void initInstr(Instr& i);
+    public:
+        Instr();
+        Instr(const Instr& that) = default;
+
+        bool operator==(const Instr& that) const;
+        bool operator!=(const Instr& that) const;
+
+        void init(void);
+        std::string toString(void) const;
+};
 
 /* 
  * Program
@@ -78,25 +86,14 @@ class Program
         unsigned int numInstr(void) const;
 
         /*
-         * save()
-         * 
-         * Inputs: std::string filename
-         * Write the program binary to the file given by filename
-         */
-        int save(const std::string& filename);
-        /* 
-         * load()
-         * Load the object file with name filename into memory as 
-         * a Program object.
-         */
-        int load(const std::string& filename);
-
-        /*
          * writeObj()
+         * Write program as a binary file to be read by an interpreter/
+         * emulator.
          */
         int writeObj(const std::string& filename);
         /*
          * readObj()
+         * Read a binary file.
          */
         int readObj(const std::string& filename);
 

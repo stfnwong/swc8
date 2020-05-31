@@ -4,8 +4,10 @@
  * Stefan Wong 2018
  */
 
+#define CATCH_CONFIG_MAIN
+#include "catch/catch.hpp"
+
 #include <vector>
-#include <gtest/gtest.h>
 #include "chip8.hpp"
 // May need to assemble the program first, so bring in assembly tools 
 #include "lexer.hpp"
@@ -14,25 +16,13 @@
 #include "program.hpp"
 #include "memory.hpp"
 
+constexpr int load_offset = 0x200;
 
-class TestChip8 : public ::testing::Test
-{
-    virtual void SetUp() {}
-    virtual void TearDown() {}
 
-    // State vector compare 
-    public:
-        int load_offset = 0x200;
-        void compare_state_vector(
-                const std::vector<C8Proc>& exp_vector,
-                const std::vector<C8Proc>& out_vector);
-};
-
-void TestChip8::compare_state_vector(
+void compare_state_vector(
         const std::vector<C8Proc>& exp_vector,
         const std::vector<C8Proc>& out_vector)
 {
-    //ASSERT_EQ(exp_vector.size(), out_vector.size());
     bool eq;
     for(unsigned int i = 0; i < exp_vector.size(); ++i)
     {
@@ -47,34 +37,34 @@ void TestChip8::compare_state_vector(
             std::cout << out_proc.diffStr(exp_proc) << std::endl;
             //std::cout << out_vector[i].diffStr(exp_proc[i]) << std::endl;
         }
-        ASSERT_EQ(true, eq);
+        REQUIRE(true == eq);
     }
 }
 
 // Test initialization
-TEST_F(TestChip8, test_init)
+TEST_CASE("test_init", "[classic]")
 {
     Chip8 c8;
     std::vector<uint8_t> mem_dump = c8.dumpMem();
-    ASSERT_EQ(0x12, mem_dump[0]);
-    ASSERT_EQ(0x00, mem_dump[1]);
+    REQUIRE(0x12 == mem_dump[0]);
+    REQUIRE(0x00 == mem_dump[1]);
     for(unsigned int m = 2; m < mem_dump.size(); m++)
-        ASSERT_EQ(0, mem_dump[m]);
+        REQUIRE(0 == mem_dump[m]);
 
     // Check that the state is initialized correctly 
     C8Proc state = c8.getState(); 
 
     // registers, stack
     for(int r = 0; r < 16; ++r)
-        ASSERT_EQ(0, state.V[r]);
+        REQUIRE(0 == state.V[r]);
 
     for(int s = 0; s < 12; ++s)
-        ASSERT_EQ(0, state.stack[s]);
+        REQUIRE(0 == state.stack[s]);
     // rest of state 
 }
 
 
-TEST_F(TestChip8, test_load_obj)
+TEST_CASE("test_load_obj", "[classic]")
 {
     int status;
     std::string asm_filename = "data/instr.asm";
@@ -91,11 +81,11 @@ TEST_F(TestChip8, test_load_obj)
     assembler.assemble();
     prog = assembler.getProgram();
     status = prog.writeObj(obj_filename);
-    ASSERT_EQ(0, status);
+    REQUIRE(0 == status);
     std::cout << "Wrote object output to " << obj_filename << std::endl;
 
-    status = c8.loadMem(obj_filename, this->load_offset);
-    ASSERT_EQ(0, status);
+    status = c8.loadMem(obj_filename, load_offset);
+    REQUIRE(0 == status);
 
     std::vector<uint8_t> mem_contents = c8.dumpMem();
     for(unsigned int idx = 0x200; idx < 0x230; ++idx)
@@ -111,12 +101,12 @@ TEST_F(TestChip8, test_load_obj)
     {
         instr = prog.get(idx - start_adr);
         mem_val = c8.readMem(idx);
-        ASSERT_EQ(instr.ins, mem_val);
+        REQUIRE(instr.ins == mem_val);
     }
 }
 
 // Try to run the draw program (no display)
-TEST_F(TestChip8, test_run_draw)
+TEST_CASE("test_run_draw", "[classic]")
 {
     int status;
     std::string asm_filename = "data/draw.asm";
@@ -133,11 +123,11 @@ TEST_F(TestChip8, test_run_draw)
     assembler.assemble();
     prog = assembler.getProgram();
     status = prog.writeObj(obj_filename);
-    ASSERT_EQ(0, status);
+    REQUIRE(0 == status);
     std::cout << "Wrote object output to " << obj_filename << std::endl;
 
-    status = c8.loadMem(obj_filename, this->load_offset);
-    ASSERT_EQ(0, status);
+    status = c8.loadMem(obj_filename, load_offset);
+    REQUIRE(0 == status);
 
     // Now that the program binary is in memory, start 
     // invoking the cycle function and stepping through the 
@@ -157,7 +147,7 @@ TEST_F(TestChip8, test_run_draw)
 // Arithmetic instructions 
 
 // ADD 
-TEST_F(TestChip8, test_add_vxvy)
+TEST_CASE("test_add_vxvy", "[classic]")
 {
     Chip8 c8;
     C8Proc proc;
@@ -189,7 +179,7 @@ TEST_F(TestChip8, test_add_vxvy)
 
     // Execute instruction
     c8.setTrace(true);
-    c8.loadMem(test_data, this->load_offset);
+    c8.loadMem(test_data, load_offset);
     for(unsigned int i = 0; i < expected_state.size()+1; ++i)
         c8.cycle();
     std::vector<C8Proc> trace_out = c8.getTrace();
@@ -200,12 +190,12 @@ TEST_F(TestChip8, test_add_vxvy)
         C8Proc exp_proc = expected_state[i];
         C8Proc out_proc = trace_out[i];
         eq = exp_proc == out_proc;
-        ASSERT_EQ(true, eq);
+        REQUIRE(true == eq);
     }
 }
 
 // ADDI
-TEST_F(TestChip8, test_add_vxkk)
+TEST_CASE("test_add_vxkk", "[classic]")
 {
     Chip8 c8;
     C8Proc proc;
@@ -230,16 +220,16 @@ TEST_F(TestChip8, test_add_vxkk)
 
     // Execute instruction
     c8.setTrace(true);
-    c8.loadMem(test_data, this->load_offset);
+    c8.loadMem(test_data, load_offset);
     for(unsigned int i = 0; i < expected_state.size()+1; ++i)
         c8.cycle();
     std::vector<C8Proc> trace_out = c8.getTrace();
 
-    this->compare_state_vector(expected_state, trace_out);
+    compare_state_vector(expected_state, trace_out);
 }
 
 // AND 
-TEST_F(TestChip8, test_and_vxvy)
+TEST_CASE("test_and_vxvy", "[classic]")
 {
     Chip8 c8;
     C8Proc proc;
@@ -271,7 +261,7 @@ TEST_F(TestChip8, test_and_vxvy)
 
     // Execute instruction
     c8.setTrace(true);
-    c8.loadMem(test_data, this->load_offset);
+    c8.loadMem(test_data, load_offset);
     for(unsigned int i = 0; i < expected_state.size()+1; ++i)
         c8.cycle();
     std::vector<C8Proc> trace_out = c8.getTrace();
@@ -282,12 +272,12 @@ TEST_F(TestChip8, test_and_vxvy)
         C8Proc exp_proc = expected_state[i];
         C8Proc out_proc = trace_out[i];
         eq = exp_proc == out_proc;
-        ASSERT_EQ(true, eq);
+        REQUIRE(true == eq);
     }
 }
 
 // OR 
-TEST_F(TestChip8, test_or_vxvy)
+TEST_CASE("test_or_vxvy", "[classic]")
 {
     Chip8 c8;
     C8Proc proc;
@@ -319,7 +309,7 @@ TEST_F(TestChip8, test_or_vxvy)
 
     // Execute instruction
     c8.setTrace(true);
-    c8.loadMem(test_data, this->load_offset);
+    c8.loadMem(test_data, load_offset);
     for(unsigned int i = 0; i < expected_state.size()+1; ++i)
         c8.cycle();
     std::vector<C8Proc> trace_out = c8.getTrace();
@@ -335,12 +325,12 @@ TEST_F(TestChip8, test_or_vxvy)
             std::cout << "State " << i << ":" << std::endl << trace_out[i].toString();
             std::cout << trace_out[i].diffStr(expected_state[i]);
         }
-        ASSERT_EQ(true, eq);
+        REQUIRE(true == eq);
     }
 }
 
 // XOR
-TEST_F(TestChip8, test_xor_vxvy)
+TEST_CASE("test_xor_vxvy", "[classic]")
 {
     Chip8 c8;
     C8Proc proc;
@@ -372,7 +362,7 @@ TEST_F(TestChip8, test_xor_vxvy)
 
     // Execute instruction
     c8.setTrace(true);
-    c8.loadMem(test_data, this->load_offset);
+    c8.loadMem(test_data, load_offset);
     for(unsigned int i = 0; i < expected_state.size()+1; ++i)
         c8.cycle();
     std::vector<C8Proc> trace_out = c8.getTrace();
@@ -388,12 +378,12 @@ TEST_F(TestChip8, test_xor_vxvy)
             std::cout << "State " << i << ":" << std::endl << trace_out[i].toString();
             std::cout << trace_out[i].diffStr(expected_state[i]);
         }
-        ASSERT_EQ(true, eq);
+        REQUIRE(true == eq);
     }
 }
 
 // SUB
-TEST_F(TestChip8, test_sub_vxvy)
+TEST_CASE("test_sub_vxvy", "[classic]")
 {
     Chip8 c8;
     C8Proc proc;
@@ -426,7 +416,7 @@ TEST_F(TestChip8, test_sub_vxvy)
 
     // Execute instruction
     c8.setTrace(true);
-    c8.loadMem(test_data, this->load_offset);
+    c8.loadMem(test_data, load_offset);
     for(unsigned int i = 0; i < expected_state.size()+1; ++i)
         c8.cycle();
     std::vector<C8Proc> trace_out = c8.getTrace();
@@ -442,12 +432,12 @@ TEST_F(TestChip8, test_sub_vxvy)
             std::cout << "State " << i << ":" << std::endl << trace_out[i].toString();
             std::cout << trace_out[i].diffStr(expected_state[i]);
         }
-        ASSERT_EQ(true, eq);
+        REQUIRE(true == eq);
     }
 }
 
 // SUBN
-TEST_F(TestChip8, test_subn_vxvy)
+TEST_CASE("test_subn_vxvy", "[classic]")
 {
     Chip8 c8;
     C8Proc proc;
@@ -480,7 +470,7 @@ TEST_F(TestChip8, test_subn_vxvy)
 
     // Execute instruction
     c8.setTrace(true);
-    c8.loadMem(test_data, this->load_offset);
+    c8.loadMem(test_data, load_offset);
     for(unsigned int i = 0; i < expected_state.size()+1; ++i)
         c8.cycle();
     std::vector<C8Proc> trace_out = c8.getTrace();
@@ -496,13 +486,13 @@ TEST_F(TestChip8, test_subn_vxvy)
             std::cout << "State " << i << ":" << std::endl << trace_out[i].toString();
             std::cout << trace_out[i].diffStr(expected_state[i]);
         }
-        ASSERT_EQ(true, eq);
+        REQUIRE(true == eq);
     }
 }
 
 
 // PROGRAM CONTROL
-TEST_F(TestChip8, test_jp)
+TEST_CASE("test_jp", "[classic]")
 {
     Chip8 c8;
     C8Proc proc;
@@ -555,13 +545,13 @@ TEST_F(TestChip8, test_jp)
             std::cout << "State " << i << ":" << std::endl << trace_out[i].toString();
             std::cout << trace_out[i].diffStr(expected_state[i]);
         }
-        ASSERT_EQ(true, eq);
+        REQUIRE(true == eq);
     }
 }
 
 
 // RET
-TEST_F(TestChip8, test_call_ret)
+TEST_CASE("test_call_ret", "[classic]")
 {
     Chip8 c8;
     C8Proc proc;
@@ -668,7 +658,7 @@ TEST_F(TestChip8, test_call_ret)
 
     // Execute instruction
     c8.setTrace(true);
-    c8.loadMem(test_data, this->load_offset);
+    c8.loadMem(test_data, load_offset);
 
     // Dump the memory contents to terminal for inspection
     unsigned int c8_mem_size = c8.getMemSize();
@@ -691,11 +681,5 @@ TEST_F(TestChip8, test_call_ret)
         std::cout << trace_out[t].toString();
     }
 
-    this->compare_state_vector(expected_state, trace_out);
-}
-
-int main(int argc, char *argv[])
-{
-    ::testing::InitGoogleTest(&argc, argv);
-    return RUN_ALL_TESTS();
+    compare_state_vector(expected_state, trace_out);
 }
