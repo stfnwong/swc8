@@ -91,6 +91,7 @@ unsigned int Program::numInstr(void) const
     return this->instructions.size();
 }
 
+// TODO deprecate....
 /*
  * save()
  */
@@ -103,7 +104,7 @@ int Program::save(const std::string& filename)
         outfile.open(filename, std::ios::binary);
     }
     catch(std::ios_base::failure& e) {
-        std::cerr << "[" << __FUNCTION__ << "] " << e.what() << std::endl;
+        std::cerr << "[" << __func__ << "] " << e.what() << std::endl;
         return -1;
     }
 
@@ -111,24 +112,28 @@ int Program::save(const std::string& filename)
     outfile.write(reinterpret_cast<char*>(&N), sizeof(uint16_t));
 
     // Debug, remove 
-    std::cout << "[" << __FUNCTION__ << "] first address is " 
+    std::cout << "[" << __func__ << "] first address is " 
         << std::hex << std::setw(4) << this->instructions[0].adr 
         << std::endl;
 
     outfile.write(reinterpret_cast<char*>
                 (&this->instructions[0].adr),
-                sizeof(uint16_t));
+                sizeof(uint16_t)
+    );
+
     for(unsigned int idx = 0; idx < this->instructions.size(); ++idx)
     {
         outfile.write(reinterpret_cast<char*>
                 (&this->instructions[idx].ins),
                 sizeof(uint16_t));
-        if(this->verbose)
-        {
-            std::cout << "Wrote instruction " << idx << "/" 
-                << this->instructions.size() << "\r";
-        }
     }
+
+    if(this->verbose)
+    {
+        std::cout << "Wrote " << std::dec << this->instructions.size() 
+            << " instructions to file " << filename << std::endl;
+    }
+
 
     if(this->verbose)
         std::cout << std::endl;
@@ -137,6 +142,7 @@ int Program::save(const std::string& filename)
     return 0;
 }
 
+// TODO deprecate....
 /*
  * load()
  */
@@ -152,14 +158,14 @@ int Program::load(const std::string& filename)
         infile.open(filename, std::ios_base::binary);
     }
     catch(std::ios_base::failure& e) {
-        std::cerr << "[" << __FUNCTION__ << "] " << e.what() << std::endl;
+        std::cerr << "[" << __func__ << "] " << e.what() << std::endl;
         return -1;
     }
 
     infile.read(reinterpret_cast<char*>(&num_records), sizeof(uint16_t));
     if(num_records == 0)
     {
-        std::cerr << "[" << __FUNCTION__ << "] no records in file " 
+        std::cerr << "[" << __func__ << "] no records in file " 
             << filename << std::endl;
         return -1;
     }
@@ -177,6 +183,9 @@ int Program::load(const std::string& filename)
     }
     infile.close();
 
+    std::cout << "[" << __func__ << "] read " << this->instructions.size() 
+        << " instructions from file [" << filename << "]" << std::endl;
+
     return 0;
 }
 
@@ -192,7 +201,7 @@ int Program::writeObj(const std::string& filename)
         outfile.open(filename, std::ios_base::binary);
     }
     catch(std::ios_base::failure& e) {
-        std::cerr << "[" << __FUNCTION__ << "] " << e.what() << std::endl;
+        std::cerr << "[" << __func__ << "] " << e.what() << std::endl;
         return -1;
     }
 
@@ -210,7 +219,7 @@ int Program::writeObj(const std::string& filename)
         outfile.write(reinterpret_cast<char*>(&lb), sizeof(uint8_t));
         if(this->verbose)
         {
-            std::cout << "[" << __FUNCTION__ << "] Writing instruction "
+            std::cout << "[" << __func__ << "] Writing instruction "
                 << i << "/" << this->instructions.size() << "\r";
         }
     }
@@ -235,7 +244,7 @@ int Program::readObj(const std::string& filename)
         infile.open(filename, std::ios_base::binary);
     }
     catch(std::ios_base::failure& e) {
-        std::cerr << "[" << __FUNCTION__ << "] " << e.what() << std::endl;
+        std::cerr << "[" << __func__ << "] " << e.what() << std::endl;
         return -1;
     }
 
@@ -244,7 +253,7 @@ int Program::readObj(const std::string& filename)
     num_bytes = infile.tellg(); 
     if(num_bytes % 4 != 0)
     {
-        std::cerr << "[" << __FUNCTION__ << "] contains " 
+        std::cerr << "[" << __func__ << "] contains " 
             << num_bytes << " bytes (" << num_bytes / 4 << " records)"
             << std::endl;
         return -1;

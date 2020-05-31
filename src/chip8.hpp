@@ -155,7 +155,7 @@ struct C8Exec
  * Chip8
  * Chip-8 object
  */
-constexpr const unsigned int DISP_H = 64;
+constexpr const unsigned int DISP_H = 32;
 constexpr const unsigned int DISP_W = 64;
 constexpr const unsigned int C8_MEM_SIZE = 0x1000;
 constexpr const unsigned int DISP_MEM_SIZE = DISP_W * DISP_H / 8;

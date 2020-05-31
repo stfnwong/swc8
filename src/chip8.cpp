@@ -386,51 +386,25 @@ void Chip8::draw(void)
     //uint16_t sprite_ptr = this->state.I;
     uint8_t flip = 0;
     int xpos, ypos;
-    int i, bit;
+    int xline, yline;
     uint8_t cur_bit, cur_sprite;
-    uint8_t* cur_pixel;
+    //uint8_t cur_pixel;
 
-    // debug only, remove
-    int cur_pixel_pos;
+    // sprite pos
+    xpos = this->exec.vx; // % DISP_W;
+    ypos = this->exec.vy; // % DISP_H;
+    this->state.V[0xF] = 0;
 
-    xpos = this->exec.vx % DISP_W;
-    ypos = this->exec.vy % DISP_H;
-
-    // Note:  pixels are bit-coded
-    for(i = 0; i < this->exec.nnn; ++i)
+    for(yline = 0; yline < this->exec.nnn; ++yline)
     {
-        //uint8_t cur_sprite = this->mem[sprite_ptr];
-        cur_sprite = this->mem[this->state.I + i];
-        for(bit = 0; bit < 8; ++bit)
+        //cur_pixel = this->disp_mem[this->state.I + yline];
+        for(xline = 0; xline < 8; ++xline)
         {
-            cur_bit = (cur_sprite >> (7 - bit)) & 0x1;
-            cur_pixel_pos = (ypos + i) % DISP_H + (xpos % DISP_W);      // TODO : remove
-            cur_pixel = &this->disp_mem[cur_pixel_pos];
-
-            //cur_pixel = &this->disp_mem[(ypos + i) % DISP_H + (xpos % DISP_W)];
-            //uint8_t* cur_pixel = &this->disp_mem[(ypos + i) % DISP_H + (xpos + (7 - bit)) % DISP_W];
-
-            if(cur_bit == 0x1 && *cur_pixel == 1)
-                this->state.V[0xF] = 1;
-            // XOR onto display
-            *cur_pixel = *cur_pixel ^ cur_bit;
-
-            //// TODO : trying out another technique that I've seen...
-            //if(cur_sprite & (0x0080 >> col))
-            //{
-            //    if(this->disp_mem[(ypos + row) * DISP_W + xpos + col] > 0)
-            //    {
-            //        this->state.V[0xF] = 1;
-            //        this->disp_mem[ypos + row * DISP_W + xpos + col] = 0;
-            //    }
-            //    else
-            //        this->disp_mem[ypos + row * DISP_W + xpos + col] = 255;
-            //}
-
-            //this->disp_mem[row * DISP_W + col] ^= (cur_sprite & (0x1 << col));
-            //this->state.V[0xF] |= this->disp_mem[row * DISP_W + col];
-            //this->disp_mem[row * DISP_W + col] ^= this->mem[sprite_ptr];
-            //sprite_ptr++;
+            uint8_t disp_x = (xpos + xline);// % DISP_W;
+            uint8_t disp_y = (ypos + yline);// % DISP_H;
+            this->disp_mem[disp_y * DISP_H + disp_x] = 1;
+            //this->disp_mem[(disp_x * DISP_W) + disp_y] = 1; // this should fill the whole pixel area
+            //this->disp_mem[(disp_y * DISP_H) + disp_x] = 1; // this should fill the whole pixel area
         }
     }
 }
@@ -693,10 +667,12 @@ int Chip8::loadMem(const std::string& filename, int offset)
 /*
  * renderTo()
  */
+// TODO : why this method? 
 void Chip8::renderTo(uint32_t* pixels, int W, int H)
 {
     for(int pos = 0; pos < (W * H); ++pos)
-        pixels[pos] = 0xFFFFFF * ((this->disp_mem[pos / 8] >> (7 - pos % 8)) & 1);
+        pixels[pos] = 0xFFFFFF * this->disp_mem[pos / 8];
+        //pixels[pos] = 0xFFFFFF * ((this->disp_mem[pos / 8] >> (7 - pos % 8)) & 1);
 }
 
 /*

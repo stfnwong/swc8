@@ -121,7 +121,7 @@ int main(int argc, char *argv[])
     assembler.assemble();
     as_prog = assembler.getProgram();
 
-    status = as_prog.save(opts.outfile);
+    status = as_prog.writeObj(opts.outfile);
     if(status < 0)
     {
         std::cerr << "ERROR while writing program to " << opts.outfile << std::endl;
@@ -130,6 +130,7 @@ int main(int argc, char *argv[])
 
     if(opts.verbose)
     {
+        // Maybe can do something more like a hex dump
         std::cout << "\t Dumping assembled output ... " << std::endl;
         std::cout << "----------------" << std::endl;
         std::cout << " ADDR    OPCODE " << std::endl;

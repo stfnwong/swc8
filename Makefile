@@ -60,7 +60,7 @@ TOOLS = c8asm c8dis c8
 
 $(TOOLS): $(OBJECTS) $(TOOL_OBJECTS)
 	$(CXX) $(LDFLAGS) $(OBJECTS) $(OBJ_DIR)/$@.o \
-		$(INCS) -o $(BIN_DIR)/$@ $(LIBS)
+		$(INCS) -o $@ $(LIBS)
 
 # Main targets 
 all : test tools

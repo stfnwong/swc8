@@ -158,7 +158,7 @@ void Disassembler::dis_arith(void)
             break;
 
         default:
-            std::cerr << "[" << __FUNCTION__ << "] unknown arithmetic op in instruction <" << std::hex << std::setw(4) << this->cur_instr << ">" << std::endl;
+            std::cerr << "[" << __func__ << "] unknown arithmetic op in instruction <" << std::hex << std::setw(4) << this->cur_instr << ">" << std::endl;
             break;
     }
     this->cur_line.vx = this->dis_vx(this->cur_instr);
@@ -188,7 +188,7 @@ void Disassembler::dis_skp(void)
             this->cur_line.error = true;
             this->cur_line.errstr = "unknown SKP opcode " + std::to_string(this->cur_instr);
             if(this->verbose)
-                std::cout << "[" << __FUNCTION__ << "] " << this->cur_line.errstr << std::endl;
+                std::cout << "[" << __func__ << "] " << this->cur_line.errstr << std::endl;
     }
 
     this->cur_line.vx = this->dis_vx(this->cur_instr);
@@ -249,7 +249,7 @@ void Disassembler::dis_ld_special(void)
             this->cur_line.error = true;
             this->cur_line.errstr = "Unknown LD opcode " + std::to_string(this->cur_instr);
             if(this->verbose)
-                std::cout << "[" << __FUNCTION__ << "] " << this->cur_line.errstr << std::endl;
+                std::cout << "[" << __func__ << "] " << this->cur_line.errstr << std::endl;
     }
 }
 
@@ -300,7 +300,7 @@ void Disassembler::dis_zero(void)
  */
 int Disassembler::load(const std::string& filename)
 {
-    return this->program.load(filename);
+    return this->program.readObj(filename);
 }
 
 /*
@@ -314,7 +314,7 @@ void Disassembler::disassemble(void)
 
     if(this->program.numInstr() == 0)
     {
-        std::cerr << "[" << __FUNCTION__ << "] No instructions in program" << std::endl;
+        std::cerr << "[" << __func__ << "] No instructions in program" << std::endl;
         return;
     }
 
@@ -374,7 +374,7 @@ void Disassembler::disassemble(void)
             default:
                 this->cur_line.error = true;
                 this->cur_line.errstr = "Unknown instruction opcode";
-                std::cerr << "[" << __FUNCTION__ << "] unknown instrucion opcode 0x" << std::hex << std::setw(4) << instr.ins << std::endl;
+                std::cerr << "[" << __func__ << "] unknown instrucion opcode 0x" << std::hex << std::setw(4) << instr.ins << std::endl;
                 break;;
         }
 

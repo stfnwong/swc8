@@ -224,7 +224,7 @@ void Lexer::nextToken(void)
     // Check for special tokens 
     if(token_str.length() == 1)
     { 
-        std::cout << "[" << __FUNCTION__ << "] checking for special token (" << token_str << ")" << std::endl;
+        std::cout << "[" << __func__ << "] checking for special token (" << token_str << ")" << std::endl;
         if(token_str == "I" || token_str == "i")
         {
             this->cur_token.type = SYM_IREG;
@@ -608,7 +608,6 @@ void Lexer::parseLD(void)
     {
         // First arg was a special reg. Second arg must be a reg or symbol or DT or literal
         this->nextToken();
-        std::cout << "[" << __func__ << "] LD 2nd arg : " << this->cur_token.toString() << std::endl;
         if(this->cur_token.type == SYM_REG)
             this->line_info.vy = std::stoi(this->cur_token.val.substr(1,1), nullptr, 16);
         else if(this->cur_token.type == SYM_DT)
