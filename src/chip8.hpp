@@ -179,7 +179,8 @@ class Chip8
         bool log_exec;
         std::vector <C8Exec> exec_log;
 
-    private:
+    //private:
+    public:     // TODO : only public during debugging
         // Display memory 
         uint8_t disp_mem[DISP_MEM_SIZE];
         uint8_t fontmem[16 * 5];
@@ -200,6 +201,7 @@ class Chip8
 
     private:
         void draw(void);
+        void debug_draw(void);  // TODO : remove
         void keypress(void);
 
     public:

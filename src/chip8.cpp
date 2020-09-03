@@ -375,7 +375,7 @@ void Chip8::exec_zero_op(void)
 }
 
 /*
- * draw()
+ * Chip8::draw()
  */
 void Chip8::draw(void)
 {
@@ -384,7 +384,7 @@ void Chip8::draw(void)
     int xpos, ypos;
     int xline, yline;
     uint8_t cur_bit, cur_sprite;
-    //uint8_t cur_pixel;
+    uint8_t cur_pixel;
 
     // sprite pos
     xpos = this->exec.vx; // % DISP_W;
@@ -393,17 +393,42 @@ void Chip8::draw(void)
 
     for(yline = 0; yline < this->exec.nnn; ++yline)
     {
-        //cur_pixel = this->disp_mem[this->state.I + yline];
+        cur_pixel = this->disp_mem[this->state.I + yline];
         for(xline = 0; xline < 8; ++xline)
         {
-            uint8_t disp_x = (xpos + xline);// % DISP_W;
-            uint8_t disp_y = (ypos + yline);// % DISP_H;
-            this->disp_mem[disp_y * DISP_H + disp_x] = 1;
+            if(cur_pixel & (0x80 >> xline) != 0)
+            {
+                this->disp_mem[xpos + xline + ((ypos + yline) * DISP_W)] ^= 1;
+            }
+            if(this->disp_mem[xpos + xline + ((ypos + yline) * DISP_W)] == 1)
+                this->state.V[0xF] = 1;
+
+            //uint8_t disp_x = (xpos + xline);// % DISP_W;
+            //uint8_t disp_y = (ypos + yline);// % DISP_H;
+            //this->disp_mem[disp_y * DISP_H + disp_x] = 1;
             //this->disp_mem[(disp_x * DISP_W) + disp_y] = 1; // this should fill the whole pixel area
             //this->disp_mem[(disp_y * DISP_H) + disp_x] = 1; // this should fill the whole pixel area
         }
     }
 }
+
+
+void Chip8::debug_draw(void)
+{
+    int x, y;
+
+    for(y = 0; y < DISP_W; ++y)
+    {
+        for(x = 0; x < DISP_W; ++x)
+        {
+            if((x % 2 == 0) && (y % 2 == 0))
+                this->disp_mem[y * DISP_H + x] = 1;
+            else
+                this->disp_mem[y * DISP_H + x] = 0;
+        }
+    }
+}
+
 
 void Chip8::keypress(void)
 {
@@ -411,7 +436,7 @@ void Chip8::keypress(void)
 }
 
 /*
- * cycle()
+ * Chip8::cycle()
  * Run through the instruction cycle 
  */
 void Chip8::cycle(void)
@@ -598,6 +623,7 @@ void Chip8::cycle(void)
             //   }
             //   else
             //     stay on KEY instr, don't advance PC, return
+            std::cout << "[" << __func__ << "] LD Vx K not yet implemented." << std::endl;
             break;
 
         case C8_LDB:    // LD B, Vx
@@ -637,18 +663,19 @@ void Chip8::cycle(void)
 
 
 /*
- * renderTo()
+ * Chip8::renderTo()
  */
-// TODO : why this method? 
+// TODO : debug mode : should fill the whole screen
 void Chip8::renderTo(uint32_t* pixels, int W, int H)
 {
     for(int pos = 0; pos < (W * H); ++pos)
-        pixels[pos] = 0xFFFFFF * this->disp_mem[pos / 8];
+        pixels[pos] = 0xFFFFFFFF;
+        //pixels[pos] = 0x00FFFFFF * this->disp_mem[pos];
         //pixels[pos] = 0xFFFFFF * ((this->disp_mem[pos / 8] >> (7 - pos % 8)) & 1);
 }
 
 /*
- * getKey()
+ * Chip8::getKey()
  */
 uint8_t Chip8::getKey(uint8_t k) const
 {
@@ -659,7 +686,7 @@ uint8_t Chip8::getKey(uint8_t k) const
 }
 
 /*
- * getKeyPress()
+ * Chip8::getKeyPress()
  */
 uint8_t Chip8::getKeyPress(void) const
 {
@@ -667,7 +694,7 @@ uint8_t Chip8::getKeyPress(void) const
 }
 
 /*
- * updateKey()
+ * Chip8::updateKey()
  */
 void Chip8::updateKey(int k, uint8_t v)
 {
@@ -675,7 +702,7 @@ void Chip8::updateKey(int k, uint8_t v)
 }
 
 /*
- * setKeyPress()
+ * Chip8::setKeyPress()
  */
 void Chip8::setKeyPress(uint8_t kp)
 {
@@ -684,7 +711,7 @@ void Chip8::setKeyPress(uint8_t kp)
 }
 
 /*
- * getST()
+ * Chip8::getST()
  */
 uint8_t Chip8::getST(void) const
 {
@@ -692,7 +719,7 @@ uint8_t Chip8::getST(void) const
 }
 
 /*
- * getDT()
+ * Chip8::getDT()
  */
 uint8_t Chip8::getDT(void) const
 {
@@ -700,7 +727,7 @@ uint8_t Chip8::getDT(void) const
 }
 
 /*
- * setST()
+ * Chip8::setST()
  */
 void Chip8::setST(uint8_t s)
 {
@@ -708,7 +735,7 @@ void Chip8::setST(uint8_t s)
 }
 
 /*
- * setDT()
+ * Chip8::setDT()
  */
 void Chip8::setDT(uint8_t d)
 {
@@ -716,7 +743,7 @@ void Chip8::setDT(uint8_t d)
 }
 
 /*
- * loadMem()
+ * Chip8::loadMem()
  */
 int Chip8::loadMem(const std::string& filename, int offset=0x200)
 {
@@ -741,7 +768,7 @@ int Chip8::loadMem(const std::string& filename, int offset=0x200)
 }
 
 /*
- * loadMem()
+ * Chip8::loadMem()
  */
 void Chip8::loadMem(const std::vector<uint8_t>& data, int offset=0x200)
 {
@@ -754,7 +781,7 @@ void Chip8::loadMem(const std::vector<uint8_t>& data, int offset=0x200)
 }
 
 /*
- * dumpMem()
+ * Chip8::dumpMem()
  */
 std::vector<uint8_t> Chip8::dumpMem(void) const
 {
@@ -767,7 +794,7 @@ std::vector<uint8_t> Chip8::dumpMem(void) const
 }
 
 /* 
- * readMem()
+ * Chip8::readMem()
  */
 uint8_t Chip8::readMem(const unsigned int addr) const
 {

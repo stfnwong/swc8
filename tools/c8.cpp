@@ -103,6 +103,7 @@ int main(int argc, char *argv[])
         // Process some instructions 
         for(int i = 0; i < max_consecutive_instr; ++i)
         {
+            // TODO : keypress in wrong place
             if(cpu.getKeyPress())
                 break;
             cpu.cycle();        
@@ -143,6 +144,7 @@ int main(int argc, char *argv[])
         auto cur_time = std::chrono::system_clock::now();
         std::chrono::duration<float> elapsed_time = cur_time - start_time;
         int num_frames = int(elapsed_time.count() * 60) - frames_done;
+        int pitch;      // expected to be 256 (64 pixels * 4 byte per pixel)
 
         if(num_frames > 0)
         {
@@ -155,8 +157,11 @@ int main(int argc, char *argv[])
             cpu.setDT(dt);
 
             // Render display
+            SDL_LockTexture(texture, nullptr, (void**) &pixels, &pitch);
             cpu.renderTo(pixels, W, H);
-            SDL_UpdateTexture(texture, nullptr, pixels, 4 * W);
+            SDL_UnlockTexture(texture);
+            SDL_RenderClear(renderer);
+            //SDL_UpdateTexture(texture, nullptr, pixels, 4 * W);
             SDL_RenderCopy(renderer, texture, nullptr, nullptr);
             SDL_RenderPresent(renderer);
         
