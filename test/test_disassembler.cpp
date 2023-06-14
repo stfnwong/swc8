@@ -31,6 +31,7 @@ void assemble_source(const std::string& infile, const std::string& outfile)
     prog_out.writeObj(outfile);
 }
 
+
 SourceInfo get_instr_expected_source_info(void)
 {
     SourceInfo info;
@@ -292,3 +293,7 @@ TEST_CASE("test_dis_instr", "[classic]")
 }
 
 
+SourceInfo get_instr_expected_source_info(void)
+{
+    SourceInfo info;
+    LineInfo line;

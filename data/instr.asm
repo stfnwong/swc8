@@ -39,3 +39,6 @@ JMP_AND_CALL:
     SYS 0x040
     SYS 0xA1A
     CALL 0x443
+
+;SYSCALLS:
+;    DW 0xFF00   ; DW just places some data in memory inline
