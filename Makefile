@@ -14,7 +14,7 @@ TOOL_DIR=tools
 # Tool options
 CXX=g++
 OPT=-O0
-CXXFLAGS=-Wall -g2 -std=c++14 -D_REENTRANT $(OPT)
+CXXFLAGS=-Wall -g2 -std=c++17 -D_REENTRANT $(OPT) -fPIC -shared
 TESTFLAGS=
 LDFLAGS =$(shell root-config --ldflags)
 LIBS=-lSDL2
@@ -56,7 +56,7 @@ $(TESTS): $(TEST_OBJECTS) $(OBJECTS)
 		-o $(TEST_BIN_DIR)/$@ $(LIBS) $(TEST_LIBS)
 
 # ===== TOOL TARGETS ===== # 
-TOOLS = c8asm c8dis 
+TOOLS = c8 c8asm c8dis 
 
 $(TOOLS): $(OBJECTS) $(TOOL_OBJECTS)
 	$(CXX) $(LDFLAGS) $(OBJECTS) $(OBJ_DIR)/$@.o \

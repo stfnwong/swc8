@@ -40,7 +40,7 @@ void compare_state_vector(
 }
 
 // Test initialization
-TEST_CASE("test_init", "[classic]")
+TEST_CASE("test_init", "chip8")
 {
     Chip8 c8;
     std::vector<uint8_t> mem_dump = c8.dumpMem();
@@ -62,7 +62,7 @@ TEST_CASE("test_init", "[classic]")
 }
 
 
-TEST_CASE("test_load_obj", "[classic]")
+TEST_CASE("test_load_obj", "chip8")
 {
     int status;
     std::string asm_filename = "data/instr.asm";
@@ -105,7 +105,7 @@ TEST_CASE("test_load_obj", "[classic]")
 
 // TODO : need a new draw program for this test..
 // Try to run the draw program (no display)
-//TEST_CASE("test_run_draw", "[classic]")
+//TEST_CASE("test_run_draw", "chip8")
 //{
 //    int status;
 //    std::string asm_filename = "data/draw.asm";
@@ -142,11 +142,12 @@ TEST_CASE("test_load_obj", "[classic]")
 //
 //}
 
+
 // ===== INSTRUCTION UNIT TESTS ===== //
 // Arithmetic instructions 
 
 // ADD 
-TEST_CASE("test_add_vxvy", "[classic]")
+TEST_CASE("test_add_vxvy", "chip8")
 {
     Chip8 c8;
     C8Proc proc;
@@ -192,7 +193,7 @@ TEST_CASE("test_add_vxvy", "[classic]")
 }
 
 // ADDI
-TEST_CASE("test_add_vxkk", "[classic]")
+TEST_CASE("test_add_vxkk", "chip8")
 {
     Chip8 c8;
     C8Proc proc;
@@ -226,7 +227,7 @@ TEST_CASE("test_add_vxkk", "[classic]")
 }
 
 // AND 
-TEST_CASE("test_and_vxvy", "[classic]")
+TEST_CASE("test_and_vxvy", "chip8")
 {
     Chip8 c8;
     C8Proc proc;
@@ -272,7 +273,7 @@ TEST_CASE("test_and_vxvy", "[classic]")
 }
 
 // OR 
-TEST_CASE("test_or_vxvy", "[classic]")
+TEST_CASE("test_or_vxvy", "chip8")
 {
     Chip8 c8;
     C8Proc proc;
@@ -323,7 +324,7 @@ TEST_CASE("test_or_vxvy", "[classic]")
 }
 
 // XOR
-TEST_CASE("test_xor_vxvy", "[classic]")
+TEST_CASE("test_xor_vxvy", "chip8")
 {
     Chip8 c8;
     C8Proc proc;
@@ -374,7 +375,7 @@ TEST_CASE("test_xor_vxvy", "[classic]")
 }
 
 // SUB
-TEST_CASE("test_sub_vxvy", "[classic]")
+TEST_CASE("test_sub_vxvy", "chip8")
 {
     Chip8 c8;
     C8Proc proc;
@@ -426,7 +427,7 @@ TEST_CASE("test_sub_vxvy", "[classic]")
 }
 
 // SUBN
-TEST_CASE("test_subn_vxvy", "[classic]")
+TEST_CASE("test_subn_vxvy", "chip8")
 {
     Chip8 c8;
     C8Proc proc;
@@ -479,7 +480,7 @@ TEST_CASE("test_subn_vxvy", "[classic]")
 
 
 // PROGRAM CONTROL
-TEST_CASE("test_jp", "[classic]")
+TEST_CASE("test_jp", "chip8")
 {
     Chip8 c8;
     C8Proc proc;
@@ -537,7 +538,7 @@ TEST_CASE("test_jp", "[classic]")
 
 
 // RET
-TEST_CASE("test_call_ret", "[classic]")
+TEST_CASE("test_call_ret", "chip8")
 {
     Chip8 c8;
     C8Proc proc;
@@ -641,7 +642,6 @@ TEST_CASE("test_call_ret", "[classic]")
     proc.stack[0] = 0x208;
     expected_state.push_back(proc);
 
-
     // Execute instruction
     c8.setTrace(true);
     c8.loadMem(test_data, load_offset);
@@ -661,6 +661,89 @@ TEST_CASE("test_call_ret", "[classic]")
         c8.cycle();
     trace_out = c8.getTrace();
 
+    for(unsigned int t = 0; t < expected_state.size(); ++t)
+    {
+        std::cout << "\tTrace vector " << t << std::endl;
+        std::cout << trace_out[t].toString();
+    }
+
+    compare_state_vector(expected_state, trace_out);
+}
+
+
+TEST_CASE("test_draw", "chip8")
+{
+    Chip8 c8;
+    C8Proc proc;
+    std::vector<C8Proc> trace_out;
+
+    // Assembly
+    std::vector<uint8_t> test_data = {
+        0x61, 0x08, // [0x200] LD V1, 0x08
+        0x62, 0x04, // [0x202] LD V2, 0x04
+        0x6A, 0x05, // [0x200] LD VA, 0x05
+        0x6B, 0x01, // [0x202] LD VB, 0x01
+        0x8A, 0xB1, // [0x204] DRW VA, VB, 0x1
+
+        //0x63, 0x08, // [0x200] LD V3, 0x08
+        //0x64, 0x04, // [0x202] LD V4, 0x04
+        //0x83, 0x44, // [0x204] ADD V3, V4
+        //0x22, 0x0A, // [0x206] CALL 0x20A
+        //0x12, 0x10, // [0x208] JP 0x210
+        //0x65, 0x01, // [0x20A] LD V5 0x01
+        //0x83, 0x54, // [0x20C] ADD V3, V5
+        //0x00, 0xEE, // [0x20E] RET
+        //0x66, 0xFF  // [0x210] LD V6, 0xFF
+    };
+    std::vector<C8Proc> expected_state;
+
+    // State 0 
+    proc.init();
+    proc.pc     = 0x200;
+    expected_state.push_back(proc);
+    // State 1 
+    proc.init();
+    proc.pc     = 0x202;
+    proc.V[0x1] = 0x08;
+    expected_state.push_back(proc);
+    // State 2 
+    proc.init();
+    proc.pc     = 0x204;
+    proc.V[0x1] = 0x08;
+    proc.V[0x2] = 0x04;
+    expected_state.push_back(proc);
+    // State 3 
+    proc.init();
+    proc.pc     = 0x206;
+    proc.V[0x1] = 0x08;
+    proc.V[0x2] = 0x04;
+    proc.V[0xA] = 0x05;
+    expected_state.push_back(proc);
+    // State 4 
+    proc.init();
+    proc.pc     = 0x208;
+    proc.V[0x1] = 0x08;
+    proc.V[0x2] = 0x04;
+    proc.V[0xA] = 0x05;
+    proc.V[0xB] = 0x01;
+    expected_state.push_back(proc);
+    // State 5
+    // DRW
+    proc.init();
+    proc.pc     = 0x20A;
+    proc.V[0x1] = 0x08;
+    proc.V[0x2] = 0x04;
+    proc.V[0xA] = 0x05;
+    proc.V[0xB] = 0x01;
+    expected_state.push_back(proc);
+
+    c8.setTrace(true);
+    c8.loadMem(test_data, load_offset);
+    for(unsigned int i = 0; i < expected_state.size()+1; ++i)
+        c8.cycle();
+    trace_out = c8.getTrace();
+
+    // Print the output trace
     for(unsigned int t = 0; t < expected_state.size(); ++t)
     {
         std::cout << "\tTrace vector " << t << std::endl;

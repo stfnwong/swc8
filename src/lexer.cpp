@@ -137,11 +137,11 @@ void Lexer::scanToken(void)
 void Lexer::advance(void)
 {
     this->cur_pos++;
-    this->cur_char = this->src[this->cur_pos];
     if(this->cur_pos >= this->src.size())
         this->cur_char = '\0';
     if(this->cur_char == '\n')
         this->cur_line = this->cur_line + 1;
+    this->cur_char = this->src[this->cur_pos];
 }
 
 /*

@@ -387,29 +387,52 @@ void Chip8::draw(void)
     uint8_t cur_pixel;
 
     // sprite pos
-    xpos = this->exec.vx; // % DISP_W;
-    ypos = this->exec.vy; // % DISP_H;
+    xpos = this->exec.vx % DISP_W;
+    ypos = this->exec.vy % DISP_H;
     this->state.V[0xF] = 0;
 
     for(yline = 0; yline < this->exec.nnn; ++yline)
     {
-        cur_pixel = this->disp_mem[this->state.I + yline];
         for(xline = 0; xline < 8; ++xline)
         {
-            if(cur_pixel & (0x80 >> xline) != 0)
-            {
-                this->disp_mem[xpos + xline + ((ypos + yline) * DISP_W)] ^= 1;
-            }
-            if(this->disp_mem[xpos + xline + ((ypos + yline) * DISP_W)] == 1)
-                this->state.V[0xF] = 1;
-
-            //uint8_t disp_x = (xpos + xline);// % DISP_W;
-            //uint8_t disp_y = (ypos + yline);// % DISP_H;
-            //this->disp_mem[disp_y * DISP_H + disp_x] = 1;
-            //this->disp_mem[(disp_x * DISP_W) + disp_y] = 1; // this should fill the whole pixel area
-            //this->disp_mem[(disp_y * DISP_H) + disp_x] = 1; // this should fill the whole pixel area
+            this->disp_mem[(ypos + yline) * xpos + xline] = 1;
         }
     }
+
+    //for(yline = 0; yline < this->exec.nnn; ++yline)
+    //{
+    //    cur_pixel = this->disp_mem[this->state.I + yline];
+    //    for(xline = 0; xline < 8; ++xline)
+    //    {
+    //        cur_bit = cur_pixel & (0x80 >> xline);
+    //        if(cur_bit != 0)
+    //        {
+    //            // wrap or clip (depends on game)
+    //            if((xpos + xline) > DISP_W)
+    //                break;
+    //                //continue;
+
+    //            if(this->disp_mem[(ypos + yline) * xpos + xline] == 0x1)
+    //            {
+    //                this->state.V[0xF] = 1;
+    //            }
+    //            this->disp_mem[(ypos + yline) * xpos + xline] ^= 0x1;
+    //        }
+
+    //        //if(cur_pixel & (0x80 >> xline) != 0)
+    //        //{
+    //        //    this->disp_mem[xpos + xline + ((ypos + yline) * DISP_W)] ^= 1;
+    //        //}
+    //        //if(this->disp_mem[xpos + xline + ((ypos + yline) * DISP_W)] == 1)
+    //        //    this->state.V[0xF] = 1;
+
+    //        //uint8_t disp_x = (xpos + xline);// % DISP_W;
+    //        //uint8_t disp_y = (ypos + yline);// % DISP_H;
+    //        //this->disp_mem[disp_y * DISP_H + disp_x] = 1;
+    //        //this->disp_mem[(disp_x * DISP_W) + disp_y] = 1; // this should fill the whole pixel area
+    //        //this->disp_mem[(disp_y * DISP_H) + disp_x] = 1; // this should fill the whole pixel area
+    //    }
+    //}
 }
 
 
@@ -592,7 +615,8 @@ void Chip8::cycle(void)
             break;
 
         case C8_DRW:    // D Vx, Vy, N
-            this->draw();
+            this->debug_draw();
+            //this->draw();
             break;
 
         case C8_SKP:    // SKP Vx
@@ -651,7 +675,7 @@ void Chip8::cycle(void)
         default:
             std::cout << "[" << __func__ << "] invalid op <0x" 
                 << std::hex << std::setw(4) << std::setfill('0') 
-                << this->cur_opcode << ">" << "instr code <" 
+                << this->cur_opcode << ">" << " instr code <" 
                 << std::hex << std::setw(4) << std::setfill('0') 
                 << instr_code << ">" << std::endl;
             break;
@@ -669,7 +693,8 @@ void Chip8::cycle(void)
 void Chip8::renderTo(uint32_t* pixels, int W, int H)
 {
     for(int pos = 0; pos < (W * H); ++pos)
-        pixels[pos] = 0xFFFFFFFF;
+        pixels[pos] = 0xF;
+        //pixels[pos] = 0xFFFFFFFF;
         //pixels[pos] = 0x00FFFFFF * this->disp_mem[pos];
         //pixels[pos] = 0xFFFFFF * ((this->disp_mem[pos / 8] >> (7 - pos % 8)) & 1);
 }
