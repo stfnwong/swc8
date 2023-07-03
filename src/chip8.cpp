@@ -693,10 +693,11 @@ void Chip8::cycle(void)
 void Chip8::renderTo(uint32_t* pixels, int W, int H)
 {
     for(int pos = 0; pos < (W * H); ++pos)
-        pixels[pos] = 0xF;
-        //pixels[pos] = 0xFFFFFFFF;
-        //pixels[pos] = 0x00FFFFFF * this->disp_mem[pos];
+        pixels[pos] = pos << 8;
+        //pixels[pos] = 0xFFFFFFFF * this->disp_mem[pos];
         //pixels[pos] = 0xFFFFFF * ((this->disp_mem[pos / 8] >> (7 - pos % 8)) & 1);
+        //pixels[pos] = 0xF;
+        //pixels[pos] = 0xFFFFFFFF;
 }
 
 /*

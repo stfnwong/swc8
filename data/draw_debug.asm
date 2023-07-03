@@ -2,7 +2,7 @@
 ; Draw some specific patterns 
 
 SPRITE:
-    DW 0x0000
+    DW 0xFFFF
 
 DRAW_ONE_PIXEL:
     LD Va, 0x1
