@@ -13,3 +13,9 @@
 c8
 c8asm
 c8dis
+
+# Ignore tags files
+tags
+
+# Ignore output disassembly 
+*.dis
